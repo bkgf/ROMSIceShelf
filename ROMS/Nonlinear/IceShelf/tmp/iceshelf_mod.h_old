@@ -1,0 +1,60 @@
+#include "cppdefs.h"
+      MODULE mod_iceshelf
+!
+!svn $Id$
+!================================================== Hernan G. Arango ===
+!  Copyright (c) 2002-2012 The ROMS/TOMS Group Benjamin K. Galton-Fenzi!
+!    Licensed under a MIT/X style license                              !
+!    See License_ROMS.txt                                              !
+!=======================================================================
+!                                                                      !
+!  Parameters for ice shelf model:                                     !
+!  =============================                                       !
+##COMMENT: List here		                                       !
+!=======================================================================
+!
+      USE mod_param
+      USE mod_kinds
+!
+      implicit none
+
+#  if defined ICESHELF_2EQN_VBC
+      real(r8), parameter :: gamma = 0.0001_r8
+      real(r8), parameter :: hlfreeze = 334000.0_r8
+      real(r8), parameter :: refSalt = 34.4_r8
+      real(r8) :: temp_f
+#  elif defined ICESHELF_3EQN_VBC
+      real(r8), parameter :: Rp = 0.0_r8 
+      real(r8), parameter :: a = -0.057_r8
+      real(r8), parameter :: b = 0.0939_r8
+      real(r8), parameter :: c = 7.61e-4
+      real(r8), parameter :: Pr = 13.8_r8
+      real(r8), parameter :: Sc = 2432.2_r8
+      real(r8), parameter :: ak = 5e-3
+      real(r8), parameter :: Un = 1.95e-6
+      real(r8), parameter :: Lh_fusion = 3.33e5
+      real(r8), parameter :: dt_ice = 1.54e-6
+      real(r8), parameter :: Atk = 273.15_r8
+      real(r8), parameter :: Cp_water = 3974._r8
+      real(r8), parameter :: rho_ice = 920._r8
+      real(r8), parameter :: Tob = -20._r8
+#  ifdef ANA_SEAICE
+      real(r8), parameter :: Gamma = 0.0001_r8
+      real(r8), parameter :: hlfreeze = 334000.0_r8
+      real(r8), parameter :: refSalt = 34.4_r8
+      real(r8), parameter :: trelax = 7.0_r8 * 86400.0_r8 ! 7 days
+      real(r8), parameter :: saltMax = 35.0_r8
+      real(r8), parameter :: saltMin = 34.0_r8
+      real(r8), parameter :: sRateInc = 0.0085_r8
+      real(r8), parameter :: sRateDec = 0.0283333_r8
+      real(r8), parameter :: Tmax = 0.0_r8
+      real(r8), parameter :: Tmin = -1.9_r8
+      real(r8) :: temp_f, tyear, sfcTemp, sfcSalt
+#   else
+      real(r8), parameter :: trelax = 10.0_r8 * 86400.0_r8 !1 day
+      real(r8), parameter :: sfcTemp = -1.85_r8
+      real(r8), parameter :: sfcSalt = 34.5_r8
+#   endif
+      real(r8), parameter :: eps = 1.0E-14_r8
+
+      END MODULE mod_iceshelf
