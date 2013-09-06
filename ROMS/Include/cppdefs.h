@@ -186,7 +186,6 @@
 ** DIAGNOSTICS_BIO     use if writing out biological diagnostics             **
 ** DIAGNOSTICS_UV      use if writing out momentum diagnostics               **
 ** DIAGNOSTICS_TS      use if writing out tracer diagnostics                 **
-** ICESHELF            use if including ice shelf cavities                   **
 ** SPHERICAL           use if analytical spherical grid                      **
 ** STATIONS            use if writing out station data                       **
 ** STATIONS_CGRID      use if extracting data at native C-grid               **
@@ -458,6 +457,15 @@
 **                                                                           **
 ** FULL_GRID           use to consider both interior and boundary points     **
 **                                                                           **
+** Ice shelf model OPTIONS:                                                  **
+**                                                                           **
+** ICESHELF            use if including ice shelf cavities                   **
+** ICESHELF_MORPH      use if allow ice draft to evolve                      **
+** ICESHELF_2EQN_VBC   use to activate 2-equation ice/ocean thermodynamics   **          
+** ICESHELF_3EQN_VBC   use to activate 3-equation ice/ocean thermodynamics   **
+** ICESHELF_TEOS10     use for teos10 in situ freezing point temperature     **
+** ANA_SEAICE          use to prescribe simple open ocean sea ice model      **
+**                                                                           **
 ** Fennel et al. (2006) biology model OPTIONS:                               **
 **                                                                           **
 ** BIO_FENNEL          use if Fennel et al. (2006) nitrogen-based model      **
@@ -567,6 +575,8 @@
 ** FLT_TEST            Float Tracking Example                                **
 ** GRAV_ADJ            Gravitational Adjustment Example                      **
 ** INLET_TEST          Test Inlet Application                                **
+** ICETEST             Idealised 3D ice-shelf/ocean application              **
+** ICESHELF2D          Idealised 2D ice-shelf/ocean application              **
 ** KELVIN              Kelvin wave test                                      **
 ** LAB_CANYON          Lab Canyon, Polar Coordinates Example                 **
 ** LAKE_SIGNELL        Lake Signell Sediment Test Case                       **
