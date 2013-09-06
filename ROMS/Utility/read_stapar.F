@@ -84,9 +84,13 @@
               Npts=load_l(Nval, Cval, Ngrids, Sout(idv2dN,:))
             CASE ('Sout(idFsur)')
               Npts=load_l(Nval, Cval, Ngrids, Sout(idFsur,:))
-# if defined ICESHELF && defined ICESHELF_MORPH
+# if defined ICESHELF
+            CASE ('Sout(idismr)')
+              Npts=load_l(Nval, Cval, Ngrids, Sout(idismr,:))
+#  if defined ICESHELF_MORPH
             CASE ('Sout(idDraft)')
               Npts=load_l(Nval, Cval, Ngrids, Sout(idDraft,:))
+#  endif
 # endif
 # if defined SEDIMENT && defined SED_MORPH
             CASE ('Sout(idBath)')

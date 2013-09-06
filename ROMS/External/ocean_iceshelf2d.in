@@ -466,6 +466,7 @@ Hout(idVbar) == T       ! vbar               2D V-velocity
 Hout(idu2dE) == F       ! ubar_eastward      2D U-eastward  at RHO-points
 Hout(idv2dN) == F       ! vbar_northward     2D V-northward at RHO-points
 Hout(idFsur) == T       ! zeta               free-surface
+Hout(idismr) == T       ! ismr               ice-shelf melt rate
 Hout(idDraft) == T      ! draft              time-dependent iceshelf draft
 Hout(idBath) == T       ! bath               time-dependent bathymetry
 

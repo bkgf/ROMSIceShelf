@@ -83,6 +83,11 @@
      &                   OCEAN(ng) % u,                                 &
      &                   OCEAN(ng) % v,                                 &
      &                   OCEAN(ng) % t,                                 &
+     &                   ICESHELFVAR(ng) % gammaT,                      &
+     &                   ICESHELFVAR(ng) % gammaS,                      &
+     &                   ICESHELFVAR(ng) % Tb,                          &
+     &                   ICESHELFVAR(ng) % Sb,                          &
+     &                   ICESHELFVAR(ng) % m,                           &
      &                   OCEAN(ng) % rho,                               &
      &                   FORCES(ng) % sustr,                            &
      &                   FORCES(ng) % svstr,                            &
@@ -107,7 +112,9 @@
 # ifdef ICESHELF_MORPH
      &                         iceshelf_draft,                          &
 # endif
-     &                         u, v, t, rho,                            &
+     &                         u, v, t,                                 &
+     &                         gammaT, gammaS,                          &
+     &                         Tb, Sb, m, rho,                          &
      &                         sustr, svstr,                            &
 #   ifdef SHORTWAVE
      &                         srflx,                                   &
@@ -149,6 +156,11 @@
       real(r8), intent(inout) :: iceshelf_draft(LBi:,LBj:,:)
 #endif
       real(r8), intent(in) :: t(LBi:,LBj:,:,:,:)
+      real(r8), intent(out) :: gammaT(LBi:,LBj:)
+      real(r8), intent(out) :: gammaS(LBi:,LBj:)
+      real(r8), intent(out) :: Tb(LBi:,LBj:)
+      real(r8), intent(out) :: Sb(LBi:,LBj:)
+      real(r8), intent(out) :: m(LBi:,LBj:)
 # ifdef SHORTWAVE
       real(r8), intent(inout) :: srflx(LBi:,LBj:)
 # endif
@@ -167,6 +179,11 @@
       real(r8), intent(in) :: iceshelf_draft(LBi:UBi,LBj:UBj,2)
 #endif
       real(r8), intent(in) :: t(LBi:UBi,LBj:UBj,N(ng),3,NT(ng))
+      real(r8), intent(out) :: gammaT(LBi:UBi,LBj:UBj)
+      real(r8), intent(out) :: gammaS(LBi:UBi,LBj:UBj)
+      real(r8), intent(out) :: Tb(LBi:UBi,LBj:UBj)
+      real(r8), intent(out) :: Sb(LBi:UBi,LBj:UBj)
+      real(r8), intent(out) :: m(LBi:UBi,LBj:UBj)
 # ifdef SHORTWAVE
       real(r8), intent(inout) :: srflx(LBi:UBi,LBj:UBj)
 # endif
@@ -189,10 +206,10 @@
 # endif
 !      integer :: IstrR, IENDR, JstrR, JendR, IstrU, JstrV
       integer :: i, j, itrc
-      real(r8) :: Pradj,Scadj, Cdrt, cp_i, gammaS, gammaT
+      real(r8) :: Pradj,Scadj, Cdrt, cp_i
 !      real(r8) :: a,b,c,Pr,Sc,Cd,small
 !      real(r8) :: cp_w,ustar,visc,turb,TFb,rho_i
-      real(r8) :: Sm,Tm,Tb,Sb,rhoi_on_rho0,ustar,TFb,turb
+      real(r8) :: Sm,Tm,rhoi_on_rho0,ustar,TFb,turb
 #ifdef ICESHELF_VBC_HFPROPTOM
       real(r8) :: Ex1,Ex2,Ex3,Ex4,Ex5,Ex6,Ep1,Ep2,Ep3,Ep31,Ep4,Ep5
       real(r8) :: Sr1,Sr2,Sf1,Sf2,Tf1,Tf2,rho_r
@@ -200,7 +217,6 @@
       real(r8) :: mflag,TFi,cff3 
 #endif
       real(r8) :: cff1, cff2
-      real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: m
 #ifdef ICESHELF_TEOS10
       real(r8) :: ct
 #endif
@@ -213,12 +229,6 @@
 !  over the ice.
 !-----------------------------------------------------------------------
 !
-# ifdef SALINITY
-          Sm=MAX(0.0_r8,t(i,j,N(ng),nrhs,isalt))
-# else
-          Sm=0.0_r8
-# endif
-
 #    ifdef ANA_SEAICE
 ! Analytical sea-ice forcing in the open water areas
       tyear = MOD(tdays(ng)-DSTART,365.25_r8)
@@ -247,6 +257,12 @@
 
       DO j=Jstr,JEND
         DO i=Istr,IEND
+# ifdef SALINITY
+          Sm=MAX(0.0_r8,t(i,j,N(ng),nrhs,isalt))
+          write(6,*)
+# else
+          Sm=0.0_r8
+# endif
           IF (zice(i,j).ne.0.0_r8) THEN
 #if defined ICESHELF_2EQN_VBC
           TFb = a*Sm+b+c*zice(i,j)
@@ -257,11 +273,12 @@
          CALL potit(Sm,t(i,j,N(ng),nrhs,itemp),-zice(i,j),0.0_r8,Tm,i,j)
 # endif
 !            write(6,*) gamma,TFb,Tm
-            stflx(i,j,itemp)=0.0_r8 !gamma*(TFb-Tm)
+            stflx(i,j,itemp)=gamma*(TFb-Tm)
             stflx(i,j,isalt)=Cp*stflx(i,j,itemp)*refSalt/L
 
 #  ifdef ICESHELF_MORPH
             m(i,j) = stflx(i,j,isalt)/Sm
+            write(6,*) m(i,j),Sm
 #  endif
 
 #elif defined ICESHELF_3EQN_VBC
@@ -283,8 +300,8 @@
            if(ustar.lt.small) ustar = small
 #    ifdef GAMMAS_KY1972
             turb = 2.12*LOG((ustar*Hz(i,j,N(ng)))/visc)
-            gammaT = ustar/(turb + Pradj - 9.0_r8)
-            gammaS = ustar/(turb + Scadj - 9.0_r8)
+            gammaT(i,j) = ustar/(turb + Pradj - 9.0_r8)
+            gammaS(i,j) = ustar/(turb + Scadj - 9.0_r8)
 #    elif defined GAMMAS_Mc1987
 ! Uses simplified version of McPhee 1987
             IF (ustar.gt.small.and.ABS(f(i,j)).gt.1.0E-8) THEN
@@ -293,11 +310,11 @@
               turb = 0.0_r8
             END IF
 
-            gammaT = ustar/(turb + Pradj - 6.0_r8)
-            gammaS = ustar/(turb + Scadj - 6.0_r8)
+            gammaT(i,j) = ustar/(turb + Pradj - 6.0_r8)
+            gammaS(i,j) = ustar/(turb + Scadj - 6.0_r8)
 #    else
-            gammaT = 1.00e-4_r8
-            gammaS = 5.05e-7_r8
+            gammaT(i,j) = 1.00e-4_r8
+            gammaS(i,j) = 5.05e-7_r8
 #    endif
 
 # ifdef ICESHELF_VBC_HFPROPTOM
@@ -307,12 +324,12 @@
 ! interface salinity (SB) to determine the melTemp_insitug/freezingrate
 ! (seta).
           rho_r= rho_i/(1000.0_r8+rho(i,j,N(ng)))
-          Ep1  = cp_w*gammaT
-          Ep2  = cp_i*gammaS
-          Ep3  = L*gammaS
+          Ep1  = cp_w*gammaT(i,j)
+          Ep2  = cp_i*gammaS(i,j)
+          Ep3  = L*gammaS(i,j)
           Ep31 = -rho_r*cp_i*dt_i/zice(i,j)
           Ep4  = b+c*z_w(i,j,N(ng))
-          Ep5  = gammaS/rho_r
+          Ep5  = gammaS(i,j)/rho_r
 !
 ! Temperature gradient within the ice ONLY changes with melTemp_insitug
           TFb = a*Sm+Ep4
@@ -339,19 +356,19 @@
 !
 ! Salinities < 0 psu are NOT defined, i.e....
          IF (Sf1.gt.0.) THEN
-           Tb = Tf1
-           Sb = Sf1
+           Tb(i,j) = Tf1
+           Sb(i,j) = Sf1
          ELSE
-           Tb = Tf2
-           Sb = Sf2
+           Tb(i,j) = Tf2
+           Sb(i,j) = Sf2
          endif
 !
-         m(i,j) = Ep5*(1.0-Sm/Sb)
+         m(i,j) = Ep5*(1.0-Sm/Sb(i,j))
 !         m(i,j)= Seta * dtfast
 !
 ! Calculates fluxes:
-         stflx(i,j,itemp)=(gammaT-rho_r*m(i,j))*(Tb-Tm)
-         stflx(i,j,isalt)=(gammaS-rho_r*m(i,j))*(Sb-Sm)
+         stflx(i,j,itemp)=(gammaT(i,j)-rho_r*m(i,j))*(Tb(i,j)-Tm)
+         stflx(i,j,isalt)=(gammaS(i,j)-rho_r*m(i,j))*(Sb(i,j)-Sm)
 
 # else
             TFb = a*Sm + b + c*zice(i,j)
@@ -360,20 +377,21 @@
 
 ! Calculate coefficents in quadratic to be solved:
            cff1 = L/cp_w + mflag*(cp_i/cp_w)*(TFi-Ti)
-           cff2 = gammaS*(L/cp_w + mflag*(cp_i/cp_w)*(TFb-Ti))          &
-     &          + gammaT*(TFi-Tm)
-           cff3 = gammaS*gammaT*(TFb - Tm)
+           cff2 = gammaS(i,j)*(L/cp_w + mflag*(cp_i/cp_w)*(TFb-Ti))     &
+     &          + gammaT(i,j)*(TFi-Tm)
+           cff3 = gammaS(i,j)*gammaT(i,j)*(TFb - Tm)
 
 ! Calculate melt rate:
            m(i,j) = -(cff2 - SQRT(cff2*cff2 - 4*cff1*cff3))/(2*cff1)
 
 ! Calculate basal temperature and salinity:
-           Tb = (gammaT*Tm+mflag*(cp_i/cp_w)*m(i,j)*Ti-(L/cp_w)*m(i,j)) &
-              / (gammaT + mflag*(cp_i/cp_w)*m(i,j))
-           Sb = (Tb - b - c*zice(i,j))/a
+           Tb(i,j) = (gammaT(i,j)*Tm+mflag*(cp_i/cp_w)*m(i,j)*Ti        &
+     &             - (L/cp_w)*m(i,j))                                   &
+     &             /(gammaT(i,j) + mflag*(cp_i/cp_w)*m(i,j))
+           Sb(i,j) = (Tb(i,j) - b - c*zice(i,j))/a
 
-           stflx(i,j,itemp)=(gammaT+rhoi_on_rho0*m(i,j))*(Tb-Tm)
-           stflx(i,j,isalt)=(gammaS+rhoi_on_rho0*m(i,j))*(Sb-Sm)
+         stflx(i,j,itemp)=(gammaT(i,j)+rhoi_on_rho0*m(i,j))*(Tb(i,j)-Tm)
+         stflx(i,j,isalt)=(gammaS(i,j)+rhoi_on_rho0*m(i,j))*(Sb(i,j)-Sm)
 !           write(6,*) gammaT,gammaS,Tb,Sb,Tm,Sm,rhoi_on_rho0
 # endif
 

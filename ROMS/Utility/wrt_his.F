@@ -36,6 +36,10 @@
       USE mod_sedbed
       USE mod_sediment
 #endif
+#if defined ICESHELF
+      USE mod_iceshelfvar
+      USE mod_iceshelf
+#endif
       USE mod_stepping
 !
       USE nf_fwrite2d_mod, ONLY : nf_fwrite2d
@@ -122,7 +126,26 @@
       IF (exit_flag.ne.NoError) RETURN
 #if defined ICESHELF 
 ! ADD OTHER TIME dependand variables here: wct, gammas, m, Tb, Ts
-
+        IF (Hout(idismr,ng)) THEN
+            scale=1.0_r8
+          gtype=gfactor*r2dvar
+          status=nf_fwrite2d(ng, iNLM, HIS(ng)%ncid,                    &
+     &                       HIS(ng)%Vid(idismr),                       &
+     &                       HIS(ng)%Rindex, gtype,                     &
+     &                       LBi, UBi, LBj, UBj, scale,                 &
+#  ifdef MASKING
+     &                       GRID(ng) % rmask_io,                       &
+#  endif
+     &                       ICESHELFVAR(ng) % m)
+          IF (status.ne.nf90_noerr) THEN
+            IF (Master) THEN
+              WRITE (stdout,10) TRIM(Vname(1,idismr)), HIS(ng)%Rindex
+            END IF
+            exit_flag=3
+            ioerror=status
+            RETURN
+          END IF
+         END IF
 # if defined ICESHELF_MORPH
 !
 !  Write out time-dependent ice draft (m)

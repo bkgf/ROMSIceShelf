@@ -440,7 +440,24 @@
      &                 SetParAccess = .FALSE.)
         IF (exit_flag.ne.NoError) RETURN
 #endif
-#if defined ICESHELF && defined ICESHELF_MORPH
+#if defined ICESHELF
+!
+!  Define time-varying bathymetry.
+!
+        IF (Hout(idismr,ng)) THEN
+          Vinfo( 1)=Vname(1,idismr)
+          Vinfo( 2)=Vname(2,idismr)
+          Vinfo( 3)=Vname(3,idismr)
+          Vinfo(14)=Vname(4,idismr)
+          Vinfo(16)=Vname(1,idismr)
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,idismr,ng),r8)
+          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idismr),   &
+     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
+     &                   SetFillVal = .FALSE.)
+          IF (exit_flag.ne.NoError) RETURN
+        END IF
+# if defined ICESHELF_MORPH
 !
 !  Define time-varying bathymetry.
 !
@@ -457,6 +474,7 @@
      &                   SetFillVal = .FALSE.)
           IF (exit_flag.ne.NoError) RETURN
         END IF
+# endif
 #endif
 #if defined SEDIMENT && defined SED_MORPH
 !

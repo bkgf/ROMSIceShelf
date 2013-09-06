@@ -168,6 +168,7 @@
 !  Input/output identification indices.
 !
         integer  :: idAice        ! fraction of cell covered by ice
+        integer  :: idismr        ! iceshelf melt rate
         integer  :: iddraft       ! iceshelf draft
         integer  :: idbath        ! bathymetry
         integer  :: idCfra        ! cloud fraction
@@ -907,6 +908,8 @@
           SELECT CASE (TRIM(ADJUSTL(Vinfo(6))))
             CASE ('idtime')
               idtime=varid
+            CASE ('idismr')
+              idismr=varid
             CASE ('iddraft')
               iddraft=varid
             CASE ('idbath')

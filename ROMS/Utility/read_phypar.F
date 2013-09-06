@@ -1175,7 +1175,15 @@
                 RETURN
               END IF
               Npts=load_l(Nval, Cval, Ngrids, Hout(idFsur,:))
-#if defined ICESHELF && defined ICESHELF_MORPH
+#if defined ICESHELF
+            CASE ('Hout(idismr)')
+              IF (idismr.eq.0) THEN
+                IF (Master) WRITE (out,280) 'idismr'
+                exit_flag=5
+                RETURN
+              END IF
+              Npts=load_l(Nval, Cval, Ngrids, Hout(idismr,:))
+# if defined ICESHELF_MORPH
             CASE ('Hout(idDraft)')
               IF (iddraft.eq.0) THEN
                 IF (Master) WRITE (out,280) 'iddraft'
@@ -1183,6 +1191,7 @@
                 RETURN
               END IF
               Npts=load_l(Nval, Cval, Ngrids, Hout(idDraft,:))
+# endif
 #endif
 #if defined SEDIMENT && defined SED_MORPH
             CASE ('Hout(idBath)')
@@ -3656,10 +3665,15 @@
           END DO
 # endif
 #endif
-#if defined ICESHELF && defined ICESHELF_MORPH
+#if defined ICESHELF
+          IF (Hout(idismr,ng)) WRITE (out,170) Hout(idismr,ng),         &
+     &       'Hout(idismr)',                                            &
+     &       'Write out ice shelf melt rate.'
+# if defined ICESHELF_MORPH
           IF (Hout(idDraft,ng)) WRITE (out,170) Hout(idDraft,ng),       &
      &       'Hout(idDraft)',                                           &
      &       'Write out time-dependent ice draft.'
+# endif
 #endif
 #if defined SEDIMENT && defined SED_MORPH
           IF (Hout(idBath,ng)) WRITE (out,170) Hout(idBath,ng),         &

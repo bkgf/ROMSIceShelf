@@ -79,6 +79,15 @@
   'nulvar'
   1.0d0
 
+'m'                                                ! Output
+  'ice shelf melt rate'
+  'meter'                                          ! [m/s]
+  'melt_rate, scalar, series'
+  'ocean_time'
+  'idismr'
+  'r2dvar'
+  1.0d0
+
 'draft'                                            ! Input/Output
   'ice draft'
   'meter'                                          ! [m]
