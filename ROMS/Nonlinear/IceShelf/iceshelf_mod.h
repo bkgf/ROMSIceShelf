@@ -17,15 +17,16 @@
 !
       implicit none
 
-#  if defined ICESHELF_2EQN_VBC
-      real(r8), parameter :: gamma = 0.0001_r8
-      real(r8), parameter :: refSalt = 34.4_r8
-      real(r8),parameter :: L=3.34e5_r8
-      real(r8) :: temp_f
-#  elif defined ICESHELF_3EQN_VBC
       real(r8), parameter :: a = -0.057_r8
       real(r8), parameter :: b = 0.0939_r8
       real(r8), parameter :: c = 7.61e-4
+
+#  if defined ICESHELF_2EQN_VBC
+      real(r8), parameter :: gamma = 0.0001_r8
+      real(r8), parameter :: refSalt = 34.4_r8
+      real(r8), parameter :: L=3.34e5_r8
+      real(r8) :: temp_f
+#  elif defined ICESHELF_3EQN_VBC
       real(r8), parameter :: Pr = 13.8_r8
       real(r8), parameter :: Sc = 2432.2_r8
       real(r8), parameter :: Cd = 5.0e-3_r8

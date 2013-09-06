@@ -399,6 +399,12 @@
       depth=900.0_r8
       f0=0.0_r8
       beta=0.0_r8
+#elif defined ICESHELF2D
+      Xsize=20.0E+03_r8
+      Esize=500.0E+03_r8
+      depth=980.0_r8
+      f0=0.0_r8
+      beta=0.0_r8
 #else
       ana_grid.h: no values provided for Xsize, Esize, depth, f0, beta.
 #endif
@@ -511,7 +517,21 @@
           latp(i,j)=latv(i,j)
         END DO
       END DO
-
+#elif defined ICESHELF2D
+      dx=Xsize/REAL(Lm(ng),r8)
+      dy=Esize/REAL(Mm(ng),r8)
+      DO j=Jmin,Jmax
+        DO i=Imin,Imax
+          xp(i,j)=dx*REAL(i-1,r8)
+          xr(i,j)=dx*(REAL(i-1,r8)+0.5_r8)
+          xu(i,j)=xp(i,j)
+          xv(i,j)=xr(i,j)
+          yp(i,j)=dy*REAL(j-1,r8)
+          yr(i,j)=dy*(REAL(j-1,r8)+0.5_r8)
+          yu(i,j)=yr(i,j)
+          yv(i,j)=yp(i,j)
+        END DO
+      END DO
 #else
       dx=Xsize/REAL(Lm(ng),r8)
       dy=Esize/REAL(Mm(ng),r8)
@@ -604,6 +624,13 @@
         DO i=I_RANGE
           wrkX(i,j)=val1/COS(latr(i,j)*deg2rad)
           wrkY(i,j)=val2
+        END DO
+      END DO
+# elif defined ICESHELF2D
+     DO j=J_RANGE
+        DO i=I_RANGE
+          wrkX(i,j)=1.0_r8/dx
+          wrkY(i,j)=1.0_r8/dy
         END DO
       END DO
 #else
@@ -991,6 +1018,13 @@
           h(i,j)=900.0_r8
         END DO
       END DO
+# elif defined ICESHELF2D
+      DO j=JstrR,JendR
+        DO i=IstrR,IendR
+         h(i,j)=20.0_r8+REAL(j,r8)*(depth/Esize)*(Esize/REAL(Mm(ng),r8))
+       write(6,*) h(i,j)
+        END DO
+      END DO
 #else
       DO j=JstrT,JendT
         DO i=IstrT,IendT
@@ -1096,6 +1130,19 @@
 !          ELSE
 !            zice(i,j)=-200.0_r8
 !          END IF
+        END DO
+      END DO
+#   elif defined ICESHELF2D
+      DO j=JstrR,JendR
+        DO i=IstrR,IendR
+          IF (j.le.60) THEN
+            zice(i,j)=-h(i,j)+20_r8
+          ELSE 
+         zice(i,j)=-(h(i,60)                                           &
+     &             -atan(REAL(j-59,r8)/10)*(h(i,60)-300_r8))           &
+     &             + 20_r8    
+!         write(6,*) zice(i,j) 
+          END IF
         END DO
       END DO
 # else

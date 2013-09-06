@@ -249,15 +249,15 @@
         DO i=Istr,IEND
           IF (zice(i,j).ne.0.0_r8) THEN
 #if defined ICESHELF_2EQN_VBC
-            TFb = a*Sm+b+c*zice(i,j)
+          TFb = a*Sm+b+c*zice(i,j)
 # ifdef ICESHELF_TEOS10
           ct = ct_from_theta(Sm,t(i,j,N(ng),nrhs,itemp))
           Tm = t_from_ct(Sm,ct,-zice(i,j))
 # else
          CALL potit(Sm,t(i,j,N(ng),nrhs,itemp),-zice(i,j),0.0_r8,Tm,i,j)
 # endif
-            write(6,*) gamma,TFb,Tm
-            stflx(i,j,itemp)=gamma*(TFb-Tm)
+!            write(6,*) gamma,TFb,Tm
+            stflx(i,j,itemp)=0.0_r8 !gamma*(TFb-Tm)
             stflx(i,j,isalt)=Cp*stflx(i,j,itemp)*refSalt/L
 
 #  ifdef ICESHELF_MORPH
@@ -276,9 +276,9 @@
 !    Calculate exchange coefficients. Note that this assumes log profile 
             ustar = SQRT(SQRT((0.5_r8*(sustr(i,j)+sustr(i+1,j)))**2+    &
      &                        (0.5_r8*(svstr(i,j)+svstr(i,j+1)))**2))
-#    ifdef MASKING
-            ustar = ustar*rmask(i,j)
-#    endif
+!#    ifdef MASKING
+!            ustar = ustar*rmask(i,j)
+!#    endif
 
            if(ustar.lt.small) ustar = small
 #    ifdef GAMMAS_KY1972
@@ -369,7 +369,7 @@
 
 ! Calculate basal temperature and salinity:
            Tb = (gammaT*Tm+mflag*(cp_i/cp_w)*m(i,j)*Ti-(L/cp_w)*m(i,j)) &
-              / (gammaT + mflag*(cp_i/cp_w)*m(i,j)+)
+              / (gammaT + mflag*(cp_i/cp_w)*m(i,j))
            Sb = (Tb - b - c*zice(i,j))/a
 
            stflx(i,j,itemp)=(gammaT+rhoi_on_rho0*m(i,j))*(Tb-Tm)

@@ -1307,7 +1307,8 @@
 #else
       GRID_VARS : IF (ncid.ne.FLT(ng)%ncid) THEN
 #endif
-#if !(defined SED_MORPH && defined SEDIMENT) && \ 
+#if !(defined SED_MORPH && defined SEDIMENT) 
+!|| \ 
     !(defined ICESHELF && defined ICESHELF_MORPH)
 !
 !  Bathymetry.

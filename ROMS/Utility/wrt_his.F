@@ -120,7 +120,10 @@
      &                      ncid = HIS(ng)%ncid,                        &
      &                      varid = HIS(ng)%Vid(idtime))
       IF (exit_flag.ne.NoError) RETURN
-#if defined ICESHELF && defined ICESHELF_MORPH
+#if defined ICESHELF 
+! ADD OTHER TIME dependand variables here: wct, gammas, m, Tb, Ts
+
+# if defined ICESHELF_MORPH
 !
 !  Write out time-dependent ice draft (m)
 !
@@ -144,6 +147,7 @@
           RETURN
         END IF
       END IF
+# endif
 #endif
 #if defined SEDIMENT && defined SED_MORPH
 !
