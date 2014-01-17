@@ -81,7 +81,7 @@
 
 'm'                                                ! Output
   'ice shelf melt rate'
-  'meter'                                          ! [m/s]
+  'meter second-1'                                 ! [m/s]
   'melt_rate, scalar, series'
   'ocean_time'
   'idismr'

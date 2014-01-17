@@ -1022,7 +1022,6 @@
       DO j=JstrR,JendR
         DO i=IstrR,IendR
          h(i,j)=20.0_r8+REAL(j,r8)*(depth/Esize)*(Esize/REAL(Mm(ng),r8))
-       write(6,*) h(i,j)
         END DO
       END DO
 #else
@@ -1141,7 +1140,6 @@
          zice(i,j)=-(h(i,60)                                           &
      &             -atan(REAL(j-59,r8)/10)*(h(i,60)-300_r8))           &
      &             + 20_r8    
-!         write(6,*) zice(i,j) 
           END IF
         END DO
       END DO

@@ -30,7 +30,7 @@
 #undef SPHERICAL
 #define SPLINES
 #define ICESHELF
-#define ICESHELF_MORPH
+#undef ICESHELF_MORPH
 #undef  AVERAGES
 #undef ATM_PRESS
 #undef ANA_PAIR

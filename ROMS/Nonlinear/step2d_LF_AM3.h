@@ -60,7 +60,7 @@
      &                  GRID(ng) % pmask,       GRID(ng) % rmask,       &
      &                  GRID(ng) % umask,       GRID(ng) % vmask,       &
 # endif
-# ifdef SOLVE3D && defined ICESHELF
+# if defined SOLVE3D && defined ICESHELF
      &                  GRID(ng) % zice,                                &
 # endif
 # ifdef WET_DRY

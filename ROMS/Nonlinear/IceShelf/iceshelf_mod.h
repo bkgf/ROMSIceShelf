@@ -32,7 +32,7 @@
       real(r8), parameter :: Cd = 5.0e-3_r8
       real(r8), parameter :: visc = 1.95e-6_r8
       real(r8), parameter :: L = 3.33e5_r8
-      real(r8), parameter :: small = 1.0e-10_r8
+      real(r8), parameter :: small = 8.0e-6_r8
       real(r8), parameter :: dt_i = 1.54e-6
       real(r8), parameter :: cp_w = 3947.0_r8
       real(r8), parameter :: rho_i = 920.0_r8
@@ -40,11 +40,6 @@
       real(r8), parameter :: Si = 0.0_r8
 #  endif
 #  ifdef ANA_SEAICE
-#   ifdef ICESHELF_3EQN_VBC
-      real(r8), parameter :: gamma = 0.0001_r8
-      real(r8), parameter :: refSalt = 34.4_r8
-      real(r8) :: temp_f
-#   endif
       real(r8), parameter :: trelax = 7.0_r8 * 86400.0_r8 ! 7 days
       real(r8), parameter :: saltMax = 35.0_r8
       real(r8), parameter :: saltMin = 34.0_r8

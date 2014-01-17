@@ -17,10 +17,12 @@
 !  Nonlinear model state.
 !
 #if defined ICESHELF 
+# if defined ICESHELF_3EQN_VBC
         real(r8), pointer :: gammaT(:,:)
         real(r8), pointer :: gammaS(:,:)
         real(r8), pointer :: Tb(:,:)
         real(r8), pointer :: Sb(:,:)
+# endif
         real(r8), pointer :: m(:,:)
 # if defined ICESHELF_MORPH
         real(r8), pointer :: iceshelf_draft0(:,:)
@@ -59,10 +61,12 @@
 !  Nonlinear model state.
 !
 #if defined ICESHELF
+# if defined ICESHELF_3EQN_VBC
       allocate ( ICESHELFVAR(ng) % gammaT(LBi:UBi,LBj:UBj))
       allocate ( ICESHELFVAR(ng) % gammaS(LBi:UBi,LBj:UBj))
       allocate ( ICESHELFVAR(ng) % Tb(LBi:UBi,LBj:UBj))
       allocate ( ICESHELFVAR(ng) % Sb(LBi:UBi,LBj:UBj))
+# endif
       allocate ( ICESHELFVAR(ng) % m(LBi:UBi,LBj:UBj))
 # if defined ICESHELF_MORPH
       allocate ( ICESHELFVAR(ng) % iceshelf_draft0(LBi:UBi,LBj:UBj) )
@@ -142,10 +146,12 @@
 #if defined ICESHELF
         DO j=Jmin,Jmax
           DO i=Imin,Imax
+# if defined ICESHELF_3EQN_VBC 
             ICESHELFVAR(ng) % gammaT(i,j) = IniVal
             ICESHELFVAR(ng) % gammaS(i,j) = IniVal
             ICESHELFVAR(ng) % Tb(i,j) = IniVal
             ICESHELFVAR(ng) % Sb(i,j) = IniVal
+# endif
             ICESHELFVAR(ng) % m(i,j) = IniVal
 # if defined ICESHELF_MORPH
             ICESHELFVAR(ng) % iceshelf_draft0(i,j) = IniVal

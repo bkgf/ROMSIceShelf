@@ -335,7 +335,7 @@
 # endif
         END DO
       END DO
-#elif defined ICETEST || defined AMERY || define ICESHELF2D
+#elif defined ICETEST || defined AMERY || defined ICESHELF2D
       DO j=JstrR,JendR
         DO i=Istr,IendR
           sustr(i,j)=0.0_r8

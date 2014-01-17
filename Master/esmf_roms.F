@@ -715,7 +715,7 @@
 !
 !  Create array.
 !
-          ExpArray=ESMF_ArrayCreate(romsArray2dSpec(ng),                  &
+          ExpArray=ESMF_ArrayCreate(romsArray2dSpec(ng),                &
      &                              distgrid=romsDistGrid(ng),          &
      &                              computationalLWidth=CLW,            &
      &                              computationalUWidth=CUW,            &

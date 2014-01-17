@@ -730,7 +730,7 @@
           END DO
         END DO
       END DO
-# elif defined ICETEST || defined AMERY || define ICESHELF2D
+# elif defined ICETEST || defined AMERY || defined ICESHELF2D
       DO k=1,N(ng)
         DO j=JstrR,JendR
           DO i=IstrR,IendR
