@@ -468,11 +468,14 @@ Hout(idv2dN) == F       ! vbar_northward     2D V-northward at RHO-points
 Hout(idFsur) == T       ! zeta               free-surface
 Hout(idDraft) == T      ! draft              time-dependent iceshelf draft
 Hout(idBath) == T       ! bath               time-dependent bathymetry
+Hout(idismr) == T       ! ismr               ice-shelf melt rate
+Hout(idDraft) == T      ! draft              time-dependent iceshelf draft
+Hout(idBath) == T       ! bath               time-dependent bathymetry
 
 Hout(idTvar) == T T     ! temp, salt         temperature and salinity
 
-Hout(idUsms) == F       ! sustr              surface U-stress
-Hout(idVsms) == F       ! svstr              surface V-stress
+Hout(idUsms) == T       ! sustr              surface U-stress
+Hout(idVsms) == T       ! svstr              surface V-stress
 Hout(idUbms) == F       ! bustr              bottom U-stress
 Hout(idVbms) == F       ! bvstr              bottom V-stress
 

@@ -420,13 +420,13 @@
 
            if(ustar.lt.small) ustar = small
 #    ifdef GAMMAS_KY1972
-            turb = 2.12*LOG((ustar*Hz(i,j,N(ng)))/visc)
+            turb = 2.12_r8*LOG((ustar*Hz(i,j,N(ng)))/visc)
             gammaT(i,j) = ustar/(turb + Pradj - 9.0_r8)
             gammaS(i,j) = ustar/(turb + Scadj - 9.0_r8)
 #    elif defined GAMMAS_Mc1987
 ! Uses simplified version of McPhee 1987
             IF (ustar.gt.small.and.ABS(f(i,j)).gt.1.0E-8) THEN
-              turb = 2.5*LOG(5300.0_r8*ustar*ustar/ABS(f(i,j))) + 7.12  
+              turb = 2.5_r8*LOG(5300.0_r8*ustar*ustar/ABS(f(i,j))) + 7.12_r8  
             ELSE
               turb = 0.0_r8
             END IF
