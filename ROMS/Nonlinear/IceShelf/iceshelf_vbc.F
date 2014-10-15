@@ -374,8 +374,8 @@
 #    endif
 
 #    ifdef ICESHELF_3EQN_VBC
-      Pradj = 12.5_r8*(Pr**(2/3))
-      Scadj = 12.5_r8*(Sc**(2/3))
+      Pradj = 12.5_r8*(Pr**(2.0_r8/3.0_r8))
+      Scadj = 12.5_r8*(Sc**(2.0_r8/3.0_r8))
       Cdrt =  sqrt(Cd)
       cp_i =  152.5_r8+7.122_r8*(273.15_r8+Ti)
       rhoi_on_rho0 = rho_i/rho0
