@@ -399,6 +399,12 @@
       depth=900.0_r8
       f0=0.0_r8
       beta=0.0_r8
+#elif defined ICESHELF3D_TOY
+      Xsize=100.0E+03_r8
+      Esize=200.0E+03_r8
+      depth=500.0_r8
+      f0=(4.0_r8*pi/86164.1_r8)*SIN(-70.0_r8*deg2rad)
+      beta=0.0_r8
 #elif defined ICESHELF2D
       Xsize=20.0E+03_r8
       Esize=500.0E+03_r8
@@ -517,6 +523,42 @@
           latp(i,j)=latv(i,j)
         END DO
       END DO
+#elif defined ICESHELF3D_TOY
+!!
+!!  Spherical coordinates set-up.
+!!
+!      dx=Xsize/REAL(Lm(ng),r8)
+!      dy=Esize/REAL(Mm(ng),r8)
+!      spherical=.TRUE.
+!      DO j=Jmin,Jmax
+!        val1=-80.0_r8+dy*(REAL(j,r8)-0.5_r8)
+!        val2=-80.0_r8+dy*REAL(j,r8)
+!        DO i=Imin,Imax
+!          lonr(i,j)=dx*(REAL(i,r8)-0.5_r8)
+!          latr(i,j)=val1
+!          lonu(i,j)=dx*REAL(i,r8)
+!          lonp(i,j)=lonu(i,j)
+!          latu(i,j)=latr(i,j)
+!          lonv(i,j)=lonr(i,j)
+!          latv(i,j)=val2
+!          latp(i,j)=latv(i,j)
+!        END DO
+!      END DO
+      dx=Xsize/REAL(Lm(ng),r8)
+      dy=Esize/REAL(Mm(ng),r8)
+      DO j=Jmin,Jmax
+        DO i=Imin,Imax
+          xp(i,j)=dx*REAL(i-1,r8)
+          xr(i,j)=dx*(REAL(i-1,r8)+0.5_r8)
+          xu(i,j)=xp(i,j)
+          xv(i,j)=xr(i,j)
+          yp(i,j)=dy*REAL(j-1,r8)
+          yr(i,j)=dy*(REAL(j-1,r8)+0.5_r8)
+          yu(i,j)=yr(i,j)
+          yv(i,j)=yp(i,j)
+        END DO
+      END DO
+
 #elif defined ICESHELF2D
       dx=Xsize/REAL(Lm(ng),r8)
       dy=Esize/REAL(Mm(ng),r8)
@@ -626,6 +668,26 @@
           wrkY(i,j)=val2
         END DO
       END DO
+#elif defined ICESHELF3D_TOY
+!!
+!!  Spherical coordinates set-up.
+!!
+!      Eradius=6371020.0_r8
+!      val1=REAL(Lm(ng),r8)/(2.0_r8*pi*Eradius)
+!      val2=REAL(Mm(ng),r8)*360.0_r8/(2.0_r8*pi*Eradius*Esize)
+!      DO j=J_RANGE
+!         cff=1.0_r8/COS((-80.0_r8+dy*(REAL(j,r8)-0.5_r8))*deg2rad)
+!        DO i=I_RANGE
+!          wrkX(i,j)=val1*cff
+!          wrkY(i,j)=val2
+!        END DO
+!      END DO
+     DO j=J_RANGE
+        DO i=I_RANGE
+          wrkX(i,j)=1.0_r8/dx
+          wrkY(i,j)=1.0_r8/dy
+        END DO
+      END DO
 # elif defined ICESHELF2D
      DO j=J_RANGE
         DO i=I_RANGE
@@ -729,7 +791,7 @@
           angler(i,j)=val1
         END DO
       END DO
-# elif defined ICETEST
+# elif defined ICETEST 
       DO j=JstrR,JendR
         DO i=IstrR,IendR
           f(i,j)=(4.0_r8*pi/86164.1_r8)*                                &
@@ -1018,6 +1080,12 @@
           h(i,j)=900.0_r8
         END DO
       END DO
+# elif defined ICESHELF3D_TOY
+      DO j=JstrR,JendR
+        DO i=IstrR,IendR
+          h(i,j)=500.0_r8
+        END DO
+      END DO
 # elif defined ICESHELF2D
       DO j=JstrR,JendR
         DO i=IstrR,IendR
@@ -1129,6 +1197,18 @@
 !          ELSE
 !            zice(i,j)=-200.0_r8
 !          END IF
+        END DO
+      END DO
+#  elif defined ICESHELF3D_TOY
+      DO j=JstrR,JendR
+        DO i=IstrR,IendR
+          IF (j.eq.0) THEN
+            zice(i,j)=-450.0_r8
+          ELSE IF (j.le.11) THEN
+            zice(i,j)=-450.0_r8+(350.0_r8/10.0_r8)*REAL(j-1,r8)
+          ELSE
+            zice(i,j)=0.0_r8
+          END IF
         END DO
       END DO
 #   elif defined ICESHELF2D

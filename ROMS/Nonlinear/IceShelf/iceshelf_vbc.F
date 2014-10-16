@@ -1,6 +1,7 @@
 #include "cppdefs.h"
 #undef ICESHELF_VBC_HFPROPTOM
 #define GAMMAS_Mc1987 
+#undef GAMMAS_KY1972
       MODULE iceshelf_vbc_mod
 #ifdef ICESHELF
 !
@@ -356,6 +357,7 @@
 !-----------------------------------------------------------------------
 !
 #    ifdef ANA_SEAICE
+#     ifdef SEAICE_CLIMA
 ! Analytical sea-ice forcing in the open water areas
       tyear = MOD(tdays(ng)-DSTART,365.25_r8)
       IF (tyear.le.59.0_r8) THEN
@@ -371,6 +373,10 @@
         sfcTemp = Tmax
         sfcSalt = saltMin
       endif
+#     elif defined SEAICE_WINTER
+        sfcTemp = Tmin
+        sfcSalt = SaltMax
+#     endif
 #    endif
 
 #    ifdef ICESHELF_3EQN_VBC
@@ -417,7 +423,6 @@
 #    ifdef MASKING
             ustar = ustar*rmask(i,j)
 #    endif
-
            if(ustar.lt.small) ustar = small
 #    ifdef GAMMAS_KY1972
             turb = 2.12_r8*LOG((ustar*Hz(i,j,N(ng)))/visc)
@@ -426,7 +431,7 @@
 #    elif defined GAMMAS_Mc1987
 ! Uses simplified version of McPhee 1987
             IF (ustar.gt.small.and.ABS(f(i,j)).gt.1.0E-8) THEN
-              turb = 2.5_r8*LOG(5300.0_r8*ustar*ustar/ABS(f(i,j))) + 7.12_r8  
+          turb = 2.5_r8*LOG(5300.0_r8*ustar*ustar/ABS(f(i,j))) + 7.12_r8  
             ELSE
               turb = 0.0_r8
             END IF

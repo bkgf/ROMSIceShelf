@@ -741,6 +741,17 @@
           END DO
         END DO
       END DO
+# elif defined ICESHELF3D_TOY
+      DO k=1,N(ng)
+        DO j=JstrR,JendR
+          DO i=IstrR,IendR
+            t(i,j,k,1,itemp)=-1.85_r8
+            t(i,j,k,1,isalt)=34.5_r8
+            t(i,j,k,2,itemp)=t(i,j,k,1,itemp)
+            t(i,j,k,2,isalt)=t(i,j,k,1,isalt)
+          END DO
+        END DO
+      END DO
 # elif defined FRAZIL_TOY
       DO k=1,N(ng)
         DO j=JstrR,JendR

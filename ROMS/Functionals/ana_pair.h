@@ -91,6 +91,7 @@
         END DO
       END DO
 #  elif defined ICETEST
+! BKGF INCOMPLETE: NEEDS FIXING AND MODIFICAITON INCLUDED IN PRS_GRD
       DO j=JstrR,JendR
         DO i=IstrR,IendR
           IF (j.eq.0) THEN

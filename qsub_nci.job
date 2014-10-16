@@ -1,0 +1,14 @@
+#!/bin/bash
+#PBS -P m68
+#PBS -q express
+#PBS -l mem=4gb,walltime=05:00:00,ncpus=64
+
+module load intel-fc
+module load netcdf
+module load openmpi
+
+cd /short/m68/bkg581/romsIceShelf
+
+make -f makefile_bkgf_nci -j 6
+
+mpirun -np 64 oceanM ROMS/External/ocean_icetest.in > ocean.log

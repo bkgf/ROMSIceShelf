@@ -167,7 +167,7 @@
           BOUNDARY(ng)%zeta_east(j)=fac*val*COS(omega-phase)
         END DO
       END IF
-#elif defined ICETEST
+#elif defined ICETEST || defined ICESHELF_TEST
       IF (LBC(inorth,isFsur,ng)%acquire.and.                            &
      &    DOMAIN(ng)%Northern_Edge(tile)) THEN
         cff=-1.0_r8*sin(2.0_r8*pi*time(ng)/(12.42_r8*3600.0_r8))
