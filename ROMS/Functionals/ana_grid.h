@@ -399,7 +399,7 @@
       depth=900.0_r8
       f0=0.0_r8
       beta=0.0_r8
-#elif defined ICESHELF3D_TOY
+#elif defined ICESHELF3D_TOY || defined ICESHELF_TIDES
       Xsize=100.0E+03_r8
       Esize=200.0E+03_r8
       depth=500.0_r8
@@ -523,7 +523,7 @@
           latp(i,j)=latv(i,j)
         END DO
       END DO
-#elif defined ICESHELF3D_TOY
+#elif defined ICESHELF3D_TOY || defined ICESHELF_TIDES
 !!
 !!  Spherical coordinates set-up.
 !!
@@ -668,7 +668,7 @@
           wrkY(i,j)=val2
         END DO
       END DO
-#elif defined ICESHELF3D_TOY
+#elif defined ICESHELF3D_TOY || defined ICESHELF_TIDES
 !!
 !!  Spherical coordinates set-up.
 !!
@@ -1080,7 +1080,7 @@
           h(i,j)=900.0_r8
         END DO
       END DO
-# elif defined ICESHELF3D_TOY
+# elif defined ICESHELF3D_TOY || defined ICESHELF_TIDES
       DO j=JstrR,JendR
         DO i=IstrR,IendR
           h(i,j)=500.0_r8
@@ -1199,7 +1199,7 @@
 !          END IF
         END DO
       END DO
-#  elif defined ICESHELF3D_TOY
+#  elif defined ICESHELF3D_TOY || defined ICESHELF_TIDES
       DO j=JstrR,JendR
         DO i=IstrR,IendR
           IF (j.eq.0) THEN

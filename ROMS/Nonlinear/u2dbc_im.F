@@ -530,8 +530,7 @@
               bry_str=cff1*(FORCES(ng)%sustr(Iend+1,j)-                 &
      &                      FORCES(ng)%bustr(Iend+1,j))
 #   ifdef ICESHELF
-          Cx=1.0_r8/SQRT(g*0.5_r8*(GRID(ng)%h(Iend+1,j)-
-          C&
+          Cx=1.0_r8/SQRT(g*0.5_r8*(GRID(ng)%h(Iend+1,j)-                &
      &                             ABS(GRID(ng)%zice(Iend+1,j))+        &
      &                             zeta(Iend+1,j,kout)+                 &
      &                             GRID(ng)%h(Iend  ,j)-                &

@@ -9,4 +9,4 @@ Includes the following test cases for:
 - ICETEST: following ISOMIP specifications
 - ICESHELF3D_TOY: Small domain (100x200 km and 500 deep)
 - ICESHELF2D
- 
+- ICESHELF_TIDES: ICESHELF3D_TOY with tidal forcing 

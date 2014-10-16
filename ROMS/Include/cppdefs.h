@@ -367,6 +367,7 @@
 ** SSH_TIDES           use if imposing tidal elevation                       **
 ** UV_TIDES            use if imposing tidal currents                        **
 ** RAMP_TIDES          use if ramping (over one day) tidal forcing           **
+** NODAL_TIDES         use if applying nodal corrections to tides
 ** FSOBC_REDUCED       use if SSH data and reduced physics conditions        **
 ** ADD_FSOBC           use to add tidal elevation to processed OBC data      **
 ** ADD_M2OBC           use to add tidal currents  to processed OBC data      **

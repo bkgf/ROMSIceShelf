@@ -130,6 +130,9 @@
       integer, intent(in) :: LBi, UBi, LBj, UBj
       integer, intent(in) :: IminS, ImaxS, JminS, JmaxS
       integer, intent(in) :: NTC
+# ifdef NODAL_TIDES
+      real(r8) :: tide_pred
+# endif
 !
 # ifdef ASSUMED_SHAPE
       real(r8), intent(in) :: angler(LBi:,LBj:)
@@ -203,7 +206,13 @@
       real(r8) :: Cangle, Cphase, Sangle, Sphase
       real(r8) :: angle, cff, phase, omega, ramp
       real(r8) :: bry_cor, bry_pgr, bry_str, bry_val
-
+# ifdef NODAL_TIDES
+      integer :: iye, mon, idy, ihr, min
+      real(r8) :: JD, tz_t,Tmax, notide
+      real(r4) :: sec
+      real(r8) :: htid(NTC), gtid(NTC)
+      character*6 :: intide(NTC)
+# endif
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: Etide
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: Utide
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: Uwrk
@@ -232,7 +241,8 @@
 # if defined AVERAGES_DETIDE && (defined SSH_TIDES || defined UV_TIDES)
 !
 !-----------------------------------------------------------------------
-!  Compute harmonic used to detide output fields.
+!  Compute harmonic used to detide output fields. Note this is not 
+!  when using NODAL_TIDES
 !-----------------------------------------------------------------------
 !
       cff=2.0_r8*pi*(time(ng)-tide_start*day2sec)
@@ -254,22 +264,59 @@
 !-----------------------------------------------------------------------
 !
       Etide(:,:)=0.0_r8
+#   ifdef NODAL_TIDES
+      intide(1) = 'm2    '
+      intide(2) = 's2    '
+      intide(3) = 'n2    '
+      intide(4) = 'k2    '
+      intide(5) = 'k1    '
+      intide(6) = 'o1    '
+      intide(7) = 'p1    '
+      intide(8) = 'q1    '
+      intide(9) = 'mf    '
+      intide(10)= 'mm    '
+      JD=tdays(ng)+2440000.5d0              ! Julian datys (from B.C.)
+      tz_t=0.0d0                            ! Time zone  0 = GMT
+      notide=-9999.0d0
+      CALL caldat(iye,mon,idy,ihr,min,sec,JD)
+      DO j=JstrR,JendR
+        DO i=IstrR,IendR
+          IF (SSH_Tamp(i,j,1).gt.notide) THEN 
+            DO itide=1,NTC
+              htid(itide) = SSH_Tamp(i,j,itide)
+              gtid(itide) = SSH_Tphase(i,j,itide)
+            END DO
+              Etide(i,j)=ramp*tide_pred(iye,mon,idy,ihr,min,sec,tz_t,   &
+     &                    htid,gtid,                                    &
+     &                    intide,                                       &
+     &                    NTC)
+#   ifdef MASKING
+              Etide(i,j)=Etide(i,j)*rmask(i,j)
+#   endif
+
+          END IF
+        END DO
+      END DO
+
+#   else
       cff=2.0_r8*pi*(time(ng)-tide_start*day2sec)
       DO itide=1,NTC
         IF (Tperiod(itide).gt.0.0_r8) THEN
           omega=cff/Tperiod(itide)
+
           DO j=JstrR,JendR
             DO i=IstrR,IendR
               Etide(i,j)=Etide(i,j)+                                    &
      &                   ramp*SSH_Tamp(i,j,itide)*                      &
      &                   COS(omega-SSH_Tphase(i,j,itide))
-#  ifdef MASKING
+#   ifdef MASKING
               Etide(i,j)=Etide(i,j)*rmask(i,j)
-#  endif
+#   endif
             END DO
           END DO
         END IF
       END DO
+#  endif
 #  if defined ZCLIMATOLOGY && defined ADD_FSOBC
 !
 !  Add sub-tidal forcing and adjust climatology to include tides.
