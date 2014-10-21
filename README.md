@@ -15,7 +15,7 @@ Ice-shelf model OPTIONS:
 
 Tide model OPTIONS:
 
-- TIDES_NODAL         use for astronomical tides with nodal corrections
+- NODAL_TIDES         use for astronomical tides with nodal corrections
 - ANA_TIDES           use if analytical astronomical tides                
 
 Includes the following test cases for:
