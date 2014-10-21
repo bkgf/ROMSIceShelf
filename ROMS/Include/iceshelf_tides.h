@@ -47,6 +47,7 @@
 #define SSH_TIDES
 #ifdef SSH_TIDES
 # define NODAL_TIDES
+# define ANA_TIDES
 #endif
 
 

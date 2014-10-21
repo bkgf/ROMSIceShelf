@@ -20,7 +20,7 @@
       USE mod_grid
       USE mod_iounits
       USE mod_ncparam
-# if defined AVERAGES_DETIDE && (defined SSH_TIDES || defined UV_TIDES)
+# if !defined ANA_TIDES && (defined AVERAGES_DETIDE && (defined SSH_TIDES || defined UV_TIDES))
       USE mod_netcdf
 # endif
       USE mod_parallel
@@ -29,7 +29,7 @@
       USE mod_sources
 # endif
       USE mod_stepping
-# if defined SSH_TIDES || defined UV_TIDES
+# if !defined ANA_TIDES && (defined SSH_TIDES || defined UV_TIDES)
       USE mod_tides
 # endif
 !

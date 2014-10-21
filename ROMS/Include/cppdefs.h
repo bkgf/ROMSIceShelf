@@ -239,6 +239,7 @@
 ** ANA_SSS             use if analytical sea surface salinity                **
 ** ANA_SST             use if analytical SST and dQdSST                      **
 ** ANA_STFLUX          use if analytical surface net heat flux               **
+** ANA_TIDES           use if analytical astronomical tidal forcing          **
 ** ANA_TAIR            use if analytical surface air temperature             **
 ** ANA_TCLIMA          use if analytical tracers climatology                 **
 ** ANA_TOBC            use if analytical tracers boundary conditions         **
@@ -367,7 +368,7 @@
 ** SSH_TIDES           use if imposing tidal elevation                       **
 ** UV_TIDES            use if imposing tidal currents                        **
 ** RAMP_TIDES          use if ramping (over one day) tidal forcing           **
-** NODAL_TIDES         use if applying nodal corrections to tides
+** TIDES_NODAL         use for astronomical tides with nodal corrections     **
 ** FSOBC_REDUCED       use if SSH data and reduced physics conditions        **
 ** ADD_FSOBC           use to add tidal elevation to processed OBC data      **
 ** ADD_M2OBC           use to add tidal currents  to processed OBC data      **
@@ -466,6 +467,8 @@
 ** ICESHELF_3EQN_VBC   use to activate 3-equation ice/ocean thermodynamics   **
 ** ICESHELF_TEOS10     use for teos10 in situ freezing point temperature     **
 ** ANA_SEAICE          use to prescribe simple open ocean sea ice model      **
+** SEAICE_CLIMA        use to prescribe seasonal climatology surface fluxes  **
+** SEAICE_WINTER       use to prescribe constant winter surface fluxes       **
 **                                                                           **
 ** Fennel et al. (2006) biology model OPTIONS:                               **
 **                                                                           **

@@ -61,6 +61,7 @@
 !! ana_stflux.h        Analytical kinematic surface flux of tracer     !
 !!                       type variables.                               !
 !! ana_tair.h          Analytical surface air temperature.             !
+!! ana_tides.h         Analytical astronomical tidal forcing           !
 !! ana_tclima.h        Analytical tracer climatology fields.           !
 !! ana_tobc.h          Analytical tracer boundary conditions.          !
 !! ana_vmix.h          Analytical vertical mixing coefficients for     !
@@ -215,6 +216,10 @@
    (defined BULK_FLUXES || defined ECOSIM || \
    (defined ANA_SRFLUX && defined ALBEDO) )
 #  include <ana_tair.h>
+# endif
+
+# if defined ANA_TIDES && defined SSH_TIDES && defined TIDES_NODAL
+#  include <ana_tides.h>
 # endif
 
 # if defined ANA_TCLIMA && defined TCLIMATOLOGY
