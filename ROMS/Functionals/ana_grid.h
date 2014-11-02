@@ -405,6 +405,12 @@
       depth=500.0_r8
       f0=(4.0_r8*pi/86164.1_r8)*SIN(-70.0_r8*deg2rad)
       beta=0.0_r8
+#elif defined ICESHELF2D_TOY || defined ICECLIFF2D_TOY
+      Xsize=30.0E+03_r8
+      Esize=100.0E+03_r8
+      depth=500.0_r8
+      f0=0.0_r8 !(4.0_r8*pi/86164.1_r8)*SIN(-70.0_r8*deg2rad)
+      beta=0.0_r8
 #elif defined ICESHELF2D
       Xsize=20.0E+03_r8
       Esize=500.0E+03_r8
@@ -559,7 +565,7 @@
         END DO
       END DO
 
-#elif defined ICESHELF2D
+#elif defined ICESHELF2D || defined ICESHELF2D_TOY || defined ICECLIFF2D_TOY
       dx=Xsize/REAL(Lm(ng),r8)
       dy=Esize/REAL(Mm(ng),r8)
       DO j=Jmin,Jmax
@@ -688,7 +694,7 @@
           wrkY(i,j)=1.0_r8/dy
         END DO
       END DO
-# elif defined ICESHELF2D
+# elif defined ICESHELF2D || defined ICESHELF2D_TOY || defined ICECLIFF2D_TOY
      DO j=J_RANGE
         DO i=I_RANGE
           wrkX(i,j)=1.0_r8/dx
@@ -1086,6 +1092,12 @@
           h(i,j)=500.0_r8
         END DO
       END DO
+#elif defined ICESHELF2D_TOY || defined ICECLIFF2D_TOY
+      DO j=JstrR,JendR
+        DO i=IstrR,IendR
+          h(i,j)=500.0_r8
+        END DO
+      END DO
 # elif defined ICESHELF2D
       DO j=JstrR,JendR
         DO i=IstrR,IendR
@@ -1208,6 +1220,28 @@
             zice(i,j)=-450.0_r8+(350.0_r8/10.0_r8)*REAL(j-1,r8)
           ELSE
             zice(i,j)=0.0_r8
+          END IF
+        END DO
+      END DO
+#elif defined ICESHELF2D_TOY
+      DO j=JstrR,JendR
+        DO i=IstrR,IendR
+          IF (j.eq.0) THEN
+            zice(i,j)=-450.0_r8
+          ELSE IF (j.le.11) THEN
+            zice(i,j)=-450.0_r8+(400.0_r8/10.0_r8)*REAL(j-1,r8)
+          ELSE
+            zice(i,j)=0.0_r8
+          END IF
+        END DO
+      END DO
+#elif defined ICECLIFF2D_TOY
+      DO j=JstrR,JendR
+        DO i=IstrR,IendR
+          IF (j.le.5) THEN
+            zice(i,j)=-491.0_r8
+          ELSE
+            zice(i,j)=-1.0_r8
           END IF
         END DO
       END DO

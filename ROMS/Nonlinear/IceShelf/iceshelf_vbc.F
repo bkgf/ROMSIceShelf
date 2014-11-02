@@ -1,7 +1,13 @@
 #include "cppdefs.h"
-#undef ICESHELF_VBC_HFPROPTOM
-#define GAMMAS_Mc1987 
-#undef GAMMAS_KY1972
+#ifdef ICESHELF2D_TOY
+#  define ICESHELF_VBC_HFPROPTOM
+#  undef GAMMAS_Mc1987 
+#  undef GAMMAS_KY1972
+#else
+#  undef ICESHELF_VBC_HFPROPTOM
+#  define GAMMAS_Mc1987 
+#  undef GAMMAS_KY1972
+#endif
       MODULE iceshelf_vbc_mod
 #ifdef ICESHELF
 !
@@ -75,6 +81,9 @@
 #if defined ICESHELF_3EQN_VBC || defined ANA_SEAICE
      &                   GRID(ng) % Hz,                                 &
 #endif
+# ifdef MASKING
+     &                   GRID(ng) % rmask,                              &
+# endif
      &                   GRID(ng) % z_r,                                &
      &                   GRID(ng) % z_w,                                &
      &                   GRID(ng) % zice,                               &
@@ -113,6 +122,9 @@
      &                         nrhs,nnew,                               &
 #if defined ICESHELF_3EQN_VBC || defined ANA_SEAICE
      &                         Hz,                                      &
+#endif
+#ifdef MASKING                 
+     &                         rmask,                                   &
 #endif
      &                         z_r, z_w,                                &
      &                         zice,f,                                  &
@@ -160,6 +172,9 @@
 #if defined ICESHELF_3EQN_VBC || defined ANA_SEAICE
       real(r8), intent(in) :: Hz(LBi:,LBj:,:)
 #endif
+#ifdef MASKING
+      real(r8), intent(in) :: rmask(LBi:,LBj:)
+#endif
       real(r8), intent(in) :: z_r(LBi:,LBj:,:)
       real(r8), intent(in) :: z_w(LBi:,LBj:,0:)
       real(r8), intent(in) :: zice(LBi:,LBj:)
@@ -187,6 +202,9 @@
       real(r8), intent(in) :: rho(LBi:UBi,LBj:UBj,N(ng))
 #if defined ICESHELF_3EQN_VBC || defined ANA_SEAICE
       real(r8), intent(in) :: Hz(LBi:UBi,LBj:UBj,N(ng))
+#endif
+#ifdef MASKING
+      real(r8), intent(in) :: rmask(LBi:UBi,LBj:UBj)
 #endif
       real(r8), intent(in) :: z_r(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(in) :: z_w(LBi:UBi,LBj:UBj,0:N(ng))
@@ -453,7 +471,11 @@
           Ep1  = cp_w*gammaT(i,j)
           Ep2  = cp_i*gammaS(i,j)
           Ep3  = L*gammaS(i,j)
+#ifdef ICESHELF2D_TOY
+          Ep31 = 0.0_r8
+#else
           Ep31 = -rho_r*cp_i*dt_i/zice(i,j)
+#endif
           Ep4  = b+c*z_w(i,j,N(ng))
           Ep5  = gammaS(i,j)/rho_r
 !
@@ -489,7 +511,7 @@
            Sb(i,j) = Sf2
          endif
 !
-         m(i,j) = Ep5*(1.0-Sm/Sb(i,j))
+         m(i,j) = -Ep5*(1.0-Sm/Sb(i,j))
 !         m(i,j)= Seta * dtfast
 !
 ! Calculates fluxes:
@@ -549,8 +571,8 @@
 # if defined ICESHELF_MORPH
       DO j=JstrR,JendR
         DO i=IstrR,IendR
-          iceshelf_draft(i,j,nnew)=zice(i,j)-                           &
-     &                             MIN(m(i,j)*dt(ng),1.0e-3_r8) 
+          iceshelf_draft(i,j,nnew)=zice(i,j)+(m(i,j)*dt(ng))!           &
+!     &                             MIN(m(i,j)*dt(ng),1.0e-8_r8) 
           IF(i.eq.40.and.j.eq.40) THEN
           write(6,*) m(i,j),zice(i,j),iceshelf_draft(i,j,nnew) 
           ENDIF

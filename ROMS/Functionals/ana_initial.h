@@ -741,7 +741,8 @@
           END DO
         END DO
       END DO
-# elif defined ICESHELF3D_TOY || defined ICESHELF_TIDES
+# elif defined ICESHELF3D_TOY || defined ICESHELF_TIDES || \
+  defined ICESHELF2D_TOY || defined ICECLIFF2D_TOY
       DO k=1,N(ng)
         DO j=JstrR,JendR
           DO i=IstrR,IendR

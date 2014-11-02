@@ -1,0 +1,7 @@
+# Compiled source
+Build
+Build/*
+oceanS
+oceanM
+*.nc
+*.job

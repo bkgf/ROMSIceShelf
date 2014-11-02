@@ -32,7 +32,7 @@
       real(r8), parameter :: Cd = 5.0e-3_r8
       real(r8), parameter :: visc = 1.95e-6_r8
       real(r8), parameter :: L = 3.33e5_r8
-      real(r8), parameter :: small = 8.0e-6_r8 ! lower limit for diffusion alone
+      real(r8), parameter :: small = 1.0e-3_r8 !8.0e-6_r8 ! lower limit for diffusion alone
       real(r8), parameter :: dt_i = 1.54e-6
       real(r8), parameter :: cp_w = 3947.0_r8
       real(r8), parameter :: rho_i = 920.0_r8
@@ -41,11 +41,11 @@
 #  endif
 #  ifdef ANA_SEAICE
       real(r8), parameter :: trelax = 3.0_r8 * 86400.0_r8 ! 3 days
-      real(r8), parameter :: saltMax = 34.5_r8
+      real(r8), parameter :: saltMax = 34.6_r8 !34.5_r8
       real(r8), parameter :: saltMin = 34.5_r8
       real(r8), parameter :: sRateInc = 0.0085_r8
       real(r8), parameter :: sRateDec = 0.0283333_r8
-      real(r8), parameter :: Tmax = -1.85_r8
+      real(r8), parameter :: Tmax = 0.5_r8 !-1.85_r8
       real(r8), parameter :: Tmin = -1.85_r8
       real(r8) :: tyear, sfcTemp, sfcSalt
 #   else

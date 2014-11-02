@@ -186,7 +186,16 @@
          END IF
         END DO
       END DO
-
+#elif defined ICECLIFF2D_TOY
+      DO j=Jstrm2,Jendp2
+        DO i=Istrm2,Iendp2
+         IF(j.le.5) THEN
+          mask(i,j)=0.0_r8
+         ELSE
+          mask(i,j)=1.0_r8
+         END IF
+        END DO
+      END DO
 #else
       ana_mask.h: no values provided for mask.
 #endif

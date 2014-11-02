@@ -339,7 +339,8 @@
 !
             cff=1.0_r8/SQRT(MAX(bvf(i,j,k),1.0E-7_r8))
 # if defined ICETEST || defined ICESHELF2D || \
-  defined ICESHELF3D_TOY || defined ICESHELF_TIDES
+  defined ICESHELF3D_TOY || defined ICESHELF_TIDES || \
+  defined ICESHELF2D_TOY || defined ICECLIFF2D_TOY
             lmd_iwm=1.0E-3_r8
             lmd_iws=5.0E-5_r8
             if (bvf(i,j,k) .lt. 0.0_r8) then

@@ -336,7 +336,8 @@
         END DO
       END DO
 #elif defined ICETEST || defined AMERY || defined ICESHELF2D || \
-      defined ICESHELF3D_TOY || defined ICESHELF_TIDES
+      defined ICESHELF3D_TOY || defined ICESHELF_TIDES || \
+      defined ICESHELF2D_TOY
       DO j=JstrR,JendR
         DO i=Istr,IendR
           sustr(i,j)=0.0_r8
