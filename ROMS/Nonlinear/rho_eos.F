@@ -138,7 +138,11 @@
 !***********************************************************************
 !
       USE mod_param
+#  ifdef GSW_EOS
+      USE mod_gswcoef
+#  else
       USE mod_eoscoef
+#  endif
       USE mod_scalars
 #  ifdef SEDIMENT
       USE mod_sediment
@@ -246,6 +250,9 @@
       real(r8), dimension(IminS:ImaxS,N(ng)) :: den
       real(r8), dimension(IminS:ImaxS,N(ng)) :: den1
 
+      real (r8) :: pp, rz0, rz1, rz2, rz3, sau, ss, ctu, zu, deltas
+      real (r8) :: sa, ct, p, r1
+
 #  include "set_bounds.h"
 !
 !=======================================================================
@@ -257,6 +264,100 @@
       DO j=JstrT,JendT
         DO k=1,N(ng)
           DO i=IstrT,IendT
+#ifdef GSW_EOS
+
+! CHECK VALUES (SA=30g/kg, CT=10degC, p=1e3dbar):
+!  rho = 1027.45140
+!  a   = 0.179649406
+!  b   = 0.765554495
+!  r1  = 1.00447333
+!  rdot= 1022.87574
+!
+! REFERENCES:
+!  Roquet, F., Madec, G., McDougall, T. J., Barker, P. M., 2014:
+!Accurate 
+!   polynomial expressions for the density and specific volume of 
+!   seawater using the TEOS-10 standard. Ocean Modelling.
+!  McDougall, T. J., D. R. Jackett, D. G. Wright and R. Feistel, 2003: 
+!   Accurate and computationally efficient algorithms for potential 
+!   temperature and density of seawater.  Journal of Atmospheric and 
+!   Oceanic Technology, 20, 730-741. 
+!
+!
+!  Check temperature and salinity lower values. Assign depth to the
+!  pressure.
+!
+            ct=MAX(-5.0_r8,t(i,j,k,nrhs,itemp))
+#  ifdef SALINITY
+            sa=MAX(0.0_r8,t(i,j,k,nrhs,isalt))
+#  else
+            sa=0.0_r8
+#  endif
+            p=-z_r(i,j,k)
+! reduced variables
+            sau = 40.0_r8*gsw_ups
+            ctu = 40.0_r8
+            zu = 1e4_r8
+            deltas = 32.0_r8
+            ss   = sqrt ( (sa+deltas)/sau )
+            tt   = ct / ctu
+            pp   = p / zu
+            r1=(((((r15*pp+r14)*pp+r13)*pp+r12)*pp+r11)*pp+r10)*pp+     &
+     &         1.0_r8
+! stiffened density
+            rz3=r013*tt + r103*ss + r003
+            rz2=(r022*tt+r112*ss+r012)*tt+(r202*ss+r102)*ss+r002
+            rz1=(((r041*tt+r131*ss+r031)*tt+                            &
+     &          (r221*ss+r121)*ss+r021)*tt+                             &
+     &          ((r311*ss+r211)*ss+r111)*ss+r011)*tt+                   &
+     &          (((r401*ss+r301)*ss+r201)*ss+r101)*ss+r001
+
+            den1(i,k)=(((((r060*tt+r150*ss+r050)*tt+                    &
+     &          (r240*ss+r140)*ss+r040)*tt+                             &
+     &          ((r330*ss+r230)*ss+r130)*ss+r030)*tt+                   &
+     &          (((r420*ss+r320)*ss+r220)*ss+r120)*ss+r020)*tt+         &
+     &        ((((r510*ss+r410)*ss+r310)*ss+r210)*ss+r110)*ss+r010)*tt+ &
+     &    (((((r600*ss+r500)*ss+r400)*ss+r300)*ss+r200)*ss+r100)*ss+r000
+
+            den(i,k)=(((rz3*pp+rz2)*pp+rz1)*pp+den1(i,k))-1000.0_r8
+
+# if defined LMD_SKPP    || defined LMD_BKPP         || \
+      defined BULK_FLUXES || defined BALANCE_OPERATOR
+!! INCOMPLETE AND WRONG ALLOCATIONS OF ALPHA, BETA. NEEDS ALPHAONBETA
+! thermal expansion a
+            alpha(i,k)=r1*(                                             &
+               ((alp003*pp+                                             &
+     &          alp012*tt + alp102*ss+alp002)*pp+                       &
+     &          ((alp031*tt+                                            &
+     &          alp121*ss+alp021)*tt+                                   &
+     &          (alp211*ss+alp111)*ss+alp011)*tt+                       &
+     &          ((alp301*ss+alp201)*ss+alp101)*ss+alp001)*pp+           &
+     &          ((((alp050*tt+                                          &
+     &          alp140*ss+alp040)*tt+                                   &
+     &          (alp230*ss+alp130)*ss+alp030)*tt+                       &
+     &          ((alp320*ss+alp220)*ss+alp120)*ss+alp020)*tt+           &
+     &        (((alp410*ss+alp310)*ss+alp210)*ss+alp110)*ss+alp010)*tt+ &
+     & ((((alp500*ss+alp400)*ss+alp300)*ss+alp200)*ss+alp100)*ss+alp000)
+
+! haline contraction b
+            beta(i,k)=((bet003*pp+                                      &
+     &        bet012*tt + bet102*ss+bet002)*pp+                         &
+     &        ((bet031*tt+                                              &
+     &        bet121*ss+bet021)*tt+                                     &
+     &        (bet211*ss+bet111)*ss+bet011)*tt+                         &
+     &        ((bet301*ss+bet201)*ss+bet101)*ss+bet001)*pp+             &
+     &        ((((bet050*tt+                                            &
+     &        bet140*ss+bet040)*tt+                                     &
+     &        (bet230*ss+bet130)*ss+bet030)*tt+                         &
+     &        ((bet320*ss+bet220)*ss+bet120)*ss+bet020)*tt+             &
+     &   (((bet410*ss+bet310)*ss+bet210)*ss+bet110)*ss+bet010)*tt+      &
+     & ((((bet500*ss+bet400)*ss+bet300)*ss+bet200)*ss+bet100)*ss+bet000
+ 
+             beta(i,k)=b(i,k)*r1/ss
+#endif
+          END DO
+        END DO
+#else
 !
 !  Check temperature and salinity lower values. Assign depth to the
 !  pressure.
@@ -271,6 +372,7 @@
 #  endif
             Tp=z_r(i,j,k)
             Tpr10=0.1_r8*Tp
+
 !
 !-----------------------------------------------------------------------
 !  Compute density (kg/m3) at standard one atmosphere pressure.
@@ -467,6 +569,7 @@
           END IF
         END DO
 #  endif
+#endif
 !
 !-----------------------------------------------------------------------
 !  Load "in situ" density anomaly (kg/m3 - 1000) and potential

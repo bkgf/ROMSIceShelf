@@ -336,7 +336,7 @@
       depth=190.0_r8
       f0=1.0E-04_r8
       beta=0.0_r8
-#elif defined SEAMOUNT
+#elif defined SEAMOUNT || defined GSW_SEAMOUNT
       Xsize=320.0E+03_r8
       Esize=320.0E+03_r8
       depth=5000.0_r8
@@ -984,7 +984,7 @@
      &                 REAL(Lm(ng)-6,r8)
         END DO
       END DO
-#elif defined SEAMOUNT
+#elif defined SEAMOUNT || defined GSW_SEAMOUNT
       DO j=JstrT,JendT
         DO i=IstrT,IendT
           val1=(xr(i,j)-0.5_r8*Xsize)/40000.0_r8

@@ -152,8 +152,8 @@ GridsInLayer =  1
    LBC(isVvel) ==   Clo     Clo     Clo     Clo         ! 3D V-momentum
    LBC(isMtke) ==   Clo     Clo     Clo     Clo         ! mixing TKE
 
-   LBC(isTvar) ==   Clo     Clo     Clo     Clo \       ! temperature
-                    Clo     Clo     Clo     Clo         ! salinity
+   LBC(isTvar) ==   Clo     Clo     Clo     Cla \       ! temperature
+                    Clo     Clo     Clo     Cla         ! salinity
 
 ! Adjoint-based algorithms can have different lateral boundary
 ! conditions keywords.
@@ -216,7 +216,7 @@ ad_VolCons(north) ==  F                            ! northern boundary
 ! Output history, average, diagnostic files parameters.
 
      LDEFOUT == T
-        NHIS == 1 !4000 !8640
+        NHIS == 400 !4000 !8640
      NDEFHIS == 0
       NTSAVG == 1
         NAVG == 864

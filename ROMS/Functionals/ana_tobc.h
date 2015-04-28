@@ -18,6 +18,9 @@
       USE mod_ncparam
       USE mod_ocean
       USE mod_stepping
+#ifdef ICECLIFF
+      USE mod_iceshelfvar
+#endif
 !
 ! Imported variable declarations.
 !
@@ -28,7 +31,7 @@
       CALL ana_tobc_tile (ng, tile, model,                              &
      &                    LBi, UBi, LBj, UBj,                           &
      &                    IminS, ImaxS, JminS, JmaxS,                   &
-     &                    nstp(ng),                                     &
+     &                    nrhs(ng),nstp(ng),                            &
      &                    GRID(ng) % z_r,                               &
      &                    OCEAN(ng) % t)
 !
@@ -49,7 +52,7 @@
       SUBROUTINE ana_tobc_tile (ng, tile, model,                        &
      &                          LBi, UBi, LBj, UBj,                     &
      &                          IminS, ImaxS, JminS, JmaxS,             &
-     &                          nstp,                                   &
+     &                          nrhs, nstp,                             &
      &                          z_r, t)
 !***********************************************************************
 !
@@ -67,7 +70,7 @@
       integer, intent(in) :: ng, tile, model
       integer, intent(in) :: LBi, UBi, LBj, UBj
       integer, intent(in) :: IminS, ImaxS, JminS, JmaxS
-      integer, intent(in) :: nstp
+      integer, intent(in) :: nrhs, nstp
 
 #ifdef ASSUMED_SHAPE
       real(r8), intent(in) :: z_r(LBi:,LBj:,:)
@@ -81,6 +84,10 @@
 !
       integer :: i, ised, itrc, j, k
       real(r8) :: cff
+      real(r8) :: Sm,Tm,rhoi_on_rho0,ustar,TFb,turb
+      real(r8), parameter :: a = -0.057_r8
+      real(r8), parameter :: b = 0.0939_r8
+      real(r8), parameter :: c = 7.61e-4
 
 #include "set_bounds.h"
 !
@@ -212,13 +219,33 @@
       IF (ANY(LBC(ieast,isTvar(:),ng)%acquire).and.                     &
      &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
         DO k=1,N(ng)
-          DO j=JstrT,JendT
+          DO i=IstrT,IendT
             BOUNDARY(ng)%t_east(j,k,itemp)=20.0_r8
             BOUNDARY(ng)%t_east(j,k,isalt)=0.0_r8
           END DO
         END DO
       END IF
-
+#elif defined ICECLIFF
+     IF (ANY(LBC(inorth,isTvar(:),ng)%acquire).and.                     &
+     &    DOMAIN(ng)%Northern_Edge(tile)) THEN
+        DO k=1,N(ng)
+          DO i=IstrT,IendT
+# ifdef SALINITY
+          Sm=MAX(0.0_r8,t(i,Jstr+1,k,nrhs,isalt))
+!          write(6,*)
+# else
+          Sm=0.0_r8
+# endif
+          TFb = a*Sm+b+c*z_r(i,Jend+1,k)
+           CALL potit(Sm,t(i,Jend+1,k,nrhs,itemp),                      &
+     &         -z_r(i,Jend+1,k),0.0_r8,Tm,i,j)
+            cff = 0.0001_r8*(TFb-Tm)*dt(ng)
+            BOUNDARY(ng)%t_north(j,k,itemp)=cff+t(i,Jend+1,k,nrhs,itemp)
+        BOUNDARY(ng)%t_north(j,k,isalt)=3487.0_r8*cff*34.5_r8/3.34e5_r8 &
+    &                                    + Sm
+          END DO
+        END DO
+      END IF
 #else
       IF (ANY(LBC(ieast,isTvar(:),ng)%acquire).and.                     &
      &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
@@ -267,3 +294,106 @@
 
       RETURN
       END SUBROUTINE ana_tobc_tile
+! *********************************************************************
+      SUBROUTINE potit(Sal,theta,Pres,RPres,Temp,i,j)
+! *********************************************************************
+! Calculates from the salinity (sal, psu), potential temperature 
+! (theta, degC) and reference pressure (pres, dbar) the in-situ 
+! temperaure (Temp_insitu, degC) related to the in-situ pressure 
+! (rfpres, dbar) with the help of an iterative method.
+      USE mod_kinds
+
+      integer, intent(in)   :: i, j
+      real(r8), intent(in)  :: Sal, Pres,theta
+      real(r8), intent(out) :: Temp
+
+      integer               :: ind
+      real(r8)              :: tpmd, theta1, thetad, epsi, RPres
+
+      data tpmd / 0.001 /
+
+      epsi = 0.
+      do ind=1,100
+      Temp   = theta+epsi
+      thetad  = thetaa(Sal,Temp,Pres,RPres)-theta
+      IF(abs(thetad).lt.tpmd) return
+       epsi = epsi-thetad
+      ENDdo
+      write(6,*) ' WARNING!',                                           &
+     & ' in-situ temperature calculation has not converged!', i,j
+      RETURN
+      END SUBROUTINE potit
+! *********************************************************************
+      REAL FUNCTION thetaa(Sal,Temp,Pres,RPres)
+! Calculates from the salinity (sal, psu), the in-situ temperature 
+! (Temp, degC) and the in-situ pressure press, dbar) the potential 
+! temperature (Theta, degC) converted to the reference pressure
+! (RPres, dbar). A Runge-Kutta procedure of the fourth order is used.
+!
+! Check value: theta   =    36.89073  degC
+!         given sal    =    40.0      psu
+!               Temp   =    40.0      degC
+!               pres   = 10000.000    dbar
+!               rfpres =     0.000    dbar
+      USE mod_kinds
+
+      real(r8), intent(in) ::  Sal,Temp,Pres,RPres
+      real(r8)             ::  p,t,dp,dt,q,ct2,ct3,cq2a,cq2b,cq3a,cq3b
+
+      data ct2 ,ct3  /0.29289322 ,  1.707106781/
+      data cq2a,cq2b /0.58578644 ,  0.121320344/
+      data cq3a,cq3b /3.414213562, -4.121320344/
+
+      p  = Pres
+      t  = Temp
+      dp = RPres-Pres
+      dt = dp*dTemp(Sal,t,p)
+      t  = t +0.5*dt
+      q = dt
+      p  = p +0.5*dp
+      dt = dp*dTemp(Sal,t,p)
+      t  = t + ct2*(dt-q)
+      q  = cq2a*dt + cq2b*q
+      dt = dp*dTemp(Sal,t,p)
+      t  = t + ct3*(dt-q)
+      q  = cq3a*dt + cq3b*q
+      p  = RPres
+      dt = dp*dTemp(Sal,t,p)
+
+      thetaa = t + (dt-q-q)/6.0
+
+      END FUNCTION thetaa
+! *********************************************************************
+! *********************************************************************
+      REAL FUNCTION dTemp(Sal,Temp,Pres)
+! Calculates from the salinity (Sal,psu), the in-situ Temperature
+! (Temp, degC) and the in-situ pressure (Pres, dbar) the adiabatic 
+! temperature gradient (dTemp, K Dbar^-1).
+!
+! Check values: dTemp  =     3.255976E-4 K dbar^-1
+!          given Sal    =    40.0         psu
+!                Temp   =    40.0         degC
+!                Pres   = 10000.000       dbar
+      USE mod_kinds
+
+      real(r8), intent(in) :: Sal, Temp, Pres
+      real(r8)             :: s0,a0,a1,a2,a3,b0,b1,c0,c1,c2,c3
+      real(r8)             :: d0,d1,e0,e1,e2,ds
+
+      data s0 /35.0D0/
+      data a0,a1,a2,a3 /3.5803D-5, 8.5258D-6, -6.8360D-8, 6.6228D-10/
+      data b0,b1       /1.8932D-6, -4.2393D-8/
+      data c0,c1,c2,c3 /1.8741D-8, -6.7795D-10, 8.7330D-12, -5.4481D-14/
+      data d0,d1       /-1.1351D-10, 2.7759D-12/
+      data e0,e1,e2    /-4.6206D-13,  1.8676D-14, -2.1687D-16/
+
+      ds = Sal-s0
+      dTemp = ( ( (e2*Temp + e1)*Temp + e0 )*Pres                       &
+     &      + ( (d1*Temp + d0)*ds                                       &
+     &      + ( (c3*Temp + c2)*Temp + c1 )*Temp + c0 ) )*Pres           &
+     &      + (b1*Temp + b0)*ds +  ( (a3*Temp + a2)*Temp + a1 )*Temp    &
+     &      + a0
+      RETURN
+      END FUNCTION dTemp
+
+

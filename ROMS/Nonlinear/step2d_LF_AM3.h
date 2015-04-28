@@ -153,7 +153,7 @@
 # ifdef MASKING
      &                        pmask, rmask, umask, vmask,               &
 # endif
-# ifdef SOLVE3D && defined ICESHELF
+# if defined SOLVE3D && defined ICESHELF
      &                        zice,                                     &
 # endif
 # ifdef WET_DRY

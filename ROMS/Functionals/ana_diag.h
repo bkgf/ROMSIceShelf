@@ -59,7 +59,7 @@
       USE mod_param
       USE mod_iounits
       USE mod_scalars
-#ifdef SEAMOUNT
+#ifdef SEAMOUNT || defined GSW_SEAMOUNT
       USE mod_stepping
 #endif
 !
@@ -96,7 +96,7 @@
 !  Compute user diagnostics.
 !-----------------------------------------------------------------------
 !
-#ifdef SEAMOUNT
+#ifdef SEAMOUNT || defined GSW_SEAMOUNT
 
 !  Open USER file.
 !

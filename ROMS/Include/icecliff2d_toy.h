@@ -43,7 +43,12 @@
 #define ANA_BSFLUX
 #define ANA_BTFLUX
 #define ANA_SRFLUX
-#define WET_DRY
+
+#define ICECLIFF
+#ifdef ICECLIFF
+#  define WET_DRY
+#  define ANA_TOBC
+#endif
 
 /* Define SET_VBC.F for open ocean boundary layer. Can be one of:
 * * ANA_SEAICE
