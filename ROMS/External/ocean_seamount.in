@@ -107,8 +107,8 @@ GridsInLayer =  1
 ! shared-memory configurations used to determine tile horizontal range
 ! indices (Istr,Iend) and (Jstr,Jend), [1:Ngrids].
 
-      NtileI == 1                               ! I-direction partition
-      NtileJ == 1                               ! J-direction partition
+      NtileI == 2                               ! I-direction partition
+      NtileJ == 2                               ! J-direction partition
 
 ! Set lateral boundary conditions keyword. Notice that a value is expected
 ! for each boundary segment per nested grid for each state variable.
@@ -146,14 +146,26 @@ GridsInLayer =  1
 !
 !                   1       2       3       4
 
-   LBC(isFsur) ==   Per     Clo     Per     Clo         ! free-surface
-   LBC(isUbar) ==   Per     Clo     Per     Clo         ! 2D U-momentum
-   LBC(isVbar) ==   Per     Clo     Per     Clo         ! 2D V-momentum
-   LBC(isUvel) ==   Per     Clo     Per     Clo         ! 3D U-momentum
-   LBC(isVvel) ==   Per     Clo     Per     Clo         ! 3D V-momentum
-   LBC(isMtke) ==   Per     Clo     Per     Clo         ! mixing TKE
+!   LBC(isFsur) ==   Per     Clo     Per     Clo         ! free-surface
+!   LBC(isUbar) ==   Per     Clo     Per     Clo         ! 2D U-momentum
+!   LBC(isVbar) ==   Per     Clo     Per     Clo         ! 2D V-momentum
+!   LBC(isUvel) ==   Per     Clo     Per     Clo         ! 3D U-momentum
+!   LBC(isVvel) ==   Per     Clo     Per     Clo         ! 3D V-momentum
+!   LBC(isMtke) ==   Per     Clo     Per     Clo         ! mixing TKE
 
-   LBC(isTvar) ==   Per     Clo     Per     Clo         ! temperature
+!   LBC(isTvar) ==   Per     Clo     Per     Clo         ! temperature
+
+   LBC(isFsur) ==   Clo     Clo     Clo     Clo         ! free-surface
+   LBC(isUbar) ==   Clo     Clo     Clo     Clo         ! 2D U-momentum
+   LBC(isVbar) ==   Clo     Clo     Clo     Clo         ! 2D V-momentum
+   LBC(isUvel) ==   Clo     Clo     Clo     Clo         ! 3D U-momentum
+   LBC(isVvel) ==   Clo     Clo     Clo     Clo         ! 3D V-momentum
+   LBC(isMtke) ==   Clo     Clo     Clo     Clo         ! mixing TKE
+
+   LBC(isTvar) ==   Clo     Clo     Clo     Clo        ! temperature
+!                    Clo     Clo     Clo     Clo         ! salinity
+
+
 
 ! Adjoint-based algorithms can have different lateral boundary
 ! conditions keywords.
