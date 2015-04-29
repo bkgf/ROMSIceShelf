@@ -384,7 +384,11 @@ endif
 
 .PHONY: all
 
+ifdef ROMS_MAKE_SHAREDLIB
+all: $(SCRATCH_DIR) $(SCRATCH_DIR)/MakeDepend $(BIN) $(BIN).so rm_macros
+else
 all: $(SCRATCH_DIR) $(SCRATCH_DIR)/MakeDepend $(BIN) rm_macros
+endif
 
  modules  :=
 ifdef USE_ADJOINT

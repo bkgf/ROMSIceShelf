@@ -23,7 +23,11 @@
 # First the defaults
 #
                FC := gfortran
-           FFLAGS := -frepack-arrays
+           FFLAGS ?= 
+ifdef ROMS_MAKE_SHAREDLIB
+           FFLAGS += -fPIC
+endif
+           FFLAGS += -frepack-arrays
               CPP := /usr/bin/cpp
          CPPFLAGS := -P -traditional
           LDFLAGS :=

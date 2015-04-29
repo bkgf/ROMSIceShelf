@@ -14,12 +14,16 @@ local_objs := $(addprefix $(SCRATCH_DIR)/, $(notdir $(local_objs)))
 
 sources    += $(local_src)
 
+
 ifdef LD_WINDOWS
 $(BIN):	$(libraries) $(local_objs)
 	$(LD) $(FFLAGS) $(local_objs) -o $@ $(libraries) $(LIBS_WIN32) $(LDFLAGS)
 else
 $(BIN):	$(libraries) $(local_objs)
 	$(LD) $(FFLAGS) $(LDFLAGS) $(local_objs) -o $@ $(libraries) $(LIBS)
+$(BIN).so: $(libraries) $(local_objs)
+	$(LD) -shared $(FFLAGS) $(LDFLAGS) $(local_objs) -o $@ $(libraries) $(LIBS)
 endif
+
 
 $(eval $(compile-rules))

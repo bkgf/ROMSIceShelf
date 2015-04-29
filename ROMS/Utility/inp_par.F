@@ -1,5 +1,5 @@
 #include "cppdefs.h"
-      SUBROUTINE inp_par (model)
+      SUBROUTINE inp_par (model,inputFile)
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
@@ -32,6 +32,7 @@
 !  Imported variable declarations.
 !
       integer, intent(in) :: model
+      character (len=*),intent(in),optional :: inputFile
 !
 !  Local variable declarations.
 !
@@ -108,10 +109,16 @@
 !  input parameters to all nodes.
 !
 !!    CALL my_getarg (1, Iname)
-      IF (Master) CALL my_getarg (1, Iname)
+      IF (PRESENT(inputFile)) THEN
+         Iname = inputFile
+         print*,"*******got input filename!**********"
+      ELSE
+         print*,"*******  slartybardfarst! **********"         
+         IF (Master) CALL my_getarg (1, Iname)
+      END IF
       CALL mp_bcasts (1, model, Iname)
       OPEN (inp, FILE=TRIM(Iname), FORM='formatted', STATUS='old',      &
-     &      ERR=20)
+     &     ERR=20)
       GO TO 40
  20   IF (Master) WRITE (stdout,30)
       exit_flag=2

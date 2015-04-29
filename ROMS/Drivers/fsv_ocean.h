@@ -47,7 +47,7 @@
 
       CONTAINS
 
-      SUBROUTINE ROMS_initialize (first, mpiCOMM)
+      SUBROUTINE ROMS_initialize (first, mpiCOMM, inputFile)
 !
 !=======================================================================
 !                                                                      !
@@ -78,6 +78,8 @@
       logical, intent(inout) :: first
 
       integer, intent(in), optional :: mpiCOMM
+
+      character (len=*),intent(in),optional :: inputFile
 !
 !  Local variable declarations.
 !
@@ -125,7 +127,7 @@
 !  initialize variables in several modules after the number of nested
 !  grids and dimension parameters are known.
 !
-        CALL inp_par (iTLM)
+        CALL inp_par (iTLM,inputFile)
         IF (exit_flag.ne.NoError) RETURN
 !
 !  Set domain decomposition tile partition range.  This range is
