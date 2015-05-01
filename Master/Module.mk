@@ -21,7 +21,7 @@ $(BIN):	$(libraries) $(local_objs)
 else
 $(BIN):	$(libraries) $(local_objs)
 	$(LD) $(FFLAGS) $(LDFLAGS) $(local_objs) -o $@ $(libraries) $(LIBS)
-$(BIN).so: $(libraries) $(local_objs)
+$(SHARED_LIB): $(libraries) $(local_objs)
 	$(LD) -shared $(FFLAGS) $(LDFLAGS) $(local_objs) -o $@ $(libraries) $(LIBS)
 endif
 

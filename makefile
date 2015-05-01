@@ -292,14 +292,18 @@ endef
 #--------------------------------------------------------------------------
 
 BIN := $(BINDIR)/oceanS
+SHARED_LIB := $(LIBDIR)/liboceanS.so
 ifdef USE_DEBUG
   BIN := $(BINDIR)/oceanG
+  SHARED_LIB := $(LIBDIR)/liboceanG.so
 else
  ifdef USE_MPI
    BIN := $(BINDIR)/oceanM
+   SHARED_LIB := $(LIBDIR)/liboceanM.so
  endif
  ifdef USE_OpenMP
    BIN := $(BINDIR)/oceanO
+   SHARED_LIB := $(LIBDIR)/liboceanO.so
  endif
 endif
 
@@ -385,7 +389,7 @@ endif
 .PHONY: all
 
 ifdef ROMS_MAKE_SHAREDLIB
-all: $(SCRATCH_DIR) $(SCRATCH_DIR)/MakeDepend $(BIN) $(BIN).so rm_macros
+all: $(SCRATCH_DIR) $(SCRATCH_DIR)/MakeDepend $(BIN) $(SHARED_LIB) rm_macros
 else
 all: $(SCRATCH_DIR) $(SCRATCH_DIR)/MakeDepend $(BIN) rm_macros
 endif
