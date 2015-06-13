@@ -2713,6 +2713,28 @@
           IF (exit_flag.ne.NoError) RETURN
         END IF
 #endif
+
+#if !(defined ICESHELF_MORPH) && defined ICESHELF
+!
+!  Ice draft.
+!
+        Vinfo( 1)='zice'
+        Vinfo( 2)='ice draft at RHO-points'
+        Vinfo( 3)='meter'
+        Vinfo(14)='bath, scalar'
+        Vinfo(22)='coordinates'
+        Aval(5)=REAL(r2dvar,r8)
+        IF (ncid.eq.STA(ng)%ncid) THEN
+          status=def_var(ng, model, ncid, varid, NF_TYPE,               &
+     &                   1, (/stadim/), Aval, Vinfo, ncname)
+          IF (exit_flag.ne.NoError) RETURN
+        ELSE
+          status=def_var(ng, model, ncid, varid, NF_TYPE,               &
+     &                   2, t2dgrd, Aval, Vinfo, ncname)
+          IF (exit_flag.ne.NoError) RETURN
+        END IF
+#endif
+
 !
 !  Coriolis Parameter.
 !

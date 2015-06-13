@@ -1308,8 +1308,6 @@
       GRID_VARS : IF (ncid.ne.FLT(ng)%ncid) THEN
 #endif
 #if !(defined SED_MORPH && defined SEDIMENT) 
-!|| \ 
-    !(defined ICESHELF && defined ICESHELF_MORPH)
 !
 !  Bathymetry.
 !
@@ -1342,6 +1340,46 @@
      &                          Nstation(ng), SCALARS(ng)%SposX,        &
      &                          SCALARS(ng)%SposY, wrk)
             CALL netcdf_put_fvar (ng, model, ncname, 'h',               &
+     &                            wrk, (/1/), (/Nstation(ng)/),         &
+     &                            ncid = ncid)
+            IF (exit_flag.ne.NoError) RETURN
+# endif
+          END IF
+        END IF
+#endif
+#if defined ICESHELF && !(defined ICESHELF_MORPH) 
+!
+!  Ice draft.
+!
+        IF (exit_flag.eq.NoError) THEN
+          scale=1.0_r8
+          IF (ncid.ne.STA(ng)%ncid) THEN
+            IF (find_string(var_name, n_var, 'zice', varid)) THEN
+              status=nf_fwrite2d(ng, model, ncid, varid, 0, r2dvar,     &
+     &                           LBi, UBi, LBj, UBj, scale,             &
+# ifdef MASKING
+     &                           GRID(ng) % rmask_io,                   &
+# endif
+     &                           GRID(ng) % zice,                       &
+     &                           SetFillVal = .FALSE.)
+              IF (status.ne.nf90_noerr) THEN
+                IF (Master) WRITE (stdout,10) 'zice', TRIM(ncname)
+                exit_flag=3
+                ioerror=status
+              END IF
+            ELSE
+              IF (Master) WRITE (stdout,20) 'zice', TRIM(ncname)
+              exit_flag=3
+              ioerror=nf90_enotvar
+            END IF
+# ifdef STATIONS
+          ELSE
+            CALL extract_sta2d (ng, model, Cgrid, ifield, r2dvar,       &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          scale, GRID(ng)%h,                      &
+     &                          Nstation(ng), SCALARS(ng)%SposX,        &
+     &                          SCALARS(ng)%SposY, wrk)
+            CALL netcdf_put_fvar (ng, model, ncname, 'zice',            &
      &                            wrk, (/1/), (/Nstation(ng)/),         &
      &                            ncid = ncid)
             IF (exit_flag.ne.NoError) RETURN

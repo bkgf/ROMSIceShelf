@@ -342,6 +342,12 @@
       depth=5000.0_r8
       f0=1.0E-04_r8
       beta=0.0_r8
+#elif defined ICEBERG || defined GSW_ICEBERG
+      Xsize=320.0E+03_r8
+      Esize=320.0E+03_r8
+      depth=5000.0_r8
+      f0=1.0E-04_r8
+      beta=0.0_r8
 #elif defined SOLITON
 !!    Xsize=0.5_r8*REAL(Lm(ng),r8)
 !!    Esize=0.5_r8*REAL(Mm(ng),r8)
@@ -1255,6 +1261,14 @@
      &             -atan(REAL(j-59,r8)/10)*(h(i,60)-300_r8))           &
      &             + 20_r8    
           END IF
+        END DO
+      END DO
+#elif  defined ICEBERG || defined GSW_ICEBERG
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+          val1=(xr(i,j)-0.5_r8*Xsize)/40000.0_r8
+          val2=(yr(i,j)-0.5_r8*Esize)/40000.0_r8
+          zice(i,j)=4500.0_r8*EXP(-(val1*val1+val2*val2))
         END DO
       END DO
 # else

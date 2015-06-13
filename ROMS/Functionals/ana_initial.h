@@ -693,6 +693,15 @@
           END DO
         END DO
       END DO
+# elif defined ICEBERG || defined GSW_ICEBERG
+      DO k=1,N(ng)
+        DO j=JstrT,JendT
+          DO i=IstrT,IendT
+            t(i,j,k,1,itemp)=T0(ng)+7.5_r8*EXP(z_r(i,j,k)/1000.0_r8)
+            t(i,j,k,1,isalt)=S0(ng)+0.1_r8*EXP(z_r(i,j,k)/1000.0_r8)
+          END DO
+        END DO
+      END DO
 # elif defined SED_TEST1
       DO k=1,N(ng)
         DO j=JstrT,JendT
