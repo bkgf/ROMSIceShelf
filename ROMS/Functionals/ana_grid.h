@@ -1268,7 +1268,7 @@
         DO i=IstrT,IendT
           val1=(xr(i,j)-0.5_r8*Xsize)/40000.0_r8
           val2=(yr(i,j)-0.5_r8*Esize)/40000.0_r8
-          zice(i,j)=4500.0_r8*EXP(-(val1*val1+val2*val2))
+          zice(i,j)=-4500.0_r8*EXP(-(val1*val1+val2*val2))
         END DO
       END DO
 # else
