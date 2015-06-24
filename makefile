@@ -58,7 +58,8 @@ $(if $(filter $(MAKE_VERSION),$(NEED_VERSION)),,        \
 #  the .h extension. For example, the upwelling application includes the
 #  "upwelling.h" header file.
 
-ROMS_APPLICATION ?= ICEBERG
+ROMS_APPLICATION ?= ICECLIFF2D_TOY
+#ROMS_APPLICATION ?= ICEBERG
 
 #  If application header files is not located in "ROMS/Include",
 #  provide an alternate directory FULL PATH.
@@ -88,7 +89,7 @@ MY_CPP_FLAGS ?=
 
 #  Activate debugging compiler options:
 
-   USE_DEBUG ?= 
+   USE_DEBUG ?=  
 
 #  If parallel applications, use at most one of these definitions
 #  (leave both definitions blank in serial applications):

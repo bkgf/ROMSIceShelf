@@ -8,8 +8,8 @@
 **
 ** Options for Simplified Ice Shelf Ocean Cavity Model Test.
 **
-** Application flag:   ICESHELF2D_TOY
-** Input script:       ocean_iceshelf2d_toy.in
+** Application flag:   ICECLIFF2D_TOY
+** Input script:       ocean_iceiff2d_toy.in
 */
 #define UV_ADV
 #define DJ_GRADPS
@@ -29,7 +29,7 @@
 #define CURVGRID
 #undef SPHERICAL
 #define SPLINES
-#define ICESHELF
+#undef ICESHELF
 #undef ICESHELF_MORPH
 #undef  AVERAGES
 #undef ATM_PRESS
@@ -46,7 +46,7 @@
 
 #define ICECLIFF
 #ifdef ICECLIFF
-#  define WET_DRY
+#  undef WET_DRY
 #  define ANA_TOBC
 #endif
 

@@ -83,7 +83,7 @@
 !  Local variable declarations.
 !
       integer :: i, ised, itrc, j, k
-      real(r8) :: cff
+      real(r8) :: cff, cff2
       real(r8) :: Sm,Tm,rhoi_on_rho0,ustar,TFb,turb
       real(r8), parameter :: a = -0.057_r8
       real(r8), parameter :: b = 0.0939_r8
@@ -231,7 +231,7 @@
         DO k=1,N(ng)
           DO i=IstrT,IendT
 # ifdef SALINITY
-          Sm=MAX(0.0_r8,t(i,Jstr+1,k,nrhs,isalt))
+          Sm=MAX(0.0_r8,t(i,Jend+1,k,nrhs,isalt))
 !          write(6,*)
 # else
           Sm=0.0_r8
@@ -239,10 +239,13 @@
           TFb = a*Sm+b+c*z_r(i,Jend+1,k)
            CALL potit(Sm,t(i,Jend+1,k,nrhs,itemp),                      &
      &         -z_r(i,Jend+1,k),0.0_r8,Tm,i,j)
+          ! Calculate meltrate 
             cff = 0.0001_r8*(TFb-Tm)*dt(ng)
-            BOUNDARY(ng)%t_north(j,k,itemp)=cff+t(i,Jend+1,k,nrhs,itemp)
-        BOUNDARY(ng)%t_north(j,k,isalt)=3487.0_r8*cff*34.5_r8/3.34e5_r8 &
-    &                                    + Sm
+            cff2 = 3487.0_r8*cff*34.5_r8/3.34e5_r8
+          write(6,*) cff, cff2
+
+        BOUNDARY(ng)%t_north(i,k,itemp)=t(i,Jend+1,k,nrhs,itemp)+cff
+        BOUNDARY(ng)%t_north(i,k,isalt)=Sm+cff2
           END DO
         END DO
       END IF
