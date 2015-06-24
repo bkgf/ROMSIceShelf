@@ -1244,11 +1244,7 @@
 #elif defined ICECLIFF2D_TOY
       DO j=JstrR,JendR
         DO i=IstrR,IendR
-          IF (j.le.5) THEN
-            zice(i,j)=-491.0_r8
-          ELSE
-            zice(i,j)=-1.0_r8
-          END IF
+            zice(i,j)=0.0_r8
         END DO
       END DO
 #   elif defined ICESHELF2D

@@ -758,7 +758,7 @@
         DO j=JstrR,JendR
           DO i=IstrR,IendR
             t(i,j,k,1,itemp)=-1.85_r8
-            t(i,j,k,1,isalt)=34.5_r8
+            t(i,j,k,1,isalt)=34.6_r8
             t(i,j,k,2,itemp)=t(i,j,k,1,itemp)
             t(i,j,k,2,isalt)=t(i,j,k,1,isalt)
           END DO

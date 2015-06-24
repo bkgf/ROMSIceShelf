@@ -29,7 +29,7 @@
 #define CURVGRID
 #undef SPHERICAL
 #define SPLINES
-#undef ICESHELF
+#define ICESHELF
 #undef ICESHELF_MORPH
 #undef  AVERAGES
 #undef ATM_PRESS
@@ -49,6 +49,7 @@
 #  undef WET_DRY
 #  define ANA_TOBC
 #endif
+
 
 /* Define SET_VBC.F for open ocean boundary layer. Can be one of:
 * * ANA_SEAICE

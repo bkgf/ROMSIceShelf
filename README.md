@@ -24,7 +24,7 @@ Includes the following test cases for:
 - ICESHELF3D_TOY: Small domain (100x200 km and 500 deep)
 - ICESHELF2D
 - ICESHELF_TIDES: ICESHELF3D_TOY with tidal forcing
-
+- ICECLIFF2D_TOY: Small toy ice cliff test case
 
 -
 -
