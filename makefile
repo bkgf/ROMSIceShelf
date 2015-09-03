@@ -57,8 +57,8 @@ $(if $(filter $(MAKE_VERSION),$(NEED_VERSION)),,        \
 #  and header file name is the lowercase value of ROMS_APPLICATION with
 #  the .h extension. For example, the upwelling application includes the
 #  "upwelling.h" header file.
-
-ROMS_APPLICATION ?= ICECLIFF2D_TOY
+ROMS_APPLICATION ?= ISOMIP_PLUS
+# ROMS_APPLICATION ?= ICECLIFF2D_TOY
 #ROMS_APPLICATION ?= ICEBERG
 
 #  If application header files is not located in "ROMS/Include",

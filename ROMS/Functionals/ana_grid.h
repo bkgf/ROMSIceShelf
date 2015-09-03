@@ -213,6 +213,9 @@
 #ifdef WEDDELL
       real(r8) :: hwrk(-1:235), xwrk(-1:235), zwrk
 #endif
+#ifdef ISOMIP_PLUS
+      real(r8) :: B0, B2, B4, B6, fc, dc, wc, H0, Xtilda, cff1, cff2, Bx, By
+#endif
       real(r8) :: wrkX(IminS:ImaxS,JminS:JmaxS)
       real(r8) :: wrkY(IminS:ImaxS,JminS:JmaxS)
 
@@ -423,6 +426,12 @@
       depth=980.0_r8
       f0=0.0_r8
       beta=0.0_r8
+#elif defined ISOMIP_PLUS
+      Xsize=480.0E+03_r8
+      Esize=80.0E+03_r8
+      depth=720.0_r8
+      f0=0.0_r8
+      beta=0.0_r8
 #else
       ana_grid.h: no values provided for Xsize, Esize, depth, f0, beta.
 #endif
@@ -586,6 +595,25 @@
           yv(i,j)=yp(i,j)
         END DO
       END DO
+#elif defined ISOMIP_PLUS
+!
+!  Spherical coordinates set-up.
+!
+      spherical=.TRUE.
+      DO j=JstrR,JendR
+        cff=-80.0_r8+0.1_r8*REAL(j-1,r8)
+        DO i=IstrR,IendR
+          lonr(i,j)=0.3_r8*REAL(i-1,r8)
+          latr(i,j)=cff
+          lonu(i,j)=0.3_r8*REAL(i-1,r8)+0.15_r8
+          lonp(i,j)=lonu(i,j)
+          latu(i,j)=latr(i,j)
+          lonv(i,j)=lonr(i,j)
+          latv(i,j)=cff+0.05_r8
+          latp(i,j)=latv(i,j)
+        END DO
+      END DO
+
 #else
       dx=Xsize/REAL(Lm(ng),r8)
       dy=Esize/REAL(Mm(ng),r8)
@@ -667,7 +695,7 @@
           wrkY(i,j)=1.0_r8/(r*theta)
         END DO
       END DO
-# elif defined ICETEST
+# elif defined ICETEST || defined ISOMIP_PLUS
 !
 !  Spherical coordinates set-up.
 !
@@ -803,7 +831,7 @@
           angler(i,j)=val1
         END DO
       END DO
-# elif defined ICETEST 
+# elif defined ICETEST || defined ISOMIP_PLUS 
       DO j=JstrR,JendR
         DO i=IstrR,IendR
           f(i,j)=(4.0_r8*pi/86164.1_r8)*                                &
@@ -853,7 +881,7 @@
      &           SIN((-79.0_r8+REAL(i-1,r8)*val1)*deg2rad)
         END DO
       END DO
-# elif defined ICETEST
+# elif defined ICETEST || defined ISOMIP_PLUS
       DO j=JstrR,JendR
         DO i=IstrR,IendR
           f(i,j)=(4.0_r8*pi/86164.1_r8)*                                &
@@ -1110,6 +1138,33 @@
          h(i,j)=20.0_r8+REAL(j,r8)*(depth/Esize)*(Esize/REAL(Mm(ng),r8))
         END DO
       END DO
+# elif defined ISOMIP_PLUS
+
+      B0 = 150.0_r8
+      B2 = -728.8_r8
+      B4 = 343.91_r8
+      B6 = -50.57_r8
+      fc = 4.0_r8
+      dc = 500.0_r8
+      wc = 24.0_r8
+      H0 = 75.0_r8
+
+      DO j=Jstr,JendR
+       DO i=Istr,IendR
+
+         Xtilda = (Xsize/REAL(i,r8))/Xsize*0.5_r8
+         Bx = B0+(B2*(Xtilda**2.0_r8))+(B4*(Xtilda**4.0_r8))            &
+            +(B6*(Xtilda**6.0_r8))
+
+         cff1 = -2.0_r8*((Esize/REAL(j,r8))-(Esize*0.5_r8) - wc)/fc
+         cff2 = 2.0_r8*((Esize/REAL(j,r8))-(Esize*0.5_r8) - wc)/fc
+
+         By = dc/(1+exp(cff1)) + dc/(1+exp(cff2))
+ 
+          h(i,j)=Bx+By
+        END DO
+      END DO
+
 #else
       DO j=JstrT,JendT
         DO i=IstrT,IendT

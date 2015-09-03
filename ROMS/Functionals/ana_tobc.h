@@ -239,7 +239,7 @@
            CALL potit(Sm,t(i,Jend+1,k,nrhs,itemp),                      &
      &         -z_r(i,Jend+1,k),0.0_r8,Tm,i,j)
           ! Calculate meltrate 
-            cff = 0.0001_r8*(TFb-Tm)*dt(ng)
+            cff = 0.00005_r8*(TFb-Tm)*dt(ng)
             cff2 = 3487.0_r8*cff*34.5_r8/3.34e5_r8
         BOUNDARY(ng)%t_north(i,k,itemp)=t(i,Jend+1,k,nrhs,itemp)+cff
         BOUNDARY(ng)%t_north(i,k,isalt)=Sm+cff2

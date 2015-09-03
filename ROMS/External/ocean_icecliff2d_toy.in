@@ -216,7 +216,7 @@ ad_VolCons(north) ==  F                            ! northern boundary
 ! Output history, average, diagnostic files parameters.
 
      LDEFOUT == T
-        NHIS == 400 !4000 !8640
+        NHIS == 100 !4000 !8640
      NDEFHIS == 0
       NTSAVG == 1
         NAVG == 864
