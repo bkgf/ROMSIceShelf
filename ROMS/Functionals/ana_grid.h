@@ -1140,28 +1140,35 @@
       END DO
 # elif defined ISOMIP_PLUS
 
-      B0 = 150.0_r8
+      B0 = -150.0_r8
       B2 = -728.8_r8
       B4 = 343.91_r8
       B6 = -50.57_r8
-      fc = 4.0_r8
+      fc = 4.0E+03_r8
       dc = 500.0_r8
-      wc = 24.0_r8
+      wc = 24.0E+03_r8
       H0 = 75.0_r8
+      Xbar = 300.0E+03_r8
+      Bmin = 720.0_r8
 
       DO j=Jstr,JendR
        DO i=Istr,IendR
 
-         Xtilda = (Xsize/REAL(i,r8))/Xsize*0.5_r8
+         Xtilda = (Xsize/REAL(Lm(ng),r8)*REAL(i,r8))/Xbar
          Bx = B0+(B2*(Xtilda**2.0_r8))+(B4*(Xtilda**4.0_r8))            &
             +(B6*(Xtilda**6.0_r8))
 
-         cff1 = -2.0_r8*((Esize/REAL(j,r8))-(Esize*0.5_r8) - wc)/fc
-         cff2 = 2.0_r8*((Esize/REAL(j,r8))-(Esize*0.5_r8) - wc)/fc
+         cff1 = -2.0_r8*((Esize/REAL(Mm(ng),r8)*REAL(j,r8))             &
+            -(Esize*0.5_r8) - wc)/fc
+         cff2 = 2.0_r8*((Esize/REAL(Mm(ng),r8)*REAL(j,r8))              &
+            -(Esize*0.5_r8) + wc)/fc
 
          By = dc/(1+exp(cff1)) + dc/(1+exp(cff2))
  
           h(i,j)=Bx+By
+           IF (h.gt.Bmin) THEN
+            h(i,j)=Bmin
+           ENDIF
         END DO
       END DO
 
