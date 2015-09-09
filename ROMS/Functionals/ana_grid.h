@@ -1159,9 +1159,9 @@
             +(B6*(Xtilda**6.0_r8))
 
          cff1 = -2.0_r8*((Esize/REAL(Mm(ng),r8)*REAL(j,r8))             &
-            -(Esize*0.5_r8) - wc)/fc
+     &       -(Esize*0.5_r8) - wc)/fc
          cff2 = 2.0_r8*((Esize/REAL(Mm(ng),r8)*REAL(j,r8))              &
-            -(Esize*0.5_r8) + wc)/fc
+     &       -(Esize*0.5_r8) + wc)/fc
 
          By = dc/(1+exp(cff1)) + dc/(1+exp(cff2))
  
