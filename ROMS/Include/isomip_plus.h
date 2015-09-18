@@ -35,7 +35,7 @@
 #undef ATM_PRESS
 #undef ANA_PAIR
 #define PERFECT_RESTART
-#define ANA_GRID
+#undef ANA_GRID
 #define ANA_INITIAL
 #define ANA_SMFLUX
 #define ANA_STFLUX
@@ -47,7 +47,7 @@
 /* Define SET_VBC.F for open ocean boundary layer. Can be one of:
 * * ANA_SEAICE
 *  Note that both undef will set surface fluf of salt and temp to zero*/
-#define ANA_SEAICE
+#undef ANA_SEAICE
 /* Define SET_VBC.F for ice-ocean Thermodynamics. Can be one of:
 *  * VBC_ICE_2EQN
 *  * VBC_ICE_3EQN       
@@ -55,6 +55,9 @@
 #undef ICESHELF_2EQN_VBC
 #define ICESHELF_3EQN_VBC
 #undef ICESHELF_TEOS10
+#undef GAMMAS_Mc1987
+#undef GAMMAS_KY1972
+#undef ICESHELF_VBC_HFPROPTOM
 
 #undef  ANA_VMIX
 #undef MY25_MIXING
