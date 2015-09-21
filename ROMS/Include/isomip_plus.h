@@ -28,6 +28,7 @@
 #define NONLIN_EOS
 #define CURVGRID
 #define SPHERICAL
+#define MASKING
 #define SPLINES
 #define ICESHELF
 #undef ICESHELF_MORPH
