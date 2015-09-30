@@ -27,6 +27,9 @@
 # if defined ICESHELF_MORPH
         real(r8), pointer :: iceshelf_draft0(:,:)
         real(r8), pointer :: iceshelf_draft(:,:,:)
+#  if defined FISOC_DDDT
+        real(r8), pointer :: iceshelf_dddt(:,:)
+#  endif
 # endif
 #endif
       END TYPE T_ICESHELFVAR
@@ -70,7 +73,10 @@
       allocate ( ICESHELFVAR(ng) % m(LBi:UBi,LBj:UBj))
 # if defined ICESHELF_MORPH
       allocate ( ICESHELFVAR(ng) % iceshelf_draft0(LBi:UBi,LBj:UBj) )
-      allocate ( ICESHELFVAR(ng) % iceshelf_draft(LBi:UBi,LBj:UBj,1:2))
+      allocate ( ICESHELFVAR(ng) % iceshelf_draft(LBi:UBi,LBj:UBj,1:2) )
+#  if defined FISOC_DDDT
+      allocate ( ICESHELFVAR(ng) % iceshelf_DDDT(LBi:UBi,LBj:UBj) )
+#  endif
 # endif
 #endif
 
@@ -157,6 +163,9 @@
             ICESHELFVAR(ng) % iceshelf_draft0(i,j) = IniVal
             ICESHELFVAR(ng) % iceshelf_draft(i,j,1) = IniVal
             ICESHELFVAR(ng) % iceshelf_draft(i,j,2) = IniVal
+#  if defined FISOC_DDDT
+            ICESHELFVAR(ng) % iceshelf_DDDT(i,j) = IniVal
+#  endif
 # endif
           END DO
         END DO
