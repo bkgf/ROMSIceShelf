@@ -28,7 +28,7 @@
 #                                                                       :::
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-NEED_VERSION := 3.80 3.81 3.82 4.0 
+NEED_VERSION := 3.80 3.81 3.82
 $(if $(filter $(MAKE_VERSION),$(NEED_VERSION)),,        \
  $(error This makefile requires one of GNU make version $(NEED_VERSION).))
 
@@ -57,11 +57,10 @@ $(if $(filter $(MAKE_VERSION),$(NEED_VERSION)),,        \
 #  and header file name is the lowercase value of ROMS_APPLICATION with
 #  the .h extension. For example, the upwelling application includes the
 #  "upwelling.h" header file.
-ROMS_APPLICATION ?= WAOM10
-#ROMS_APPLICATION ?= ISOMIP_PLUS
-# ROMS_APPLICATION ?= ICECLIFF2D_TOY
-#ROMS_APPLICATION ?= ICEBERG
 
+#ROMS_APPLICATION ?= SEAMOUNT 
+ROMS_APPLICATION ?= ICETEST
+#ROMS_APPLICATION ?= AMERY
 #  If application header files is not located in "ROMS/Include",
 #  provide an alternate directory FULL PATH.
 
@@ -95,7 +94,7 @@ MY_CPP_FLAGS ?=
 #  If parallel applications, use at most one of these definitions
 #  (leave both definitions blank in serial applications):
 
-     USE_MPI ?=
+     USE_MPI ?=  
   USE_OpenMP ?=
 
 #  If distributed-memory, turn on compilation via the script "mpif90".
@@ -106,7 +105,7 @@ MY_CPP_FLAGS ?=
 #  In this, case the user need to select the desired compiler below and
 #  turn on both USE_MPI and USE_MPIF90 macros.
 
-  USE_MPIF90 ?=
+  USE_MPIF90 ?= on
 
 #  If applicable, activate 64-bit compilation:
 
@@ -140,7 +139,7 @@ MY_CPP_FLAGS ?=
 #  NetCDF and so on.
 #--------------------------------------------------------------------------
 
-        FORT ?= gfortran
+        FORT ?= ifort
 
 #--------------------------------------------------------------------------
 #  Set directory for executable.
@@ -336,7 +335,7 @@ ifndef FORT
 endif
 
 ifneq "$(MAKECMDGOALS)" "clean"
-  include $(COMPILERS)/$(OS)-$(strip $(FORT)).mk
+  include $(COMPILERS)/$(OS)-$(strip $(FORT))-bkgf-nci.mk
 endif
 
 ifdef USE_MPI
