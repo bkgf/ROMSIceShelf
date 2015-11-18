@@ -554,7 +554,7 @@
          stflx(i,j,isalt)=(gammaS(i,j)+rhoi_on_rho0*m(i,j))*(Sb(i,j)-Sm)
 !           write(6,*) gammaT,gammaS,Tb,Sb,Tm,Sm,rhoi_on_rho0
 # endif
-
+         
 #else
          DO itrc=1,NT(ng)
             stflx(i,j,itrc)=0.0_r8
@@ -568,11 +568,11 @@
          stflx(i,j,isalt)=Hz(i,j,N(ng))*                             &
          (sfcSalt-t(i,j,N(ng),nrhs,isalt))/trelax
 # else
-          DO itrc=1,NT(ng)
-             stflx(i,j,itrc)=0.0_r8
-          END DO
+         DO itrc=1,NT(ng)
+            stflx(i,j,itrc)=0.0_r8
+         END DO
 # endif
-       END IF
+      END IF
       END DO
       END DO
       

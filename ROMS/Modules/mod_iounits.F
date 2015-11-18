@@ -86,7 +86,11 @@
 !  I/O units.
 !
       integer, parameter :: stdinp = 5      ! standard input
+#ifdef ROMS4FISOC
+      integer, parameter :: stdout = 31     ! Unit to file opened by FISOC
+#else
       integer, parameter :: stdout = 6      ! standard output
+#endif
       integer, parameter :: usrout = 10     ! generic user unit
 !
 !  I/O files management, derived type structures.

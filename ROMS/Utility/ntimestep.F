@@ -61,6 +61,8 @@
 !  are an interger factor of the grid size and time-step size.
 !
       WindowSteps=0
+      my_Nsteps=0
+      step_counter=0
 !
 !  Loop over all grids in current layer nesting layer.
 !
