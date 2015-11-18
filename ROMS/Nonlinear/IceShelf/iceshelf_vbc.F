@@ -90,6 +90,9 @@
      &                   GRID(ng) % f,                                  &
 #ifdef ICESHELF_MORPH
      &                   ICESHELFVAR(ng) % iceshelf_draft,              &
+# ifdef FISOC_DDDT
+     &                   ICESHELFVAR(ng) % iceshelf_DDDT,               &
+# endif
 #endif
      &                   OCEAN(ng) % u,                                 &
      &                   OCEAN(ng) % v,                                 &
@@ -130,6 +133,9 @@
      &                         zice,f,                                  &
 # ifdef ICESHELF_MORPH
      &                         iceshelf_draft,                          &
+#  ifdef FISOC_DDDT
+     &                         iceshelf_DDDT,                           &
+#  endif
 # endif
      &                         u, v, t,                                 &
 #ifdef ICESHELF_3EQN_VBC
@@ -181,6 +187,9 @@
       real(r8), intent(in) :: f(LBi:,LBj:)
 #ifdef ICESHELF_MORPH
       real(r8), intent(inout) :: iceshelf_draft(LBi:,LBj:,:)
+# ifdef FISOC_DDDT
+      real(r8), intent(inout) :: iceshelf_DDDT(LBi:,LBj:)
+# endif
 #endif
       real(r8), intent(in) :: t(LBi:,LBj:,:,:,:)
 #ifdef ICESHELF_3EQN_VBC
@@ -212,6 +221,9 @@
       real(r8), intent(in) :: f(LBi:UBi,LBj:UBj)
 #ifdef ICESHELF_MORPH
       real(r8), intent(in) :: iceshelf_draft(LBi:UBi,LBj:UBj,2)
+# ifdef FISOC_DDDT
+      real(r8), intent(in) :: iceshelf_DDDT(LBi:UBi,LBj:UBj)
+# endif
 #endif
       real(r8), intent(in) :: t(LBi:UBi,LBj:UBj,N(ng),3,NT(ng))
 #ifdef ICESHELF_3EQN_VBC
@@ -544,49 +556,53 @@
 # endif
 
 #else
-      DO itrc=1,NT(ng)
-              stflx(i,j,itrc)=0.0_r8
-      END DO
+         DO itrc=1,NT(ng)
+            stflx(i,j,itrc)=0.0_r8
+         END DO
 #endif
-          ELSE
-            m(i,j) = 0.0_r8
+      ELSE
+         m(i,j) = 0.0_r8
 # if defined ANA_SEAICE
-            stflx(i,j,itemp)=Hz(i,j,N(ng))*                             &
-                             (sfcTemp-t(i,j,N(ng),nrhs,itemp))/trelax
-            stflx(i,j,isalt)=Hz(i,j,N(ng))*                             &
-                             (sfcSalt-t(i,j,N(ng),nrhs,isalt))/trelax
+         stflx(i,j,itemp)=Hz(i,j,N(ng))*                             &
+         (sfcTemp-t(i,j,N(ng),nrhs,itemp))/trelax
+         stflx(i,j,isalt)=Hz(i,j,N(ng))*                             &
+         (sfcSalt-t(i,j,N(ng),nrhs,isalt))/trelax
 # else
           DO itrc=1,NT(ng)
              stflx(i,j,itrc)=0.0_r8
           END DO
 # endif
-          END IF
-        END DO
+       END IF
       END DO
-
+      END DO
+      
 !-----------------------------------------------------------------------
-! Store old ice shelf thickness.
+!     Store old ice shelf thickness.
 !-----------------------------------------------------------------------
-!
+!     
 # if defined ICESHELF_MORPH
       DO j=JstrR,JendR
-        DO i=IstrR,IendR
-          iceshelf_draft(i,j,nnew)=zice(i,j)+(m(i,j)*dt(ng))!           &
-!     &                             MIN(m(i,j)*dt(ng),1.0e-8_r8) 
-          IF(i.eq.40.and.j.eq.40) THEN
-          write(6,*) m(i,j),zice(i,j),iceshelf_draft(i,j,nnew) 
-          ENDIF
-        END DO
+         DO i=IstrR,IendR            
+#  if defined FISOC_DDDT
+            iceshelf_draft(i,j,nnew) = zice(i,j) +  &
+     &           (iceshelf_dddt(i,j)*dt(ng))
+#  else
+            iceshelf_draft(i,j,nnew) = zice(i,j) + (m(i,j)*dt(ng))
+#  endif            
+            IF(i.eq.40.and.j.eq.40) THEN
+               write(6,*) m(i,j),zice(i,j),iceshelf_draft(i,j,nnew) 
+            ENDIF
+         END DO
       END DO
-
-        IF (EWperiodic(ng).or.NSperiodic(ng)) THEN
-          CALL exchange_r2d_tile (ng, tile,                             &
-     &                            LBi, UBi, LBj, UBj,                   &
-     &                            iceshelf_draft(:,:,nnew))
-        END IF
+      
+      IF (EWperiodic(ng).or.NSperiodic(ng)) THEN
+         CALL exchange_r2d_tile (ng, tile,          &
+     &        LBi, UBi, LBj, UBj,                   &
+     &        iceshelf_draft(:,:,nnew))
+      END IF
 # endif
-
-!
+      
+!     
 !  Apply gradient or periodic boundary conditions for the two fluxes
 !
       CALL bc_r2d_tile (ng, tile,                                       &

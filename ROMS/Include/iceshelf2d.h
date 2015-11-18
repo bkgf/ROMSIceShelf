@@ -1,16 +1,10 @@
 /*
-** svn $Id: icetest.h 1307 2008-01-10 00:22:36Z bgalton $
-*******************************************************************************
-** Copyright (c) 2002-2008 The ROMS/TOMS Group                               **
-**   Licensed under a MIT/X style license                                    **
-**   See License_ROMS.txt                                                    **
-*******************************************************************************
-**
-** Options for 2D simplified Ice Shelf Ocean Cavity Model Test.
+** Options for 2D simplified Ice Shelf Ocean Cavity Model Test
 **
 ** Application flag:   ICESHELF2D
 ** Input script:       ocean_iceshelf2d.in
 */
+
 #define UV_ADV
 #define DJ_GRADPS
 #undef UV_COR
@@ -29,8 +23,19 @@
 #define CURVGRID
 #undef SPHERICAL
 #define SPLINES
+
+/* 
+**  coupled through FISOC 
+** (framework for ice sheet ocean couping).
+** DDDT is short for d(ice draft)/d(time), i.e. we get rate of change of ice draft 
+** from the coupling to the ice sheet model
+*/
+#define FISOC_DDDT
+#ifdef FISOC_DDDT
+#define ICESHELF_MORPH
 #define ICESHELF
-#undef ICESHELF_MORPH
+#endif
+
 #undef  AVERAGES
 #undef ATM_PRESS
 #undef ANA_PAIR
@@ -55,8 +60,8 @@
 *  * VBC_ICE_3EQN       
 *  * Note that both undef will set surface fluf of salt and temp to zero */
 
-#define ICESHELF_2EQN_VBC
-#undef ICESHELF_3EQN_VBC
+#undef ICESHELF_2EQN_VBC
+#define ICESHELF_3EQN_VBC
 #undef ICESHELF_TEOS10
 
 #undef  ANA_VMIX
