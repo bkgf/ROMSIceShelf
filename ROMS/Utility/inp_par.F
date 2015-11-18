@@ -108,12 +108,9 @@
 !  parallel nodes.  This is to avoid a very complex broadcasting of the
 !  input parameters to all nodes.
 !
-!!    CALL my_getarg (1, Iname)
       IF (PRESENT(inputFile)) THEN
          Iname = inputFile
-         print*,"*******got input filename!**********"
       ELSE
-         print*,"*******  slartybardfarst! **********"         
          IF (Master) CALL my_getarg (1, Iname)
       END IF
       CALL mp_bcasts (1, model, Iname)
