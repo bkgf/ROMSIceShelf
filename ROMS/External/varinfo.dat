@@ -88,6 +88,24 @@
   'r2dvar'
   1.0d0
 
+'Tb'                                                ! Output
+  'temperature at ice-shelf base'
+  'Celcius'                                         ! [Celcius]
+  'temperature_base, scalar, series'
+  'ocean_time'
+  'idisTb'
+  'r2dvar'
+  1.0d0
+
+'Sb'                                                ! Output
+  'salinity at ice-shelf base'
+  'nondimensional'                                  ! [PSU]
+  'salinity_base, scalar, series'
+  'ocean_time'
+  'idisSb'
+  'r2dvar'
+  1.0d0
+
 'draft'                                            ! Input/Output
   'ice draft'
   'meter'                                          ! [m]
