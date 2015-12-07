@@ -468,6 +468,8 @@ Hout(idFsur) == T       ! zeta               free-surface
 Hout(idDraft) == T      ! draft              time-dependent iceshelf draft
 Hout(idBath) == F       ! bath               time-dependent bathymetry
 Hout(idismr) == T       ! ismr               ice-shelf melt rate
+Hout(idisTb) == T       ! isTb               temperature at ice-shelf base
+Hout(idisSb) == T       ! isSb               salinity at ice-shelf base
 
 Hout(idTvar) == T T     ! temp, salt         temperature and salinity
 

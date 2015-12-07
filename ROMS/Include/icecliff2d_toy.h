@@ -8,8 +8,8 @@
 **
 ** Options for Simplified Ice Shelf Ocean Cavity Model Test.
 **
-** Application flag:   ICESHELF2D_TOY
-** Input script:       ocean_iceshelf2d_toy.in
+** Application flag:   ICECLIFF2D_TOY
+** Input script:       ocean_iceiff2d_toy.in
 */
 #define UV_ADV
 #define DJ_GRADPS
@@ -43,7 +43,13 @@
 #define ANA_BSFLUX
 #define ANA_BTFLUX
 #define ANA_SRFLUX
-#define WET_DRY
+
+#define ICECLIFF
+#ifdef ICECLIFF
+#  undef WET_DRY
+#  define ANA_TOBC
+#endif
+
 
 /* Define SET_VBC.F for open ocean boundary layer. Can be one of:
 * * ANA_SEAICE

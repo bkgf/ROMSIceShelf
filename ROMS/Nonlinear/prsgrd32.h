@@ -172,7 +172,7 @@
       real(r8), parameter :: OneTwelfth = 1.0_r8/12.0_r8
       real(r8), parameter :: eps = 1.0E-10_r8
 #ifdef ICESHELF
-      real(r8), parameter :: drhodz = 0.00478_r8
+      real(r8), parameter :: drhodz = 0.0_r8 !0.00478_r8
 #endif
 
       real(r8) :: GRho, GRho0,  HalfGRho

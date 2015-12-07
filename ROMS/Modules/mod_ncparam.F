@@ -171,6 +171,8 @@
         integer  :: idismr        ! iceshelf melt rate
         integer  :: iddraft       ! iceshelf draft
         integer  :: idbath        ! bathymetry
+        integer  :: idisTb        ! Temperature at base of the ice shelf
+        integer  :: idisSb        ! Salinity at base of the ice shelf
         integer  :: idCfra        ! cloud fraction
         integer  :: idCosW        ! COS(omega(k)*t)
         integer  :: idCos2        ! COS(omega(k)*t)*COS(omega(l)*t)
@@ -914,6 +916,10 @@
               iddraft=varid
             CASE ('idbath')
               idbath=varid
+            CASE ('idisTb')
+              idisTb=varid
+            CASE ('idisSb')
+              idisSb=varid
             CASE ('idFsur')
               idFsur=varid
             CASE ('idRzet')

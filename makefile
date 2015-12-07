@@ -28,7 +28,7 @@
 #                                                                       :::
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-NEED_VERSION := 3.80 3.81 3.82
+NEED_VERSION := 3.80 3.81 3.82 4.0 
 $(if $(filter $(MAKE_VERSION),$(NEED_VERSION)),,        \
  $(error This makefile requires one of GNU make version $(NEED_VERSION).))
 
@@ -57,9 +57,11 @@ $(if $(filter $(MAKE_VERSION),$(NEED_VERSION)),,        \
 #  and header file name is the lowercase value of ROMS_APPLICATION with
 #  the .h extension. For example, the upwelling application includes the
 #  "upwelling.h" header file.
-
-ROMS_APPLICATION ?= ICESHELF2D
-
+#ROMS_APPLICATION ?= WAOM10
+#ROMS_APPLICATION ?= ISOMIP_PLUS
+# ROMS_APPLICATION ?= ICECLIFF2D_TOY
+#ROMS_APPLICATION ?= ICEBERG
+ROMS_APPLICATION ?= ICESHELF2D_TOY
 #  If application header files is not located in "ROMS/Include",
 #  provide an alternate directory FULL PATH.
 
@@ -88,7 +90,7 @@ MY_CPP_FLAGS ?=
 
 #  Activate debugging compiler options:
 
-   USE_DEBUG ?= 
+   USE_DEBUG ?=  
 
 #  If parallel applications, use at most one of these definitions
 #  (leave both definitions blank in serial applications):
@@ -113,7 +115,7 @@ MY_CPP_FLAGS ?=
 #  If applicable, link with NetCDF-4 library. Notice that the NetCDF-4
 #  library needs both the HDF5 and MPI libraries.
 
- USE_NETCDF4 ?=
+ USE_NETCDF4 ?= on
 
 #--------------------------------------------------------------------------
 #  We are going to include a file with all the settings that depend on

@@ -683,11 +683,22 @@
           END DO
         END DO
       END DO
-# elif defined SEAMOUNT
+# elif defined SEAMOUNT || defined GSW_SEAMOUNT
       DO k=1,N(ng)
         DO j=JstrT,JendT
           DO i=IstrT,IendT
             t(i,j,k,1,itemp)=T0(ng)+7.5_r8*EXP(z_r(i,j,k)/1000.0_r8)
+            t(i,j,k,1,isalt)=S0(ng)+0.1_r8*EXP(z_r(i,j,k)/1000.0_r8)
+
+          END DO
+        END DO
+      END DO
+# elif defined ICEBERG || defined GSW_ICEBERG
+      DO k=1,N(ng)
+        DO j=JstrT,JendT
+          DO i=IstrT,IendT
+            t(i,j,k,1,itemp)=T0(ng)+7.5_r8*EXP(z_r(i,j,k)/1000.0_r8)
+            t(i,j,k,1,isalt)=S0(ng)+0.1_r8*EXP(z_r(i,j,k)/1000.0_r8)
           END DO
         END DO
       END DO
@@ -747,7 +758,7 @@
         DO j=JstrR,JendR
           DO i=IstrR,IendR
             t(i,j,k,1,itemp)=-1.85_r8
-            t(i,j,k,1,isalt)=34.5_r8
+            t(i,j,k,1,isalt)=34.6_r8
             t(i,j,k,2,itemp)=t(i,j,k,1,itemp)
             t(i,j,k,2,isalt)=t(i,j,k,1,isalt)
           END DO
