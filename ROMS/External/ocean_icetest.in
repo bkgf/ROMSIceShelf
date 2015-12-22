@@ -69,7 +69,7 @@
 
 ! C-preprocessing Flag.
 
-    MyAppCPP = WEDDELL
+    MyAppCPP = ICETEST
 
 ! Input variable information file name.  This file needs to be processed
 ! first so all information arrays can be initialized properly.
@@ -107,8 +107,8 @@ GridsInLayer =  1
 ! shared-memory configurations used to determine tile horizontal range
 ! indices (Istr,Iend) and (Jstr,Jend), [1:Ngrids].
 
-      NtileI == 8                               ! I-direction partition
-      NtileJ == 8                               ! J-direction partition
+      NtileI == 2                               ! I-direction partition
+      NtileJ == 4                               ! J-direction partition
 
 ! Set lateral boundary conditions keyword. Notice that a value is expected
 ! for each boundary segment per nested grid for each state variable.

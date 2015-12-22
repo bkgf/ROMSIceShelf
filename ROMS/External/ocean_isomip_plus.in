@@ -92,9 +92,9 @@ GridsInLayer =  1
 ! Grid dimension parameters. See notes below in the Glossary for how to set
 ! these parameters correctly.
 
-          Lm == 40            ! Number of I-direction INTERIOR RHO-points
-          Mm == 240           ! Number of J-direction INTERIOR RHO-points
-           N == 36            ! Number of vertical levels
+          Lm == 38            ! Number of I-direction INTERIOR RHO-points
+          Mm == 238           ! Number of J-direction INTERIOR RHO-points
+           N == 21            ! Number of vertical levels
 
         Nbed =  0             ! Number of sediment bed layers
 
@@ -107,8 +107,8 @@ GridsInLayer =  1
 ! shared-memory configurations used to determine tile horizontal range
 ! indices (Istr,Iend) and (Jstr,Jend), [1:Ngrids].
 
-      NtileI == 8                               ! I-direction partition
-      NtileJ == 8                               ! J-direction partition
+      NtileI == 4                               ! I-direction partition
+      NtileJ == 16                               ! J-direction partition
 
 ! Set lateral boundary conditions keyword. Notice that a value is expected
 ! for each boundary segment per nested grid for each state variable.
@@ -186,9 +186,9 @@ ad_VolCons(north) ==  F                            ! northern boundary
 
 ! Time-Stepping parameters.
 
-      NTIMES == 1051200
-          DT == 300d0
-     NDTFAST == 30
+      NTIMES == 15778800 !100yrs !3155760 !20 years at DT=200s
+          DT == 200d0
+     NDTFAST == 20
 
 ! Model iteration loops parameters.
 
@@ -209,7 +209,7 @@ ad_VolCons(north) ==  F                            ! northern boundary
 
        NRREC == 0
    LcycleRST == T
-        NRST == 864
+        NRST == 78894 !6 months at DT=200s
         NSTA == 1
         NFLT == 1
        NINFO == 1
@@ -217,7 +217,7 @@ ad_VolCons(north) ==  F                            ! northern boundary
 ! Output history, average, diagnostic files parameters.
 
      LDEFOUT == T
-        NHIS == 8640
+        NHIS == 13149 !1 month at DT=200s
      NDEFHIS == 0
       NTSAVG == 1
         NAVG == 864
@@ -251,7 +251,7 @@ ad_VolCons(north) ==  F                            ! northern boundary
 ! Harmonic/biharmonic horizontal diffusion of tracer for nonlinear model
 ! and adjoint-based algorithms: [1:NAT+NPT,Ngrids].
 
-        TNU2 == 100.0d0 100.0d0                 ! m2/s
+        TNU2 == 1.0d0 1.0d0                     ! m2/s
         TNU4 ==  0.0d0  0.0d0                   ! m4/s
 
      ad_TNU2 == 0.0d0  0.0d0                    ! m2/s
@@ -260,7 +260,7 @@ ad_VolCons(north) ==  F                            ! northern boundary
 ! Harmonic/biharmonic, horizontal viscosity coefficient for nonlinear model
 ! and adjoint-based algorithms: [Ngrids].
 
-       VISC2 == 600.0d0                         ! m2/s
+       VISC2 == 6.0d0                         ! m2/s
        VISC4 ==  0.0d0                          ! m4/s
 
     ad_VISC2 == 0.0d0                           ! m2/s
@@ -336,14 +336,14 @@ ad_VolCons(north) ==  F                            ! northern boundary
 ! Set vertical, terrain-following coordinates transformation equation and
 ! stretching function (see below for details), [1:Ngrids].
 
-  Vtransform == 1                          ! transformation equation
+  Vtransform == 2                          ! transformation equation
  Vstretching == 1                          ! stretching function
 
 ! Vertical S-coordinates parameters (see below for details), [1:Ngrids].
 
      THETA_S == 4.0d0                      ! surface stretching parameter
      THETA_B == 0.9d0                      ! bottom  stretching parameter
-      TCLINE == 20.0d0                     ! critical depth (m)
+      TCLINE == 100.0d0                     ! critical depth (m)
 
 ! Mean Density and Brunt-Vaisala frequency.
 
@@ -382,7 +382,7 @@ ad_VolCons(north) ==  F                            ! northern boundary
 
 ! Slipperiness parameter: 1.0 (free slip) or -1.0 (no slip)
 
-      GAMMA2 == 1.0d0
+      GAMMA2 == -1.0d0
 
 ! Logical switches (TRUE/FALSE) to specify which variables to process for
 ! tracers climatology: [1:NAT+NPT,Ngrids]. See glossary below for details.
@@ -468,7 +468,7 @@ Hout(idv2dN) == F       ! vbar_northward     2D V-northward at RHO-points
 Hout(idFsur) == T       ! zeta               free-surface
 Hout(idDraft) == F      ! draft              time-dependent iceshelf draft
 Hout(idBath) == F       ! bath               time-dependent bathymetry
-Hout(idismr) == F       ! ismr               ice-shelf melt rate
+Hout(idismr) == T       ! ismr               ice-shelf melt rate
 
 Hout(idTvar) == T T     ! temp, salt         temperature and salinity
 
@@ -725,7 +725,7 @@ Dout(iTvdif) == T T     ! temp_vdiff, ...    vertical diffusion
 
 ! Input NetCDF file names, [1:Ngrids].
 
-     GRDNAME == isomip_plus_grd1.nc
+     GRDNAME == isomip_plus_ocean1.nc
      ININAME == ocean_ini.nc
      ITLNAME == ocean_itl.nc
      IRPNAME == ocean_irp.nc
