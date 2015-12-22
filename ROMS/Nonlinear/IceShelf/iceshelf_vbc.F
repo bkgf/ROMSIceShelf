@@ -3,6 +3,13 @@
 #  define ICESHELF_VBC_HFPROPTOM
 #  undef GAMMAS_Mc1987 
 #  undef GAMMAS_KY1972
+#elif defined ISOMIP_PLUS
+#  undef ICESHELF_2EQN_VBC
+#  undef ICESHELF_TEOS10
+#  define ICESHELF_3EQN_VBC
+#  undef GAMMAS_Mc1987
+#  undef GAMMAS_KY1972
+#  define ICESHELF_VBC_HFPROPTOM
 #else
 #  undef ICESHELF_VBC_HFPROPTOM
 #  define GAMMAS_Mc1987 
@@ -245,6 +252,10 @@
 #ifdef ICESHELF_TEOS10
       real(r8) :: ct
 #endif
+#ifdef ISOMIP_PLUS
+      real(r8) :: u_t
+      real(r8) :: GammaT_0,GammaS_0
+#endif
 #  if (!defined BBL_MODEL) && defined UV_LOGDRAG
       real(r8), dimension(PRIVATE_2D_SCRATCH_ARRAY) :: wrk
 #  endif
@@ -405,6 +416,14 @@
       rhoi_on_rho0 = rho_i/rho0
 #   endif
 
+!#ifdef ISOMIP_PLUS
+!! find model layer closest to 10m
+!      DO j=Jstr,JEND
+!        DO i=Istr,IEND
+!         D_of_z_0 = MINLOC(ABS((z_r(i,j,N(ng))-zice(i,j))-z_0))
+!        END DO
+!      END DO
+!#endif
       DO j=Jstr,JEND
         DO i=Istr,IEND
 # ifdef SALINITY
@@ -456,6 +475,14 @@
 
             gammaT(i,j) = ustar/(turb + Pradj - 6.0_r8)
             gammaS(i,j) = ustar/(turb + Scadj - 6.0_r8)
+#    elif defined ISOMIP_PLUS
+! Scales constant gammaT and gammaS by depth below ice
+           u_t = 0.01_r8
+           GammaT_0 = 5.00e-2_r8
+           GammaS_0 = 1.40e-3_r8
+           gammaT(i,j) = GammaT_0 * SQRT(ustar*ustar + rdrg2(ng)*u_t**2.0_r8)! * (z_0/ABS(z_r(i,j,N(ng))-zice(i,j)))
+           gammaS(i,j) = GammaS_0 * SQRT(ustar*ustar + rdrg2(ng)*u_t**2.0_r8)! * (z_0/ABS(z_r(i,j,N(ng))-zice(i,j))) 
+
 #    else
             gammaT(i,j) = 1.00e-4_r8
             gammaS(i,j) = 5.05e-7_r8
@@ -471,7 +498,7 @@
           Ep1  = cp_w*gammaT(i,j)
           Ep2  = cp_i*gammaS(i,j)
           Ep3  = L*gammaS(i,j)
-#ifdef ICESHELF2D_TOY
+#if defined ICESHELF2D_TOY || defined ISOMIP_PLUS
           Ep31 = 0.0_r8
 #else
           Ep31 = -rho_r*cp_i*dt_i/zice(i,j)

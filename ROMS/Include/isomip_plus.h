@@ -18,14 +18,15 @@
 #define UV_QDRAG
 #define MIX_GEO_UV
 #undef MIX_S_UV
-#define TS_C4HADVECTION
+#undef TS_C4HADVECTION
+#define TS_U3HADVECTION
 #define TS_C4VADVECTION
 #define TS_DIF2
 #define MIX_GEO_TS
 #undef  MIX_S_TS
 #define SOLVE3D
 #define SALINITY
-#define NONLIN_EOS
+#undef NONLIN_EOS
 #define CURVGRID
 #define SPHERICAL
 #define MASKING
@@ -45,6 +46,11 @@
 #define ANA_BTFLUX
 #define ANA_SRFLUX
 
+#define TCLIMATOLOGY
+#define ANA_TCLIMA
+#define TCLM_NUDGING
+#define ANA_NUDGCOEF
+
 /* Define SET_VBC.F for open ocean boundary layer. Can be one of:
 * * ANA_SEAICE
 *  Note that both undef will set surface fluf of salt and temp to zero*/
@@ -56,9 +62,6 @@
 #undef ICESHELF_2EQN_VBC
 #define ICESHELF_3EQN_VBC
 #undef ICESHELF_TEOS10
-#undef GAMMAS_Mc1987
-#undef GAMMAS_KY1972
-#undef ICESHELF_VBC_HFPROPTOM
 
 #undef  ANA_VMIX
 #undef MY25_MIXING

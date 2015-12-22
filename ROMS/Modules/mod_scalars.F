@@ -319,7 +319,11 @@
 !    rhow          fresh water density (kg/m3).
 !    vonKar        von Karman constant.
 !
+#ifdef ISOMIP_PLUS
+        real(r8) :: Cp = 3974.0_r8              ! Joules/kg/degC       
+#else
         real(r8) :: Cp = 3985.0_r8              ! Joules/kg/degC
+#endif
         real(r8) :: Csolar = 1353.0_r8          ! 1360-1380 W/m2
         real(r8) :: Infinity                    ! Infinity = 1.0/0.0
         real(r8) :: Eradius = 6371315.0_r8      ! m
