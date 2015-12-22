@@ -1,14 +1,14 @@
 #!/bin/bash
-#PBS -P m68
-#PBS -q express
-#PBS -l mem=4gb,walltime=05:00:00,ncpus=8
+#PBS -P gh8
+#PBS -q normal
+#PBS -l mem=5gb,walltime=40:00:00,ncpus=64
 
 module load intel-fc
 module load netcdf
 module load openmpi
 
-cd /short/m68/bkg581/romsIceShelf
+cd /short/m68/deg581/ISOMIP_PLUS_E1
 
-make -f makefile_bkgf_nci -j 6
+make -f makefile_deg_nci -j 6
 
-mpirun -np 8 oceanM ROMS/External/ocean_iceshelf3d_toy.in > ocean.log
+mpiexec ./oceanM ROMS/External/ocean_isomip_plus.in > ocean.log
