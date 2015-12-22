@@ -71,7 +71,9 @@
 !
       integer :: i, itrc, j, k
       real(r8) :: val1, val2, val3, val4
-
+#ifdef ISOMIP_PLUS
+      real(r8) :: Tbot, Sbot, T02, S02, Bmax
+#endif
 #include "set_bounds.h"
 !
 !-----------------------------------------------------------------------
@@ -94,6 +96,31 @@
           END DO
         END DO
       END DO
+#elif defined ISOMIP_PLUS
+        Tbot = 1.0_r8 !warm
+        Sbot = 34.7_r8 !warm
+!        Tbot = -1.9_r8 !cold
+!        Sbot = 34.55_r8 !cold
+        T02 = -1.9_r8
+        S02 = 33.8_r8
+        Bmax = 720.0_r8
+      DO k=1,N(ng)
+        DO j=JstrT,JendT
+          DO i=IstrT,IendT
+            tclm(i,j,k,itemp)=T02 + (Tbot - T02)*(-GRID(ng)%z_r(i,j,k)/Bmax)
+            tclm(i,j,k,isalt)=S02 + (Sbot - S02)*(-GRID(ng)%z_r(i,j,k)/Bmax)
+!      IF(i.eq.20.and.j.eq.235) THEN
+!          write(6,*) tclm(i,j,k,itemp)
+!      ENDIF
+!      IF(i.eq.20.and.j.eq.240) THEN
+!          write(6,*) tclm(i,j,k,itemp)
+!      ENDIF
+
+
+          END DO
+        END DO
+      END DO
+
 #else
       DO k=1,N(ng)
         DO j=JstrT,JendT

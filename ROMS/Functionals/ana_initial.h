@@ -175,6 +175,9 @@
       real(r8), parameter :: guscale = 40.0E+03_r8
       real(r8), parameter :: u0 = 1.6_r8
 #endif
+#ifdef ISOMIP_PLUS
+      real(r8) :: T0i, S0i, Tboti, Sboti, Bmax
+#endif
       real(r8) :: depth, dx, val1, val2, val3, val4, x, x0, y, y0
 
 #include "set_bounds.h"
@@ -761,6 +764,32 @@
             t(i,j,k,1,isalt)=34.6_r8
             t(i,j,k,2,itemp)=t(i,j,k,1,itemp)
             t(i,j,k,2,isalt)=t(i,j,k,1,isalt)
+          END DO
+        END DO
+      END DO
+# elif defined ISOMIP_PLUS
+      Tboti = -1.9_r8 !cold
+      Sboti = 34.55_r8 !cold
+!      Tboti = 1.0_r8 !hot
+!      Sboti = 34.7_r8 !hot
+      T0i = -1.9_r8
+      S0i = 33.8_r8
+      Bmax = 720.0_r8
+      DO k=1,N(ng)
+        DO j=JstrR,JendR
+          DO i=IstrR,IendR
+            t(i,j,k,1,itemp)=T0i + (Tboti - T0i)*(-z_r(i,j,k)/Bmax)
+            t(i,j,k,1,isalt)=S0i + (Sboti - S0i)*(-z_r(i,j,k)/Bmax)
+            t(i,j,k,2,itemp)=t(i,j,k,1,itemp)
+            t(i,j,k,2,isalt)=t(i,j,k,1,isalt)
+!          IF(i.eq.20.and.j.eq.140) THEN
+!          write(6,*) z_r(i,j,k), t(i,j,k,1,itemp)!,T0i, S0i, Tboti, Bmax
+!          ENDIF
+!          IF(i.eq.20.and.j.eq.239) THEN
+!          write(6,*) GRID(ng)%z_r(i,j,k), z_r(i,j,k)
+!          ENDIF
+
+
           END DO
         END DO
       END DO

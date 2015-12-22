@@ -70,6 +70,14 @@
       integer, intent(in) :: ng, tile, model
       integer, intent(in) :: LBi, UBi, LBj, UBj
       integer, intent(in) :: IminS, ImaxS, JminS, JmaxS
+!#ifdef ISOMIP_PLUS
+!# ifdef ASSUMED_SHAPE
+!      real(r8), intent(in) :: xr(LBi:,LBj:)
+!# else
+!      real(r8), intent(in) :: xr(LBi:UBi,LBj:UBj)
+!# endif
+!#endif
+
 !
 !  Local variable declarations.
 !
@@ -161,6 +169,56 @@
         DO i=IstrT,IendT
           CLIMA(ng)%Tnudgcof(i,j,itemp)=wrk(i,j)
           CLIMA(ng)%Tnudgcof(i,j,isalt)=wrk(i,j)
+        END DO
+      END DO
+# endif
+
+#elif ISOMIP_PLUS
+!  Set tracer nudging coefficient at the northern edge to a 10-day
+!  relaxation time scale, which decreases linearly to zero-nudging
+!  at x (north-south) coordinate = 790 km.
+!
+      cff1=1.0_r8/(10.0_r8*86400.0_r8) !10 days
+      cff2=0.0_r8                      !Inf days (no nudge)
+      cff3=5.0_r8                      !width of layer in grid points
+! do something like real(r8), intent(in) :: yr(LBi:,LBj:)
+      DO j=MAX(JstrT,Mm(ng)+1-(INT(cff3)-1)),JendT
+       DO i=IstrT,IendT
+          wrk(i,j)=cff1*(GRID(ng)%xr(i,j)-790000.0_r8)/(10000.0_r8)
+!          wrk(i,j) = (cff1-cff2)/cff3*REAL(j-(Mm(ng)+1)+INT(cff3),r8)
+       END DO
+      END DO
+# ifdef TCLM_NUDGING
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+          CLIMA(ng)%Tnudgcof(i,j,itemp)=wrk(i,j)
+          CLIMA(ng)%Tnudgcof(i,j,isalt)=wrk(i,j)
+      IF(i.eq.20.and.j.eq.233) THEN
+          write(6,*) wrk(i,j), j, GRID(ng)%xr(i,j)
+      ENDIF
+      IF(i.eq.20.and.j.eq.234) THEN
+          write(6,*) wrk(i,j), j, GRID(ng)%xr(i,j)
+      ENDIF
+      IF(i.eq.20.and.j.eq.235) THEN
+          write(6,*) wrk(i,j), j, GRID(ng)%xr(i,j)
+      ENDIF
+      IF(i.eq.20.and.j.eq.236) THEN
+          write(6,*) wrk(i,j), j, GRID(ng)%xr(i,j)
+      ENDIF
+      IF(i.eq.20.and.j.eq.237) THEN
+          write(6,*) wrk(i,j), j, GRID(ng)%xr(i,j)
+      ENDIF
+      IF(i.eq.20.and.j.eq.238) THEN
+          write(6,*) wrk(i,j), j, GRID(ng)%xr(i,j)
+      ENDIF
+      IF(i.eq.20.and.j.eq.239) THEN
+          write(6,*) wrk(i,j), j, GRID(ng)%xr(i,j)
+      ENDIF
+      IF(i.eq.20.and.j.eq.239) THEN
+          write(6,*) cff1, Mm(ng)
+      ENDIF
+
+
         END DO
       END DO
 # endif
