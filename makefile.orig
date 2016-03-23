@@ -28,7 +28,11 @@
 #                                                                       :::
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
+<<<<<<< Updated upstream
 NEED_VERSION := 3.80 3.81 3.82 4.0 
+=======
+NEED_VERSION := 3.80 3.81 3.82 4.0
+>>>>>>> Stashed changes
 $(if $(filter $(MAKE_VERSION),$(NEED_VERSION)),,        \
  $(error This makefile requires one of GNU make version $(NEED_VERSION).))
 
@@ -57,10 +61,16 @@ $(if $(filter $(MAKE_VERSION),$(NEED_VERSION)),,        \
 #  and header file name is the lowercase value of ROMS_APPLICATION with
 #  the .h extension. For example, the upwelling application includes the
 #  "upwelling.h" header file.
+<<<<<<< Updated upstream
+ROMS_APPLICATION ?= WAOM10
 #ROMS_APPLICATION ?= ISOMIP_PLUS
- ROMS_APPLICATION ?= ICECLIFF2D_TOY
+# ROMS_APPLICATION ?= ICECLIFF2D_TOY
 #ROMS_APPLICATION ?= ICEBERG
-#ROMS_APPLICATION ?= ICESHELF2D_TOY
+=======
+
+ROMS_APPLICATION ?= ICESHELF2D_TOY
+>>>>>>> Stashed changes
+
 #  If application header files is not located in "ROMS/Include",
 #  provide an alternate directory FULL PATH.
 

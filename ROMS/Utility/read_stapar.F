@@ -87,6 +87,10 @@
 # if defined ICESHELF
             CASE ('Sout(idismr)')
               Npts=load_l(Nval, Cval, Ngrids, Sout(idismr,:))
+            CASE ('Sout(idisTb)')
+              Npts=load_l(Nval, Cval, Ngrids, Sout(idisTb,:))
+            CASE ('Sout(idisSb)')
+              Npts=load_l(Nval, Cval, Ngrids, Sout(idisSb,:))
 #  if defined ICESHELF_MORPH
             CASE ('Sout(idDraft)')
               Npts=load_l(Nval, Cval, Ngrids, Sout(idDraft,:))

@@ -158,6 +158,9 @@
 #ifdef ICESHELF_MORPH
       USE mod_iceshelfvar
 #endif
+#ifdef ICESHELF_DYNAM
+      USE mod_iceshelfdyn
+#endif
       USE bc_2d_mod
       USE exchange_2d_mod, ONLY : exchange_r2d_tile
 # ifdef DISTRIBUTE

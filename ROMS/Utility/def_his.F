@@ -442,7 +442,7 @@
 #endif
 #if defined ICESHELF
 !
-!  Define time-varying bathymetry.
+!  Define ice shelf basal melt rate.
 !
         IF (Hout(idismr,ng)) THEN
           Vinfo( 1)=Vname(1,idismr)
@@ -453,6 +453,38 @@
           Vinfo(22)='coordinates'
           Aval(5)=REAL(Iinfo(1,idismr,ng),r8)
           status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idismr),   &
+     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
+     &                   SetFillVal = .FALSE.)
+          IF (exit_flag.ne.NoError) RETURN
+        END IF
+!
+!  Define temperature at the base of the ice shelf.
+!
+        IF (Hout(idisTb,ng)) THEN
+          Vinfo( 1)=Vname(1,idisTb)
+          Vinfo( 2)=Vname(2,idisTb)
+          Vinfo( 3)=Vname(3,idisTb)
+          Vinfo(14)=Vname(4,idisTb)
+          Vinfo(16)=Vname(1,idisTb)
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,idisTb,ng),r8)
+          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idisTb),   &
+     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
+     &                   SetFillVal = .FALSE.)
+          IF (exit_flag.ne.NoError) RETURN
+        END IF
+!
+!  Define salinity at the base of the ice shelf.
+!
+        IF (Hout(idisSb,ng)) THEN
+          Vinfo( 1)=Vname(1,idisSb)
+          Vinfo( 2)=Vname(2,idisSb)
+          Vinfo( 3)=Vname(3,idisSb)
+          Vinfo(14)=Vname(4,idisSb)
+          Vinfo(16)=Vname(1,idisSb)
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,idisTb,ng),r8)
+          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idisSb),   &
      &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
      &                   SetFillVal = .FALSE.)
           IF (exit_flag.ne.NoError) RETURN

@@ -1183,6 +1183,20 @@
                 RETURN
               END IF
               Npts=load_l(Nval, Cval, Ngrids, Hout(idismr,:))
+            CASE ('Hout(idisTb)')
+              IF (idisTb.eq.0) THEN
+                IF (Master) WRITE (out,280) 'idisTb'
+                exit_flag=5
+                RETURN
+              END IF
+              Npts=load_l(Nval, Cval, Ngrids, Hout(idisTb,:))
+            CASE ('Hout(idisSb)')
+              IF (idisTb.eq.0) THEN
+                IF (Master) WRITE (out,280) 'idisSb'
+                exit_flag=5
+                RETURN
+              END IF
+              Npts=load_l(Nval, Cval, Ngrids, Hout(idisSb,:))
 # if defined ICESHELF_MORPH
             CASE ('Hout(idDraft)')
               IF (iddraft.eq.0) THEN
@@ -3669,6 +3683,12 @@
           IF (Hout(idismr,ng)) WRITE (out,170) Hout(idismr,ng),         &
      &       'Hout(idismr)',                                            &
      &       'Write out ice shelf melt rate.'
+          IF (Hout(idisTb,ng)) WRITE (out,170) Hout(idisTb,ng),         &
+     &       'Hout(idisTb)',                                            &
+     &       'Write out temperature at base of ice shelf.'
+          IF (Hout(idisSb,ng)) WRITE (out,170) Hout(idisSb,ng),         &
+     &       'Hout(idisSb)',                                            &
+     &       'Write out temperature at base of ice shelf.'
 # if defined ICESHELF_MORPH
           IF (Hout(idDraft,ng)) WRITE (out,170) Hout(idDraft,ng),       &
      &       'Hout(idDraft)',                                           &
