@@ -97,10 +97,13 @@
         END DO
       END DO
 #elif defined ISOMIP_PLUS
-        Tbot = 1.0_r8 !warm
-        Sbot = 34.7_r8 !warm
-!        Tbot = -1.9_r8 !cold
-!        Sbot = 34.55_r8 !cold
+#  ifdef ISOMIP_PLUS_INICOLD
+      Tbot = -1.9_r8 !cold
+      Sbot = 34.55_r8 !cold
+#  elif defined ISOMIP_PLUS_INIWARM
+      Tbot = 1.0_r8 !hot
+      Sbot = 34.7_r8 !hot
+#  endif
         T02 = -1.9_r8
         S02 = 33.8_r8
         Bmax = 720.0_r8

@@ -63,6 +63,17 @@
 #define ICESHELF_3EQN_VBC
 #undef ICESHELF_TEOS10
 
+#ifdef ISOMIP_PLUS
+/* By default initial/forcing conditions are:
+ * Initial conditions: Warm
+ * Forcing conditions: Warm
+ */
+#define ISOMIP_PLUS_INIWARM
+#define ISOMIP_PLUS_FORCEWARM
+#undef ISOMIP_PLUS_INICOLD
+#undef ISOMIP_PLUS_FORCECOLD
+#endif
+
 #undef  ANA_VMIX
 #undef MY25_MIXING
 #define LMD_MIXING

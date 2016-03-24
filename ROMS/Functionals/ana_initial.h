@@ -768,10 +768,13 @@
         END DO
       END DO
 # elif defined ISOMIP_PLUS
+#  ifdef ISOMIP_PLUS_INICOLD
       Tboti = -1.9_r8 !cold
       Sboti = 34.55_r8 !cold
-!      Tboti = 1.0_r8 !hot
-!      Sboti = 34.7_r8 !hot
+#  elif defined ISOMIP_PLUS_INIWARM
+      Tboti = 1.0_r8 !hot
+      Sboti = 34.7_r8 !hot
+#  endif
       T0i = -1.9_r8
       S0i = 33.8_r8
       Bmax = 720.0_r8
