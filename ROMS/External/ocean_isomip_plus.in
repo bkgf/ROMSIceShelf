@@ -186,7 +186,7 @@ ad_VolCons(north) ==  F                            ! northern boundary
 
 ! Time-Stepping parameters.
 
-      NTIMES == 15778800 !100yrs !3155760 !20 years at DT=200s
+      NTIMES == 3153600 !20yrs !3155760 !20 years at DT=200s
           DT == 200d0
      NDTFAST == 20
 
@@ -209,7 +209,7 @@ ad_VolCons(north) ==  F                            ! northern boundary
 
        NRREC == 0
    LcycleRST == T
-        NRST == 78894 !6 months at DT=200s
+        NRST == 78840 !6 months at DT=200s
         NSTA == 1
         NFLT == 1
        NINFO == 1
@@ -217,7 +217,7 @@ ad_VolCons(north) ==  F                            ! northern boundary
 ! Output history, average, diagnostic files parameters.
 
      LDEFOUT == T
-        NHIS == 13149 !1 month at DT=200s
+        NHIS == 13140 !1 month at DT=200s
      NDEFHIS == 0
       NTSAVG == 1
         NAVG == 864
