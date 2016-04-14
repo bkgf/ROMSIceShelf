@@ -178,7 +178,7 @@
 !  relaxation time scale, which decreases linearly to zero-nudging
 !  at x (north-south) coordinate = 790 km.
 !
-      cff1=1.0_r8/(10.0_r8*86400.0_r8) !10 days
+      cff1=10.0_r8/(86400.0_r8) !10 days^-1
       cff2=0.0_r8                      !Inf days (no nudge)
       cff3=5.0_r8                      !width of layer in grid points
 ! do something like real(r8), intent(in) :: yr(LBi:,LBj:)
