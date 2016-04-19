@@ -482,7 +482,7 @@
 ! Scales constant gammaT and gammaS by depth below ice
            u_t = 0.01_r8
            GammaT_0 = 5.00e-2_r8
-           GammaS_0 = 1.40e-3_r8
+           GammaS_0 = GammaT_0/35.0_r8 !1.40e-3_r8
            gammaT(i,j) = GammaT_0 * SQRT(ustar*ustar + rdrg2(ng)*u_t**2.0_r8)! * (z_0/ABS(z_r(i,j,N(ng))-zice(i,j)))
            gammaS(i,j) = GammaS_0 * SQRT(ustar*ustar + rdrg2(ng)*u_t**2.0_r8)! * (z_0/ABS(z_r(i,j,N(ng))-zice(i,j))) 
 
