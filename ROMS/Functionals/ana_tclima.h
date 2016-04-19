@@ -97,10 +97,10 @@
         END DO
       END DO
 #elif defined ISOMIP_PLUS
-#  ifdef ISOMIP_PLUS_INICOLD
+#  ifdef ISOMIP_PLUS_FORCECOLD
       Tbot = -1.9_r8 !cold
       Sbot = 34.55_r8 !cold
-#  elif defined ISOMIP_PLUS_INIWARM
+#  elif defined ISOMIP_PLUS_FORCEWARM
       Tbot = 1.0_r8 !hot
       Sbot = 34.7_r8 !hot
 #  endif
