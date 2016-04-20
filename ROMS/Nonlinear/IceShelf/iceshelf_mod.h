@@ -20,11 +20,11 @@
 #  if defined ISOMIP_PLUS
       real(r8), parameter :: a = -0.0573_r8
       real(r8), parameter :: b = 0.0832_r8
-      real(r8), parameter :: c = 7.61e-4
+      real(r8), parameter :: c = 7.478e-4_r8 !assume 1dbar<~>-.993m
 #  else
       real(r8), parameter :: a = -0.057_r8
       real(r8), parameter :: b = 0.0939_r8
-      real(r8), parameter :: c = 7.61e-4
+      real(r8), parameter :: c = 7.61e-4_r8
 #  endif
 #  if defined ICESHELF_2EQN_VBC
       real(r8), parameter :: gamma = 0.0001_r8
