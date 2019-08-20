@@ -54,6 +54,9 @@
      &                   OCEAN(ng) % tl_u,                              &
      &                   OCEAN(ng) % tl_v,                              &
 # endif
+#ifdef ICESHELF
+     &                GRID(ng) % tl_zice,                               &
+#endif
      &                   OCEAN(ng) % tl_ubar,                           &
      &                   OCEAN(ng) % tl_vbar,                           &
      &                   OCEAN(ng) % tl_zeta)
@@ -73,6 +76,9 @@
      &                         tl_Hz, tl_z_r, tl_z_w,                   &
      &                         tl_rho, tl_u, tl_v,                      &
 # endif
+#ifdef ICESHELF
+     &                      tl_zice,                                    &
+#endif
      &                         tl_ubar, tl_vbar, tl_zeta)
 !***********************************************************************
 !
@@ -106,6 +112,9 @@
       real(r8), intent(in) :: tl_u(LBi:,LBj:,:,:)
       real(r8), intent(in) :: tl_v(LBi:,LBj:,:,:)
 #  endif
+# ifdef ICESHELF
+      real(r8), intent(in) :: tl_zice(LBi:,LBj:)
+# endif
       real(r8), intent(in) :: tl_ubar(LBi:,LBj:,:)
       real(r8), intent(in) :: tl_vbar(LBi:,LBj:,:)
       real(r8), intent(in) :: tl_zeta(LBi:,LBj:,:)
@@ -120,6 +129,9 @@
       real(r8), intent(in) :: tl_u(LBi:UBi,LBj:UBj,N(ng),2)
       real(r8), intent(in) :: tl_v(LBi:UBi,LBj:UBj,N(ng),2)
 #  endif
+# ifdef ICESHELF
+      real(r8), intent(in) :: tl_zice(LBi:UBi,LBj:UBj)
+# endif
       real(r8), intent(in) :: tl_ubar(LBi:UBi,LBj:UBj,3)
       real(r8), intent(in) :: tl_vbar(LBi:UBi,LBj:UBj,3)
       real(r8), intent(in) :: tl_zeta(LBi:UBi,LBj:UBj,3)
@@ -136,7 +148,7 @@
       integer :: my_threadnum
 # endif
 
-      real(r8) :: cff, my_avgke, my_avgpe, my_volume
+      real(r8) :: cff, my_avgke, my_avgpe, my_volume, u2v2
 
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: ke2d
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: pe2d
@@ -161,12 +173,18 @@
           cff=g/rho0
           DO k=N(ng),1,-1
             DO i=Istr,Iend
-              ke2d(i,j)=ke2d(i,j)+                                      &
-     &                  tl_Hz(i,j,k)*                                   &
-     &                  0.25_r8*(tl_u(i  ,j,k,nstp)*tl_u(i  ,j,k,nstp)+ &
+               u2v2=            (tl_u(i  ,j,k,nstp)*tl_u(i  ,j,k,nstp)+ &
      &                           tl_u(i+1,j,k,nstp)*tl_u(i+1,j,k,nstp)+ &
      &                           tl_v(i,j  ,k,nstp)*tl_v(i,j  ,k,nstp)+ &
      &                           tl_v(i,j+1,k,nstp)*tl_v(i,j+1,k,nstp))
+#ifdef ICESHELF
+            ke2d(i,j)=(tl_zeta(i,j,kstp)+h(i,j)-ABS(tl_zice(i,j)))*     &
+     &           0.25_r8*u2v2
+#else
+              ke2d(i,j)=ke2d(i,j)+                                      &
+     &                  tl_Hz(i,j,k)*                                   &
+     &                  0.25_r8*u2v2
+#endif
               pe2d(i,j)=pe2d(i,j)+                                      &
      &                  cff*tl_Hz(i,j,k)*(tl_rho(i,j,k)+1000.0_r8)*     &
      &                  (tl_z_r(i,j,k)-tl_z_w(i,j,0))
@@ -184,6 +202,7 @@
           END DO
 # endif
         END DO
+! NOTE: Added tl code from ICESHELF up to here
 !
 !  Integrate horizontally within one tile. In order to reduce the
 !  round-off errors, the summation is performed in two stages. First,

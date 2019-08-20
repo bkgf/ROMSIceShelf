@@ -97,6 +97,9 @@
 # if defined SSH_TIDES_NOT_YET || defined UV_TIDES_NOT_YET
 !!    USE tl_set_tides_mod, ONLY : tl_set_tides
 # endif
+# ifdef ICESHELF
+      USE tl_iceshelf_mod, ONLY : tl_iceshelf
+# endif
       USE tl_set_vbc_mod, ONLY : tl_set_vbc
       USE tl_set_zeta_mod, ONLY : tl_set_zeta
       USE tl_step2d_mod, ONLY : tl_step2d
@@ -329,6 +332,9 @@
             CALL tl_bblm (ng, tile)
 # endif
             CALL tl_set_vbc (ng, tile)
+# ifdef ICESHELF
+                CALL tl_iceshelf (ng,tile)
+# endif
 # if defined SSH_TIDES_NOT_YET || defined UV_TIDES_NOT_YET
             CALL tl_set_tides (ng, tile)
 # endif

@@ -241,6 +241,22 @@
               bry_cor=0.0_r8
               tl_bry_cor=0.0_r8
 #  endif
+#   ifdef ICESHELF
+          cff1=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jstr-1)-                    &
+     &                         ABS(GRID(ng)%zice(i,Jstr-1))+            &
+     &                         zeta(i,Jstr-1,kout)+                     &
+     &                         GRID(ng)%h(i,Jstr  )-                    &
+     &                         ABS(GRID(ng)%zice(i,Jstr  ))+            &
+     &                         zeta(i,Jstr  ,kout)))
+          tl_cff1=-cff1*cff1*(0.5_r8*(GRID(ng)%tl_h(i,Jstr-1)-          &
+     &                         SIGN(1.0_r8,GRID(ng)%zice(i,Jstr-1))*    &
+     &                          GRID(ng)%tl_zice(i,Jstr-1)+             &
+     &                         tl_zeta(i,Jstr-1,kout)+                  &
+     &                         GRID(ng)%tl_h(i,Jstr  )-                 &
+     &                         SIGN(1.0_r8,GRID(ng)%zice(i,Jstr  ))*    &
+     &                          GRID(ng)%tl_zice(i,Jstr  )+             &
+     &                         tl_zeta(i,Jstr  ,kout)))
+#   else
               cff1=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jstr-1)+                &
      &                             zeta(i,Jstr-1,know)+                 &
      &                             GRID(ng)%h(i,Jstr  )+                &
@@ -249,12 +265,29 @@
      &                                    tl_zeta(i,Jstr-1,know)+       &
      &                                    GRID(ng)%tl_h(i,Jstr  )+      &
      &                                    tl_zeta(i,Jstr  ,know)))
+#   endif
               bry_str=cff1*(FORCES(ng)%svstr(i,Jstr)-                   &
      &                      FORCES(ng)%bvstr(i,Jstr))
               tl_bry_str=tl_cff1*(FORCES(ng)%svstr(i,Jstr)-             &
      &                            FORCES(ng)%bvstr(i,Jstr))+            &
      &                   cff1*(FORCES(ng)%tl_svstr(i,Jstr)-             &
      &                         FORCES(ng)%tl_bvstr(i,Jstr))
+#   ifdef ICESHELF
+              Ce=1.0_r8/SQRT(g*0.5_r8*(GRID(ng)%h(i,Jstr-1)-            &
+     &                             ABS(GRID(ng)%zice(i,Jstr-1))+        &
+     &                             zeta(i,Jstr-1,kout)+                 &
+     &                             GRID(ng)%h(i,Jstr  )-                &
+     &                             ABS(GRID(ng)%zice(i,Jstr  ))+        &
+     &                             zeta(i,Jstr  ,kout)))
+              tl_Ce=-Ce*Ce*Ce*g*0.25_r8*(GRID(ng)%tl_h(i,Jstr-1)-       &
+     &                            SIGN(1.0_r8,GRID(ng)%zice(i,Jstr-1))* &
+     &                                 GRID(ng)%tl_zice(i,Jstr-1)+      &
+     &                             tl_zeta(i,Jstr-1,kout)+              &
+     &                             GRID(ng)%tl_h(i,Jstr  )-             &
+     &                             SIGN(1.0_r8,GRID(ng)%zice(i,Jstr  ))*&
+     &                                 GRID(ng)%tl_zice(i,Jstr  )+      &
+     &                             tl_zeta(i,Jstr  ,kout))
+#  else
               Ce=1.0_r8/SQRT(g*0.5_r8*(GRID(ng)%h(i,Jstr-1)+            &
      &                                 zeta(i,Jstr-1,know)+             &
      &                                 GRID(ng)%h(i,Jstr  )+            &
@@ -263,6 +296,7 @@
      &                                   tl_zeta(i,Jstr-1,know)+        &
      &                                   GRID(ng)%tl_h(i,Jstr  )+       &
      &                                   tl_zeta(i,Jstr  ,know))
+#  endif
               cff2=GRID(ng)%on_v(i,Jstr)*Ce
               tl_cff2=GRID(ng)%on_v(i,Jstr)*tl_Ce
 !>            bry_val=vbar(i,Jstr+1,know)+                              &
@@ -290,6 +324,18 @@
               tl_bry_val=0.0_r8
 #  endif
 # endif
+#  ifdef ICESHELF
+          cff=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jstr-1)-                     &
+     &                        ABS(GRID(ng)%zice(i,Jstr-1))+             &
+     &                        GRID(ng)%h(i,Jstr  )-                     &
+     &                        ABS(GRID(ng)%zice(i,Jstr  ))))
+          tl_cff=-cff*cff*(0.5_r8*(GRID(ng)%tl_h(i,Jstr-1)-             &
+     &                        SIGN(1.0_r8,GRID(ng)%zice(i,Jstr-1))*     &
+     &                           GRID(ng)%tl_zice(i,Jstr-1)+            &
+     &                        GRID(ng)%tl_h(i,Jstr  )-                  &
+     &                        SIGN(1.0_r8,GRID(ng)%zice(i,Jstr  ))*     &
+     &                           GRID(ng)%tl_zice(i,Jstr  )))
+#  else
               cff=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jstr-1)+                 &
      &                            zeta(i,Jstr-1,know)+                  &
      &                            GRID(ng)%h(i,Jstr  )+                 &
@@ -298,6 +344,7 @@
      &                                 tl_zeta(i,Jstr-1,know)+          &
      &                                 GRID(ng)%tl_h(i,Jstr  )+         &
      &                                 tl_zeta(i,Jstr  ,know)))
+#  endif
               Ce=SQRT(g*cff)
               tl_Ce=0.5_r8*g*tl_cff/Ce
 !>            vbar(i,Jstr,kout)=bry_val-                                &
@@ -581,6 +628,22 @@
 !>
               tl_bry_cor=0.0_r8
 # endif
+#  ifdef ICESHELF
+          cff=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jstr-1)-                     &
+     &                        ABS(GRID(ng)%zice(i,Jstr-1))+             &
+     &                        zeta(i,Jstr-1,kout)+                      &
+     &                        GRID(ng)%h(i,Jstr  )-                     &
+     &                        ABS(GRID(ng)%zice(i,Jstr  ))+             &
+     &                        zeta(i,Jstr  ,kout)))
+          tl_cff=-cff*cff*0.5_r8*(GRID(ng)%tl_h(i,Jstr-1)-              &
+     &                        SIGN(1.0_r8,GRID(ng)%zice(i,Jstr-1))*     &
+     &                           GRID(ng)%tl_zice(i,Jstr-1)+            &
+     &                        tl_zeta(i,Jstr-1,kout)+                   &
+     &                        GRID(ng)%tl_h(i,Jstr  )-                  &
+     &                        SIGN(1.0_r8,GRID(ng)%zice(i,Jstr  ))*     &
+     &                           GRID(ng)%tl_zice(i,Jstr  )+            &
+     &                        tl_zeta(i,Jstr  ,kout))
+#  else
               cff=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jstr-1)+                 &
      &                            zeta(i,Jstr-1,know)+                  &
      &                            GRID(ng)%h(i,Jstr  )+                 &
@@ -589,6 +652,7 @@
      &                                tl_zeta(i,Jstr-1,know)+           &
      &                                GRID(ng)%tl_h(i,Jstr  )+          &
      &                                tl_zeta(i,Jstr  ,know))
+#  endif
 !>            bry_str=cff*(FORCES(ng)%svstr(i,Jstr)-                    &
 !>   &                     FORCES(ng)%bvstr(i,Jstr))
 !>
@@ -743,6 +807,22 @@
               bry_cor=0.0_r8
               tl_bry_cor=0.0_r8
 #  endif
+# ifdef ICESHELF
+          cff1=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jend  )-                    &
+     &                         ABS(GRID(ng)%zice(i,Jend  ))+            &
+     &                         zeta(i,Jend  ,kout)+                     &
+     &                         GRID(ng)%h(i,Jend+1)-                    &
+     &                         ABS(GRID(ng)%zice(i,Jend+1))+            &
+     &                         zeta(i,Jend+1,kout)))
+          tl_cff1=-cff1*cff1*0.5_r8*(GRID(ng)%tl_h(i,Jend  )-           &
+     &                         SIGN(1.0_r8,GRID(ng)%zice(i,Jend  ))*    &
+     &                             GRID(ng)%tl_zice(i,Jend  )+          &
+     &                         tl_zeta(i,Jend  ,kout)+                  &
+     &                         GRID(ng)%tl_h(i,Jend+1)-                 &
+     &                         SIGN(1.0_r8,GRID(ng)%zice(i,Jend+1))*    &
+     &                             GRID(ng)%tl_zice(i,Jend+1)+          &
+     &                         tl_zeta(i,Jend+1,kout))
+# else
               cff1=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jend  )+                &
      &                             zeta(i,Jend  ,know)+                 &
      &                             GRID(ng)%h(i,Jend+1)+                &
@@ -751,12 +831,29 @@
      &                                   tl_zeta(i,Jend  ,know)+        &
      &                                   GRID(ng)%tl_h(i,Jend+1)+       &
      &                                   tl_zeta(i,Jend+1,know))
+# endif
               bry_str=cff1*(FORCES(ng)%svstr(i,Jend+1)-                 &
      &                      FORCES(ng)%bvstr(i,Jend+1))
               tl_bry_str=tl_cff1*(FORCES(ng)%svstr(i,Jend+1)-           &
      &                            FORCES(ng)%bvstr(i,Jend+1))+          &
      &                   cff1*(FORCES(ng)%tl_svstr(i,Jend+1)-           &
      &                         FORCES(ng)%tl_bvstr(i,Jend+1))
+# ifdef ICESHELF
+          Ce=1.0_r8/SQRT(g*0.5_r8*(GRID(ng)%h(i,Jend+1)-                &
+     &                             ABS(GRID(ng)%zice(i,Jend+1))+        &
+     &                             zeta(i,Jend+1,kout)+                 &
+     &                             GRID(ng)%h(i,Jend  )-                &
+     &                             ABS(GRID(ng)%zice(i,Jend  ))+        &
+     &                             zeta(i,Jend  ,kout)))
+          tl_Ce=-Ce*Ce*Ce*g*0.5_r8*(GRID(ng)%tl_h(i,Jend+1)-            &
+     &                             SIGN(1.0_r8,GRID(ng)%zice(i,Jend+1))*&
+     &                                GRID(ng)%tl_zice(i,Jend+1)+       &
+     &                             tl_zeta(i,Jend+1,kout)+              &
+     &                             GRID(ng)%tl_h(i,Jend  )-             &
+     &                             SIGN(1.0_r8,GRID(ng)%zice(i,Jend  ))*&
+     &                                GRID(ng)%tl_zice(i,Jend  )+       &
+     &                             tl_zeta(i,Jend  ,kout))
+# else
               Ce=1.0_r8/SQRT(g*0.5_r8*(GRID(ng)%h(i,Jend+1)+            &
      &                                 zeta(i,Jend+1,know)+             &
      &                                 GRID(ng)%h(i,Jend  )+            &
@@ -765,6 +862,7 @@
      &                                   tl_zeta(i,Jend+1,know)+        &
      &                                   GRID(ng)%tl_h(i,Jend  )+       &
      &                                   tl_zeta(i,Jend  ,know))
+# endif
               cff2=GRID(ng)%on_v(i,Jend+1)*Ce
               tl_cff2=GRID(ng)%on_v(i,Jend+1)*tl_Ce
 !>            bry_val=vbar(i,Jend,know)+                                &
@@ -792,6 +890,18 @@
               tl_bry_val=0.0_r8
 #  endif
 # endif
+# ifdef ICESHELF
+          cff=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jend  )-                     &
+     &                        ABS(GRID(ng)%zice(i,Jend  ))+             &
+     &                        GRID(ng)%h(i,Jend+1)-                     &
+     &                        ABS(GRID(ng)%zice(i,Jend+1))))
+          tl_cff=-cff*cff*(0.5_r8*(GRID(ng)%tl_h(i,Jend  )-             &
+     &                        SIGN(1.0_r8,GRID(ng)%zice(i,Jend  ))*     &
+     &                           GRID(ng)%tl_zice(i,Jend  )+            &
+     &                        GRID(ng)%tl_h(i,Jend+1)-                  &
+     &                        SIGN(1.0_r8,GRID(ng)%zice(i,Jend+1))*     &
+     &                           GRID(ng)%tl_zice(i,Jend+1)))
+# else
               cff=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jend  )+                 &
      &                            zeta(i,Jend  ,know)+                  &
      &                            GRID(ng)%h(i,Jend+1)+                 &
@@ -800,6 +910,7 @@
      &                                 tl_zeta(i,Jend  ,know)+          &
      &                                 GRID(ng)%tl_h(i,Jend+1)+         &
      &                                 tl_zeta(i,Jend+1,know)))
+# endif
               Ce=SQRT(g*cff)
               tl_Ce=0.5_r8*g*tl_cff/Ce
 !>            vbar(i,Jend+1,kout)=bry_val+                              &
@@ -1083,6 +1194,22 @@
 !>
               tl_bry_cor=0.0_r8
 # endif
+# ifdef ICESHELF
+          cff=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jend  )-                     &
+     &                        ABS(GRID(ng)%zice(i,Jend  ))+             &
+     &                        zeta(i,Jend  ,kout)+                      &
+     &                        GRID(ng)%h(i,Jend+1)-                     &
+     &                        ABS(GRID(ng)%zice(i,Jend+1))+             &
+     &                        zeta(i,Jend+1,kout)))
+          tl_cff=-cff*cff*0.5_r8*(GRID(ng)%tl_h(i,Jend  )-              &
+     &                        SIGN(1.0_r8,GRID(ng)%zice(i,Jend  ))*     &
+     &                           GRID(ng)%tl_zice(i,Jend  )+            &
+     &                        tl_zeta(i,Jend  ,kout)+                   &
+     &                        GRID(ng)%tl_h(i,Jend+1)-                  &
+     &                        SIGN(1.0_r8,GRID(ng)%zice(i,Jend+1))*     &
+     &                           GRID(ng)%tl_zice(i,Jend+1)+            &
+     &                        tl_zeta(i,Jend+1,kout))
+# else
               cff=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jend  )+                 &
      &                            zeta(i,Jend  ,know)+                  &
      &                            GRID(ng)%h(i,Jend+1)+                 &
@@ -1091,6 +1218,7 @@
      &                                tl_zeta(i,Jend  ,know)+           &
      &                                GRID(ng)%tl_h(i,Jend+1)+          &
      &                                tl_zeta(i,Jend+1,know))
+# endif
 !>            bry_str=cff*(FORCES(ng)%svstr(i,Jend+1)-                  &
 !>   &                     FORCES(ng)%bvstr(i,Jend+1))
 !>
@@ -1207,6 +1335,18 @@
             IF (LBC_apply(ng)%west(j)) THEN
               cff=dt2d*0.5_r8*(GRID(ng)%pm(Istr,j-1)+                   &
      &                         GRID(ng)%pm(Istr,j  ))
+# ifdef ICESHELF
+          cff1=SQRT(g*0.5_r8*(GRID(ng)%h(Istr,j-1)-                     &
+     &                        ABS(GRID(ng)%zice(Istr,j-1))+             &
+     &                        GRID(ng)%h(Istr,j  )-                     &
+     &                        ABS(GRID(ng)%zice(Istr,j  ))))
+          tl_cff1=-g*0.25_r8*(GRID(ng)%tl_h(Istr,j-1)-                  &
+     &                        SIGN(1.0_r8,GRID(ng)%zice(Istr,j-1))*     &
+     &                           GRID(ng)%tl_zice(Istr,j-1)+            &
+     &                        GRID(ng)%tl_h(Istr,j  )-                  &
+     &                        SIGN(1.0_r8,GRID(ng)%zice(Istr,j  ))*     &
+     &                           GRID(ng)%tl_zice(Istr,j  ))/cff1
+# else
               cff1=SQRT(g*0.5_r8*(GRID(ng)%h(Istr,j-1)+                 &
      &                            zeta(Istr,j-1,know)+                  &
      &                            GRID(ng)%h(Istr,j  )+                 &
@@ -1215,6 +1355,7 @@
      &                           tl_zeta(Istr,j-1,know)+                &
      &                           GRID(ng)%tl_h(Istr,j  )+               &
      &                           tl_zeta(Istr,j  ,know))/cff1
+# endif
               Cx=cff*cff1
               tl_Cx=cff*tl_cff1
               cff2=1.0_r8/(1.0_r8+Cx)
@@ -1386,6 +1527,18 @@
             IF (LBC_apply(ng)%east(j)) THEN
               cff=dt2d*0.5_r8*(GRID(ng)%pm(Iend,j-1)+                   &
      &                         GRID(ng)%pm(Iend,j  ))
+# ifdef ICESHELF
+          cff1=SQRT(g*0.5_r8*(GRID(ng)%h(Iend,j-1)-                     &
+     &                        ABS(GRID(ng)%zice(Iend,j-1))+             &
+     &                        GRID(ng)%h(Iend,j  )-                     &
+     &                        ABS(GRID(ng)%zice(Iend,j  ))))
+          tl_cff1=g*0.25_r8*(GRID(ng)%tl_h(Iend,j-1)-                   &
+     &                        SIGN(1.0_r8,GRID(ng)%zice(Iend,j-1))*     &
+     &                           GRID(ng)%tl_zice(Iend,j-1)+            &
+     &                        GRID(ng)%tl_h(Iend,j  )-                  &
+     &                        SIGN(1.0_r8,GRID(ng)%zice(Iend,j  ))*     &
+     &                           GRID(ng)%tl_zice(Iend,j  ))
+# else
               cff1=SQRT(g*0.5_r8*(GRID(ng)%h(Iend,j-1)+                 &
      &                            zeta(Iend,j-1,know)+                  &
      &                            GRID(ng)%h(Iend,j  )+                 &
@@ -1394,6 +1547,7 @@
      &                           tl_zeta(Iend,j-1,know)+                &
      &                           GRID(ng)%tl_h(Iend,j  )+               &
      &                           tl_zeta(Iend,j  ,know))/cff1
+# endif
               Cx=cff*cff1
               tl_Cx=cff*tl_cff1
               cff2=1.0_r8/(1.0_r8+Cx)

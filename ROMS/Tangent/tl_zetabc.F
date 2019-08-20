@@ -183,10 +183,17 @@
           DO j=Jstr,Jend
             IF (LBC_apply(ng)%west(j)) THEN
               cff=dt2d*GRID(ng)%pm(Istr,j)
+# ifdef ICESHELF
+          cff1=SQRT(g*(GRID(ng)%h(Istr,j)-ABS(GRID(ng)%zice(Istr,j))))
+          tl_cff1=0.5_r8*g*(GRID(ng)%tl_h(Istr,j)-                      &
+     &               SIGN(1.0_r8,GRID(ng)%zice(Istr,j))*                &
+     &                  GRID(ng)%tl_zice(Istr,j))/cff1
+# else
               cff1=SQRT(g*(GRID(ng)%h(Istr,j)+                          &
      &                     zeta(Istr,j,know)))
               tl_cff1=0.5_r8*g*(GRID(ng)%tl_h(Istr,j)+                  &
      &                          tl_zeta(Istr,j,know))/cff1
+# endif
               Cx=cff*cff1
               tl_Cx=cff*tl_cff1
 !>            zeta(Istr-1,j,kout)=(1.0_r8-Cx)*zeta(Istr-1,j,know)+      &
@@ -212,10 +219,17 @@
           DO j=Jstr,Jend
             IF (LBC_apply(ng)%west(j)) THEN
               cff=dt2d*GRID(ng)%pm(Istr,j)
+# ifdef ICESHELF
+          cff1=SQRT(g*(GRID(ng)%h(Istr,j)-ABS(GRID(ng)%zice(Istr,j))))
+          tl_cff1=0.5_r8*g*(GRID(ng)%tl_h(Istr,j)-                      &
+     &               SIGN(1.0_r8,GRID(ng)%zice(Istr,j))*                &
+     &                     GRID(ng)%tl_zice(Istr,j))/cff1
+# else
               cff1=SQRT(g*(GRID(ng)%h(Istr,j)+                          &
      &                     zeta(Istr,j,know)))
               tl_cff1=0.5_r8*g*(GRID(ng)%tl_h(Istr,j)+                  &
      &                          tl_zeta(Istr,j,know))/cff1
+# endif
               Cx=cff*cff1
               tl_Cx=cff*tl_cff1
               cff2=1.0_r8/(1.0_r8+Cx)
@@ -376,10 +390,17 @@
           DO j=Jstr,Jend
             IF (LBC_apply(ng)%east(j)) THEN
               cff=dt2d*GRID(ng)%pm(Iend,j)
+# ifdef ICESHELF
+          cff1=SQRT(g*(GRID(ng)%h(Iend,j)-ABS(GRID(ng)%zice(Iend,j))))
+          tl_cff1=0.5_r8*g*(GRID(ng)%tl_h(Iend,j)-                      &
+     &                 SIGN(1.0_r8,GRID(ng)%zice(Iend,j))*              &
+     &                   GRID(ng)%tl_zice(Iend,j))/cff1
+# else
               cff1=SQRT(g*(GRID(ng)%h(Iend,j)+                          &
      &                     zeta(Iend,j,know)))
               tl_cff1=0.5_r8*g*(GRID(ng)%tl_h(Iend,j)+                  &
      &                          tl_zeta(Iend,j,know))/cff1
+# endif
               Cx=cff*cff1
               tl_Cx=cff*tl_cff1
 !>            zeta(Iend+1,j,kout)=(1.0_r8-Cx)*zeta(Iend+1,j,know)+      &
@@ -405,10 +426,17 @@
           DO j=Jstr,Jend
             IF (LBC_apply(ng)%east(j)) THEN
               cff=dt2d*GRID(ng)%pm(Iend,j)
+# ifdef ICESHELF
+          cff1=SQRT(g*(GRID(ng)%h(Iend,j)-ABS(GRID(ng)%zice(Iend,j))))
+          tl_cff1=0.5_r8*g*(GRID(ng)%tl_h(Iend,j)-                      &
+     &                 SIGN(1.0_r8,GRID(ng)%zice(Iend,j))*              &
+     &                    GRID(ng)%tl_zice(Iend,j))/cff1
+# else
               cff1=SQRT(g*(GRID(ng)%h(Iend,j)+                          &
      &                     zeta(Iend,j,know)))
               tl_cff1=0.5_r8*g*(GRID(ng)%tl_h(Iend,j)+                  &
      &                          tl_zeta(Iend,j,know))/cff1
+# endif
               Cx=cff*cff1
               tl_Cx=cff*tl_cff1
               cff2=1.0_r8/(1.0_r8+Cx)
@@ -569,10 +597,17 @@
           DO i=Istr,Iend
             IF (LBC_apply(ng)%south(i)) THEN
               cff=dt2d*GRID(ng)%pn(i,Jstr)
+# ifdef ICESHELF
+          cff1=SQRT(g*(GRID(ng)%h(i,Jstr)-ABS(GRID(ng)%zice(i,Jstr))))
+          tl_cff1=0.5_r8*g*(GRID(ng)%tl_h(i,Jstr)-                      &
+     &                    SIGN(1.0_r8,GRID(ng)%zice(i,Jstr))*           &
+     &                       GRID(ng)%tl_zice(i,Jstr))/cff1
+# else
               cff1=SQRT(g*(GRID(ng)%h(i,Jstr)+                          &
      &                     zeta(i,Jstr,know)))
               tl_cff1=0.5_r8*g*(GRID(ng)%tl_h(i,Jstr)+                  &
      &                          tl_zeta(i,Jstr,know))/cff1
+# endif
               Ce=cff*cff1
               tl_Ce=cff*tl_cff1
 !>            zeta(i,Jstr-1,kout)=(1.0_r8-Ce)*zeta(i,Jstr-1,know)+      &
@@ -598,10 +633,17 @@
           DO i=Istr,Iend
             IF (LBC_apply(ng)%south(i)) THEN
               cff=dt2d*GRID(ng)%pn(i,Jstr)
+# ifdef ICESHELF
+          cff1=SQRT(g*(GRID(ng)%h(i,Jstr)-ABS(GRID(ng)%zice(i,Jstr))))
+          tl_cff1=0.5_r8*g*(GRID(ng)%tl_h(i,Jstr)-                      &
+     &                        SIGN(1.0_r8,GRID(ng)%zice(i,Jstr))*       &
+     &                           GRID(ng)%tl_zice(i,Jstr))/cff1
+# else
               cff1=SQRT(g*(GRID(ng)%h(i,Jstr)+                          &
      &                     zeta(i,Jstr,know)))
               tl_cff1=0.5_r8*g*(GRID(ng)%tl_h(i,Jstr)+                  &
      &                          tl_zeta(i,Jstr,know))/cff1
+# endif
               Ce=cff*cff1
               tl_Ce=cff*tl_cff1
               cff2=1.0_r8/(1.0_r8+Ce)
@@ -762,10 +804,17 @@
           DO i=Istr,Iend
             IF (LBC_apply(ng)%north(i)) THEN
               cff=dt2d*GRID(ng)%pn(i,Jend)
+# ifdef ICESHELF
+          cff1=SQRT(g*(GRID(ng)%h(i,Jend)-ABS(GRID(ng)%zice(i,Jend))))
+          tl_cff1=0.5_r8*g*(GRID(ng)%tl_h(i,Jend)-                      &
+     &                 SIGN(1.0_r8,GRID(ng)%zice(i,Jend))*              &
+     &                    GRID(ng)%tl_zice(i,Jend))/cff1
+# else
               cff1=SQRT(g*(GRID(ng)%h(i,Jend)+                          &
      &                     zeta(i,Jend,know)))
               tl_cff1=0.5_r8*g*(GRID(ng)%tl_h(i,Jend)+                  &
      &                          tl_zeta(i,Jend,know))/cff1
+# endif
               Ce=cff*cff1
               tl_Ce=cff*tl_cff1
 !>            zeta(i,Jend+1,kout)=(1.0_r8-Ce)*zeta(i,Jend+1,know)+      &
@@ -791,10 +840,17 @@
           DO i=Istr,Iend
             IF (LBC_apply(ng)%north(i)) THEN
               cff=dt2d*GRID(ng)%pn(i,Jend)
+# ifdef ICESHELF
+          cff1=SQRT(g*(GRID(ng)%h(i,Jend)-ABS(GRID(ng)%zice(i,Jend))))
+          tl_cff1=0.5_r8*g*(GRID(ng)%tl_h(i,Jend)-                      &
+     &                   SIGN(1.0_r8,GRID(ng)%zice(i,Jend))*            &
+     &                      GRID(ng)%tl_zice(i,Jend))/cff1
+# else
               cff1=SQRT(g*(GRID(ng)%h(i,Jend)+                          &
      &                     zeta(i,Jend,know)))
               tl_cff1=0.5_r8*g*(GRID(ng)%tl_h(i,Jend)+                  &
      &                          tl_zeta(i,Jend,know))/cff1
+# endif
               Ce=cff*cff1
               tl_Ce=cff*tl_cff1
               cff2=1.0_r8/(1.0_r8+Ce)

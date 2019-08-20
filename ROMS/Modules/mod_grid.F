@@ -213,6 +213,9 @@
 # ifdef ICESHELF
           real(r8), pointer :: IcePress(:,:)
           real(r8), pointer :: zice(:,:)
+#  ifdef TANGENT
+          real(r8), pointer :: tl_zice(:,:)
+#  endif
 # endif
 #endif
 #ifdef MASKING
@@ -399,6 +402,9 @@
 # ifdef ICESHELF
       allocate ( GRID(ng) % IcePress(LBi:UBi,LBj:UBj) )
       allocate ( GRID(ng) % zice(LBi:UBi,LBj:UBj) )
+#  ifdef TANGENT
+      allocate ( GRID(ng) % tl_zice(LBi:UBi,LBj:UBj) )
+#  endif
 # endif
 
 #endif
@@ -639,6 +645,9 @@
 #if defined ICESHELF && defined SOLVE3D
             GRID(ng) % IcePress(i,j) = IniVal
             GRID(ng) % zice(i,j) = IniVal
+#  ifdef TANGENT
+            GRID(ng) % tl_zice(i,j) = IniVal
+#  endif
 #endif
 
 #ifdef MASKING

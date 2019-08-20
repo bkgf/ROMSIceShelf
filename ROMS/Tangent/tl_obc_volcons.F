@@ -95,8 +95,13 @@
       real(r8), intent(in) :: umask(LBi:,LBj:)
       real(r8), intent(in) :: vmask(LBi:,LBj:)
 #  endif
+# ifdef ICESHELF
+      real(r8), intent(in) :: h(IminS:,JminS:)
+      real(r8), intent(in) :: tl_h(IminS:,JminS:)
+# else
       real(r8), intent(in) :: h(LBi:,LBj:)
       real(r8), intent(in) :: tl_h(LBi:,LBj:)
+# endif
       real(r8), intent(in) :: om_v(LBi:,LBj:)
       real(r8), intent(in) :: on_u(LBi:,LBj:)
 
@@ -111,8 +116,13 @@
       real(r8), intent(in) :: umask(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: vmask(LBi:UBi,LBj:UBj)
 #  endif
+# ifdef ICESHELF
+      real(r8), intent(in) :: h(IminS:ImaxS,JminS:JmaxS)
+      real(r8), intent(in) :: tl_h(IminS:ImaxS,JminS:JmaxS)
+# else
       real(r8), intent(in) :: h(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: tl_h(LBi:UBi,LBj:UBj)
+# endif
       real(r8), intent(in) :: om_v(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: on_u(LBi:UBi,LBj:UBj)
 

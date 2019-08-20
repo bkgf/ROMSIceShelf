@@ -34,6 +34,9 @@
       USE mod_coupling
 # endif
       USE mod_ocean
+# if defined SOLVE3D && defined ICESHELF
+      USE mod_iceshelfvar
+# endif
       USE mod_stepping
 !
 !  Imported variable declarations.
@@ -792,6 +795,9 @@
       USE mod_coupling
 # endif
       USE mod_ocean
+# if defined SOLVE3D && defined ICESHELF && defined ICESHELF_MORPH
+      USE mod_iceshelfvar
+# endif
 # if defined SOLVE3D && defined SEDIMENT && defined SED_MORPH
       USE mod_sedbed
 # endif
@@ -819,6 +825,11 @@
      &                       GRID(ng) % h,                              &
 # endif
 # ifdef SOLVE3D
+#  if defined ICESHELF && defined ICESHELF_MORPH
+     &                    GRID(ng) % tl_zice,                           &
+     &                    ICESHELFVAR(ng) % tl_iceshelf_draft0,         &
+     &                    ICESHELFVAR(ng) % tl_iceshelf_draft,          &
+#  endif
 #  if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
      &                       SEDBED(ng) % tl_bed,                       &
      &                       SEDBED(ng) % tl_bed_thick0,                &
@@ -847,6 +858,10 @@
      &                             h,                                   &
 # endif
 # ifdef SOLVE3D
+#  if defined ICESHELF && defined ICESHELF_MORPH
+     &                          tl_zice, tl_iceshelf_draft0,            &
+     &                          tl_iceshelf_draft,                      &
+#  endif
 #  if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
      &                             tl_bed,                              &
      &                             tl_bed_thick0, tl_bed_thick,         &
@@ -859,6 +874,9 @@
       USE mod_param
       USE mod_ncparam
       USE mod_scalars
+# if defined ICESHELF && defined ICESHELF_MORPH
+      USE mod_iceshelfvar
+# endif
 # if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
       USE mod_sediment
 # endif
@@ -885,6 +903,11 @@
 #  endif
       real(r8), intent(in) :: zeta(LBi:,LBj:,:)
 #  ifdef SOLVE3D
+#   if defined ICESHELF && defined ICESHELF_MORPH
+      real(r8), intent(in) :: tl_zice(LBi:,LBj:)
+      real(r8), intent(inout) :: tl_iceshelf_draft0(LBi:,LBj:)
+      real(r8), intent(inout) :: tl_iceshelf_draft(LBi:,LBj:,:)
+#   endif
 #   if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
       real(r8), intent(in) :: tl_bed(LBi:,LBj:,:,:)
       real(r8), intent(inout) :: tl_bed_thick0(LBi:,LBj:)
@@ -904,6 +927,11 @@
 #  endif
       real(r8), intent(in) :: zeta(LBi:UBi,LBj:UBj,3)
 #  ifdef SOLVE3D
+#   if defined ICESHELF && defined ICESHELF_MORPH
+      real(r8), intent(in) :: tl_zice(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: tl_iceshelf_draft0(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: tl_iceshelf_draft(LBi:UBi,LBj:UBj,2)
+#   endif
 #   if defined SOLVE3D && defined SEDIMENT && defined SED_MORPH
       real(r8), intent(in) :: tl_bed(LBi:UBi,LBj:UBj,Nbed,MBEDP)
       real(r8), intent(inout) :: tl_bed_thick0(LBi:UBi,LBj:UBj)
@@ -1108,6 +1136,60 @@
      &                    NghostPoints,                                 &
      &                    EWperiodic(ng), NSperiodic(ng),               &
      &                    tl_Zt_avg1)
+#  endif
+
+#  if defined ICESHELF && defined ICESHELF_MORPH
+!
+!-----------------------------------------------------------------------
+!  Compute initial total thickness for ice shelf
+!-----------------------------------------------------------------------
+!
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+!         iceshelf_draft0(i,j)=zice(i,j)
+          tl_iceshelf_draft0(i,j)=tl_zice(i,j)
+!         iceshelf_draft(i,j,1)=iceshelf_draft0(i,j)
+          tl_iceshelf_draft(i,j,1)=tl_iceshelf_draft0(i,j)
+!         iceshelf_draft(i,j,2)=iceshelf_draft0(i,j)
+          tl_iceshelf_draft(i,j,2)=tl_iceshelf_draft0(i,j)
+        END DO
+      END DO
+!
+      IF (EWperiodic(ng).or.NSperiodic(ng)) THEN
+!       CALL exchange_r2d_tile (ng, tile,                               &
+!    &                          LBi, UBi, LBj, UBj,                     &
+!    &                          iceshelf_draft0)
+        CALL exchange_r2d_tile (ng, tile,                               &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          tl_iceshelf_draft0)
+!       CALL exchange_r2d_tile (ng, tile,                               &
+!    &                          LBi, UBi, LBj, UBj,                     &
+!    &                          iceshelf_draft(:,:,1))
+        CALL exchange_r2d_tile (ng, tile,                               &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          tl_iceshelf_draft(:,:,1))
+!       CALL exchange_r2d_tile (ng, tile,                               &
+!    &                          LBi, UBi, LBj, UBj,                     &
+!    &                          iceshelf_draft(:,:,2))
+        CALL exchange_r2d_tile (ng, tile,                               &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          tl_iceshelf_draft(:,:,2))
+      END IF
+
+#   ifdef DISTRIBUTE
+!     CALL mp_exchange2d (ng, tile, model, 3,                           &
+!    &                    LBi, UBi, LBj, UBj,                           &
+!    &                    NghostPoints,                                 &
+!    &                    EWperiodic(ng), NSperiodic(ng),               &
+!    &                    iceshelf_draft0,                              &
+!    &                    iceshelf_draft(:,:,1), iceshelf_draft(:,:,2))
+      CALL mp_exchange2d (ng, tile, model, 3,                           &
+     &                    LBi, UBi, LBj, UBj,                           &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    tl_iceshelf_draft0,                           &
+     &               tl_iceshelf_draft(:,:,1), tl_iceshelf_draft(:,:,2))
+#   endif
 #  endif
 
 #  if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET

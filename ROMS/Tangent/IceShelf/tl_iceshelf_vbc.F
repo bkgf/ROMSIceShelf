@@ -365,8 +365,8 @@
      &                    tl_v(i-1,j+1,N(ng),nrhs))
             cff2=SQRT(u(i,j,N(ng),nrhs)*u(i,j,N(ng),nrhs)+cff1*cff1)
             IF (cff2.ne.0.0_r8) THEN
-              tl_cff2=(2.0_r8*u(i,j,N(ng),nrhs)*tl_u(i,j,N(ng),nrhs)+   &
-     &                 2.0_r8*cff1*tl_cff1)/cff2
+              tl_cff2=(u(i,j,N(ng),nrhs)*tl_u(i,j,N(ng),nrhs)+          &
+     &                 cff1*tl_cff1)/cff2
             ELSE
               tl_cff2=0.0_r8
             END IF
@@ -394,8 +394,8 @@
      &                       tl_u(i+1,j-1,N(ng),nrhs))
             cff2=SQRT(cff1*cff1+v(i,j,N(ng),nrhs)*v(i,j,N(ng),nrhs))
             IF (cff2.ne.0.0_r8) THEN
-              tl_cff2=(2.0_r8*cff1*tl_cff1+                             &
-     &              2.0_r8*v(i,j,N(ng),nrhs)*tl_v(i,j,N(ng),nrhs))/cff2
+              tl_cff2=(cff1*tl_cff1+                                    &
+     &              v(i,j,N(ng),nrhs)*tl_v(i,j,N(ng),nrhs))/cff2
             ELSE
               tl_cff2=0.0_r8
             END IF
@@ -427,8 +427,8 @@
      &                       tl_v(i-1,j+1,N(ng),nrhs))
             cff2=SQRT(u(i,j,N(ng),nrhs)*u(i,j,N(ng),nrhs)+cff1*cff1)
             IF (cff2.ne.0.0_r8) THEN
-              tl_cff2=(2.0_r8*u(i,j,N(ng),nrhs)*tl_u(i,j,N(ng),nrhs)+   &
-     &                 2.0_r8*cff1*tl_cff1)/cff2
+              tl_cff2=(u(i,j,N(ng),nrhs)*tl_u(i,j,N(ng),nrhs)+          &
+     &                 cff1*tl_cff1)/cff2
             ELSE
               tl_cff2=0.0_r8
             END IF
@@ -451,8 +451,8 @@
      &                       tl_u(i+1,j-1,N(ng),nrhs))
             cff2=SQRT(cff1*cff1+v(i,j,N(ng),nrhs)*v(i,j,N(ng),nrhs))
             IF (cff2.ne.0.0_r8) THEN
-              tl_cff2=(2.0_r8*cff1*tl_cff1+                              &
-     &               2.0_r8*v(i,j,N(ng),nrhs)*tl_v(i,j,N(ng),nrhs))/cff2
+              tl_cff2=(cff1*tl_cff1+                                    &
+     &               v(i,j,N(ng),nrhs)*tl_v(i,j,N(ng),nrhs))/cff2
             ELSE
               tl_cff2=0.0_r8
             END IF

@@ -62,15 +62,18 @@
 #  elif defined UV_QDRAG
      &                      GRID(ng) % rdrag2,                          &
 #  endif
-#  if !defined BBL_MODEL_NOT_YET
+#  if !defined BBL_MODEL_NOT_YET || defined ICESHELF
      &                      GRID(ng) % z_r,                             &
      &                      GRID(ng) % z_w,                             &
      &                      GRID(ng) % tl_z_r,                          &
      &                      GRID(ng) % tl_z_w,                          &
 #  endif
+#  if defined ICESHELF
+     &                      GRID(ng) % zice,                            &
+#  endif
      &                      OCEAN(ng) % t,                              &
      &                      OCEAN(ng) % tl_t,                           &
-#  if !defined BBL_MODEL_NOT_YET
+#  if !defined BBL_MODEL_NOT_YET || defined ICESHELF
      &                      OCEAN(ng) % u,                              &
      &                      OCEAN(ng) % v,                              &
      &                      OCEAN(ng) % tl_u,                           &
@@ -82,6 +85,13 @@
 #  endif
 #  if defined SCORRECTION || defined SRELAXATION
      &                      FORCES(ng) % sss,                           &
+#  endif
+#  if defined ICESHELF
+#   ifdef SHORTWAVE
+     &                      FORCES(ng) % srflx,                         &
+#   endif
+     &                      FORCES(ng) % tl_sustr,                      &
+     &                      FORCES(ng) % tl_svstr,                      &
 #  endif
 #  ifndef BBL_MODEL_NOT_YET
      &                      FORCES(ng) % tl_bustr,                      &
@@ -111,12 +121,15 @@
 #  elif defined UV_QDRAG
      &                            rdrag2,                               &
 #  endif
-#  if !defined BBL_MODEL_NOT_YET 
+#  if !defined BBL_MODEL_NOT_YET || defined ICESHELF
      &                            z_r, z_w,                             &
      &                            tl_z_r, tl_z_w,                       &
 #  endif
+#  if defined ICESHELF
+     &                            zice,                                 &
+#  endif
      &                            t, tl_t,                              &
-#  if !defined BBL_MODEL_NOT_YET
+#  if !defined BBL_MODEL_NOT_YET || defined ICESHELF
      &                            u, v,                                 &
      &                            tl_u, tl_v,                           &
 #  endif
@@ -125,6 +138,12 @@
 #  endif
 #  if defined SCORRECTION || defined SRELAXATION
      &                            sss,                                  &
+#  endif
+#  if defined ICESHELF
+#   ifdef SHORTWAVE
+     &                            srflx,                                &
+#   endif
+     &                            tl_sustr, tl_svstr,                   &
 #  endif
 #  ifndef BBL_MODEL_NOT_YET
      &                            tl_bustr, tl_bvstr,                   &
@@ -158,15 +177,18 @@
 #   elif defined UV_QDRAG
       real(r8), intent(in) :: rdrag2(LBi:,LBj:)
 #   endif
-#   if !defined BBL_MODEL_NOT_YET
+#   if !defined BBL_MODEL_NOT_YET || defined ICESHELF
       real(r8), intent(in) :: z_r(LBi:,LBj:,:)
       real(r8), intent(in) :: z_w(LBi:,LBj:,0:)
       real(r8), intent(in) :: tl_z_r(LBi:,LBj:,:)
       real(r8), intent(in) :: tl_z_w(LBi:,LBj:,0:)
 #   endif
+#   if defined ICESHELF
+      real(r8), intent(in) :: zice(LBi:,LBj:)
+#   endif
       real(r8), intent(in) :: t(LBi:,LBj:,:,:,:)
       real(r8), intent(in) :: tl_t(LBi:,LBj:,:,:,:)
-#   if !defined BBL_MODEL_NOT_YET
+#   if !defined BBL_MODEL_NOT_YET || defined ICESHELF
       real(r8), intent(in) :: u(LBi:,LBj:,:,:)
       real(r8), intent(in) :: v(LBi:,LBj:,:,:)
       real(r8), intent(in) :: tl_u(LBi:,LBj:,:,:)
@@ -180,6 +202,13 @@
 #   endif
 #   if defined SCORRECTION || defined SRELAXATION
       real(r8), intent(in) :: sss(LBi:,LBj:)
+#   endif
+#   if defined ICESHELF
+#    ifdef SHORTWAVE
+      real(r8), intent(inout) :: srflx(LBi:,LBj:)
+#    endif
+      real(r8), intent(inout) :: tl_sustr(LBi:,LBj:)
+      real(r8), intent(inout) :: tl_svstr(LBi:,LBj:)
 #   endif
 #   ifndef BBL_MODEL_NOT_YET
       real(r8), intent(inout) :: tl_bustr(LBi:,LBj:)
@@ -197,15 +226,18 @@
 #   elif defined UV_QDRAG
       real(r8), intent(in) :: rdrag2(LBi:UBi,LBj:UBj)
 #   endif
-#   if !defined BBL_MODEL_NOT_YET
+#   if !defined BBL_MODEL_NOT_YET || defined ICESHELF
       real(r8), intent(in) :: z_r(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(in) :: z_w(LBi:UBi,LBj:UBj,0:N(ng))
       real(r8), intent(in) :: tl_z_r(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(in) :: tl_z_w(LBi:UBi,LBj:UBj,0:N(ng))
 #   endif
+#   if defined ICESHELF
+      real(r8), intent(in) :: zice(LBi:UBi,LBj:UBj)
+#   endif
       real(r8), intent(in) :: t(LBi:UBi,LBj:UBj,N(ng),3,NT(ng))
       real(r8), intent(in) :: tl_t(LBi:UBi,LBj:UBj,N(ng),3,NT(ng))
-#   if !defined BBL_MODEL_NOT_YET
+#   if !defined BBL_MODEL_NOT_YET || defined ICESHELF
       real(r8), intent(in) :: u(LBi:UBi,LBj:UBj,N(ng),2)
       real(r8), intent(in) :: v(LBi:UBi,LBj:UBj,N(ng),2)
       real(r8), intent(in) :: tl_u(LBi:UBi,LBj:UBj,N(ng),2)
@@ -220,6 +252,13 @@
 #   if defined SCORRECTION || defined SRELAXATION
       real(r8), intent(in) :: sss(LBi:UBi,LBj:UBj)
 #   endif
+#   if defined ICESHELF
+#    ifdef SHORTWAVE
+      real(r8), intent(inout) :: srflx(LBi:UBi,LBj:UBj)
+#    endif
+      real(r8), intent(inout) :: tl_sustr(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: tl_svstr(LBi:UBi,LBj:UBj)
+#   endif
 #   ifndef BBL_MODEL_NOT_YET
       real(r8), intent(inout) :: tl_bustr(LBi:UBi,LBj:UBj)
       real(r8), intent(inout) :: tl_bvstr(LBi:UBi,LBj:UBj)
@@ -232,12 +271,12 @@
 !
       integer :: i, j, itrc
 
-#  if !defined BBL_MODEL_NOT_YET
+#  if !defined BBL_MODEL_NOT_YET || defined ICESHELF
       real(r8) :: cff1, cff2, cff3
       real(r8) :: tl_cff1, tl_cff2, tl_cff3
 #  endif
 
-#  if (!defined BBL_MODEL_NOT_YET) && defined UV_LOGDRAG
+#  if (!defined BBL_MODEL_NOT_YET || defined ICESHELF) && defined UV_LOGDRAG
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: wrk
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: tl_wrk
 #  endif
@@ -303,6 +342,255 @@
      &                        tl_t(i,j,1,nrhs,isalt)
         END DO
       END DO
+#  endif
+#  ifdef ICESHELF
+!
+!-----------------------------------------------------------------------
+!  If ice shelf cavities, zero out for now the surface tracer flux
+!  over the ice.
+!-----------------------------------------------------------------------
+!
+      DO itrc=1,NT(ng)
+        DO j=JstrR,JendR
+          DO i=IstrR,IendR
+            IF (zice(i,j).ne.0.0_r8) THEN
+!>            stflx(i,j,itrc)=0.0_r8
+!>
+              tl_stflx(i,j,itrc)=0.0_r8
+            END IF
+          END DO
+        END DO
+      END DO
+#   ifdef SHORTWAVE
+      DO j=JstrR,JendR
+        DO i=IstrR,IendR
+          IF (zice(i,j).ne.0.0_r8) THEN
+!>          srflx(i,j)=0.0_r8
+!>
+            srflx(i,j)=0.0_r8
+          END IF
+        END DO
+      END DO
+#   endif
+!
+!-----------------------------------------------------------------------
+!  If ice shelf cavities, replace surface wind stress with ice shelf
+!  cavity stress (m2/s2).
+!-----------------------------------------------------------------------
+
+#   if defined UV_LOGDRAG
+!
+!  Set logarithmic ice shelf cavity stress.
+!
+      DO j=JstrV-1,Jend
+        DO i=IstrU-1,Iend
+          cff1=1.0_r8/LOG((z_w(i,j,N(ng))-z_r(i,j,N(ng)))/ZoBot(i,j))
+          tl_cff1=-cff1*cff1*(tl_z_w(i,j,N(ng))-tl_z_r(i,j,N(ng)))/     &
+     &                       (z_w(i,j,N(ng))-z_r(i,j,N(ng)))
+          cff2=vonKar*vonKar*cff1*cff1
+          tl_cff2=vonKar*vonKar*2.0_r8*cff1*tl_cff1
+          cff3=MAX(Cdb_min,cff2)
+          tl_cff3=(0.5_r8-SIGN(0.5_r8,Cdb_min-cff2))*tl_cff2
+          wrk(i,j)=MIN(Cdb_max,cff3)
+          tl_wrk(i,j)=(0.5_r8-SIGN(0.5_r8,cff3-Cdb_max))*tl_cff3
+        END DO
+      END DO
+      DO j=Jstr,Jend
+        DO i=IstrU,Iend
+          IF (zice(i,j)*zice(i-1,j).ne.0.0_r8) THEN
+            cff1=0.25_r8*(v(i  ,j  ,N(ng),nrhs)+                        &
+     &                    v(i  ,j+1,N(ng),nrhs)+                        &
+     &                    v(i-1,j  ,N(ng),nrhs)+                        &
+     &                    v(i-1,j+1,N(ng),nrhs))
+            tl_cff1=0.25_r8*(tl_v(i  ,j  ,N(ng),nrhs)+                  &
+     &                       tl_v(i  ,j+1,N(ng),nrhs)+                  &
+     &                       tl_v(i-1,j  ,N(ng),nrhs)+                  &
+     &                       tl_v(i-1,j+1,N(ng),nrhs))
+            cff2=SQRT(u(i,j,N(ng),nrhs)*u(i,j,N(ng),nrhs)+cff1*cff1)
+            IF (cff2.ne.0.0_r8) THEN
+              tl_cff2=(u(i,j,N(ng),nrhs)*tl_u(i,j,N(ng),nrhs)+          &
+     &                 cff1*tl_cff1)/cff2
+            ELSE
+              tl_cff2=0.0_r8
+            END IF
+!>          sustr(i,j)=-0.5_r8*(wrk(i-1,j)+wrk(i,j))*                   &
+!>   &                 u(i,j,N(ng),nrhs)*cff2
+!>
+            tl_sustr(i,j)=-0.5_r8*                                      &
+     &                    ((tl_wrk(i-1,j)+tl_wrk(i,j))*                 &
+     &                     u(i,j,N(ng),nrhs)*cff2+                      &
+     &                     (wrk(i-1,j)+wrk(i,j))*                       &
+     &                     (tl_u(i,j,N(ng),nrhs)*cff2+                  &
+     &                      u(i,j,N(ng),nrhs)*tl_cff2))
+          END IF
+        END DO
+      END DO
+      DO j=JstrV,Jend
+        DO i=Istr,Iend
+          IF (zice(i,j)*zice(i,j-1).ne.0.0_r8) THEN
+            cff1=0.25_r8*(u(i  ,j  ,N(ng),nrhs)+                        &
+     &                    u(i+1,j  ,N(ng),nrhs)+                        &
+     &                    u(i  ,j-1,N(ng),nrhs)+                        &
+     &                    u(i+1,j-1,N(ng),nrhs))
+            tl_cff1=0.25_r8*(tl_u(i  ,j  ,N(ng),nrhs)+                  &
+     &                       tl_u(i+1,j  ,N(ng),nrhs)+                  &
+     &                       tl_u(i  ,j-1,N(ng),nrhs)+                  &
+     &                       tl_u(i+1,j-1,N(ng),nrhs))
+            cff2=SQRT(cff1*cff1+v(i,j,N(ng),nrhs)*v(i,j,N(ng),nrhs))
+            IF (cff2.ne.0.0_r8) THEN
+              tl_cff2=(cff1*tl_cff1+                                    &
+     &                 v(i,j,N(ng),nrhs)*tl_v(i,j,N(ng),nrhs))/cff2
+            ELSE
+              tl_cff2=0.0_r8
+            END IF
+!>          svstr(i,j)=-0.5_r8*(wrk(i,j-1)+wrk(i,j))*                   &
+!>   &                 v(i,j,N(ng),nrhs)*cff2
+!>
+            tl_svstr(i,j)=-0.5_r8*                                      &
+     &                    ((tl_wrk(i,j-1)+tl_wrk(i,j))*                 &
+     &                     v(i,j,N(ng),nrhs)*cff2+                      &
+     &                     (wrk(i,j-1)+wrk(i,j))*                       &
+     &                     (tl_v(i,j,N(ng),nrhs)*cff2+                  &
+     &                      v(i,j,N(ng),nrhs)*tl_cff2))
+          END IF
+        END DO
+      END DO
+#   elif defined UV_QDRAG
+!
+!  Set quadratic ice shelf cavity stress.
+!
+      DO j=Jstr,Jend
+        DO i=IstrU,Iend
+          IF (zice(i,j)*zice(i-1,j).ne.0.0_r8) THEN
+            cff1=0.25_r8*(v(i  ,j  ,N(ng),nrhs)+                        &
+     &                    v(i  ,j+1,N(ng),nrhs)+                        &
+     &                    v(i-1,j  ,N(ng),nrhs)+                        &
+     &                    v(i-1,j+1,N(ng),nrhs))
+            tl_cff1=0.25_r8*(tl_v(i  ,j  ,N(ng),nrhs)+                  &
+     &                       tl_v(i  ,j+1,N(ng),nrhs)+                  &
+     &                       tl_v(i-1,j  ,N(ng),nrhs)+                  &
+     &                       tl_v(i-1,j+1,N(ng),nrhs))
+     &      cff2=SQRT(u(i,j,N(ng),nrhs)*u(i,j,N(ng),nrhs)+cff1*cff1)
+            IF (cff2.ne.0.0_r8) THEN
+              tl_cff2=(u(i,j,N(ng),nrhs)*tl_u(i,j,N(ng),nrhs)+          &
+     &                 cff1*tl_cff1)/cff2
+            ELSE
+              tl_cff2=0.0_r8
+            END IF
+!>          sustr(i,j)=-0.5_r8*(rdrag2(i-1,j)+rdrag2(i,j))*             &
+!>   &                 u(i,j,N(ng),nrhs)*cff2
+!>
+            tl_sustr(i,j)=-0.5_r8*(rdrag2(i-1,j)+rdrag2(i,j))*          &
+     &                    (tl_u(i,j,N(ng),nrhs)*cff2+                   &
+     &                     u(i,j,N(ng),nrhs)*tl_cff2)
+          END IF
+        END DO
+      END DO
+      DO j=JstrV,Jend
+        DO i=Istr,Iend
+          IF (zice(i,j)*zice(i,j-1).ne.0.0_r8) THEN
+            cff1=0.25_r8*(u(i  ,j  ,N(ng),nrhs)+                        &
+     &                    u(i+1,j  ,N(ng),nrhs)+                        &
+     &                    u(i  ,j-1,N(ng),nrhs)+                        &
+     &                    u(i+1,j-1,N(ng),nrhs))
+            tl_cff1=0.25_r8*(tl_u(i  ,j  ,N(ng),nrhs)+                  &
+     &                       tl_u(i+1,j  ,N(ng),nrhs)+                  &
+     &                       tl_u(i  ,j-1,N(ng),nrhs)+                  &
+     &                       tl_u(i+1,j-1,N(ng),nrhs))
+            cff2=SQRT(cff1*cff1+v(i,j,N(ng),nrhs)*v(i,j,N(ng),nrhs))
+            IF (cff2.ne.0.0_r8) THEN
+              tl_cff2=(cff1*tl_cff1+                                    &
+     &                 v(i,j,N(ng),nrhs)*tl_v(i,j,N(ng),nrhs))/cff2
+            ELSE
+              tl_cff2=0.0_r8
+            END IF
+!>          svstr(i,j)=-0.5_r8*(rdrag2(i,j-1)+rdrag2(i,j))*             &
+!>   &                 v(i,j,N(ng),nrhs)*cff2
+!>
+            tl_svstr(i,j)=-0.5_r8*(rdrag2(i,j-1)+rdrag2(i,j))*          &
+     &                    (tl_v(i,j,N(ng),nrhs)*cff2+                   &
+     &                     v(i,j,N(ng),nrhs)*tl_cff2)
+          END IF
+        END DO
+      END DO
+#   elif defined UV_LDRAG
+!
+!  Set linear ice shelf cavity stress.
+!
+      DO j=Jstr,Jend
+        DO i=IstrU,Iend
+          IF (zice(i,j)*zice(i-1,j).ne.0.0_r8) THEN
+!>          sustr(i,j)=-0.5_r8*(rdrag(i-1,j)+rdrag(i,j))*               &
+!>   &                 u(i,j,N(ng),nrhs)
+!>
+            tl_sustr(i,j)=-0.5_r8*(rdrag(i-1,j)+rdrag(i,j))*            &
+     &                    tl_u(i,j,N(ng),nrhs)
+          END IF
+        END DO
+      END DO
+      DO j=JstrV,Jend
+        DO i=Istr,Iend
+          IF (zice(i,j)*zice(i,j-1).ne.0.0_r8) THEN
+!>          svstr(i,j)=-0.5_r8*(rdrag(i,j-1)+rdrag(i,j))*               &
+!>   &                 v(i,j,N(ng),nrhs)
+!>
+            tl_svstr(i,j)=-0.5_r8*(rdrag(i,j-1)+rdrag(i,j))*            &
+     &                    tl_v(i,j,N(ng),nrhs)
+          END IF
+        END DO
+      END DO
+#   else
+      DO j=Jstr,Jend
+        DO i=IstrU,Iend
+          IF (zice(i,j)*zice(i-1,j).ne.0.0_r8) THEN
+!>          sustr(i,j)=0.0_r8
+!>
+            tl_sustr(i,j)=0.0_r8
+          END IF
+        END DO
+      END DO
+      DO j=JstrV,Jend
+        DO i=Istr,Iend
+          IF (zice(i,j)*zice(i,j-1).ne.0.0_r8) THEN
+!>          svstr(i,j)=0.0_r8
+!>
+            tl_svstr(i,j)=0.0_r8
+          END IF
+        END DO
+      END DO
+#   endif
+!
+!  Apply periodic or gradient boundary conditions for output
+!  purposes only.
+!
+!>    CALL bc_u2d_tile (ng, tile,                                       &
+!>   &                  LBi, UBi, LBj, UBj,                             &
+!>   &                  sustr)
+!>
+      CALL bc_u2d_tile (ng, tile,                                       &
+     &                  LBi, UBi, LBj, UBj,                             &
+     &                  tl_sustr)
+!>    CALL bc_v2d_tile (ng, tile,                                       &
+!>   &                  LBi, UBi, LBj, UBj,                             &
+!>   &                  svstr)
+!>
+      CALL bc_v2d_tile (ng, tile,                                       &
+     &                  LBi, UBi, LBj, UBj,                             &
+     &                  tl_svstr)
+
+#   ifdef DISTRIBUTE
+!>    CALL mp_exchange2d (ng, tile, iNLM, 2,                            &
+!>   &                    LBi, UBi, LBj, UBj,                           &
+!>   &                    NghostPoints,                                 &
+!>   &                    EWperiodic(ng), NSperiodic(ng),               &
+!>   &                    sustr, svstr)
+!>
+      CALL mp_exchange2d (ng, tile, iTLM, 2,                            &
+     &                    LBi, UBi, LBj, UBj,                           &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    tl_sustr, tl_svstr)
+#   endif
 #  endif
 #  ifndef BBL_MODEL_NOT_YET
 !
