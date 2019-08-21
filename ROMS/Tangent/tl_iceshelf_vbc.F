@@ -190,9 +190,14 @@
 # ifdef DISTRIBUTE
       USE mp_exchange_mod, ONLY : mp_exchange2d
 # endif
+# if defined ICESHELF_TEOS10
+      USE iceshelf_vbc_mod, ONLY : ct_from_theta
+      USE iceshelf_vbc_mod, ONLY : t_from_ct
+# else
       USE iceshelf_vbc_mod, ONLY : dTemp
       USE iceshelf_vbc_mod, ONLY : thetaa
       USE iceshelf_vbc_mod, ONLY : potit
+# endif
 !
 !  Imported variable declarations.
 !
@@ -317,17 +322,17 @@
       real(r8) :: Sr1,Sr2,Sf1,Sf2,Tf1,Tf2,rho_r
       real(r8) :: tl_Sr1,tl_Sr2,tl_Sf1,tl_Sf2,tl_Tf1,tl_Tf2,tl_rho_r
 #else
-      real(r8) :: mflag,TFi,cff3 
-      real(r8) :: tl_TFi,tl_cff3 
+      real(r8) :: mflag,TFi 
+      real(r8) :: tl_TFi 
 #endif
-      real(r8) :: cff1, cff2
-      real(r8) :: tl_cff1, tl_cff2
+      real(r8) :: cff1, cff2, cff3
+      real(r8) :: tl_cff1, tl_cff2, tl_cff3
       real(r8) :: fac, tl_fac
 #ifdef ICESHELF_TEOS10
       real(r8) :: ct, tl_ct
 #endif
 #  if (!defined BBL_MODEL) && defined UV_LOGDRAG
-      real(r8), dimension(PRIVATE_2D_SCRATCH_ARRAY) :: wrk
+      real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: wrk, tl_wrk
 #  endif
 #  include "set_bounds.h"
 !
@@ -669,11 +674,11 @@
             END IF
 
             gammaT(i,j) = ustar/(turb + Pradj - 6.0_r8)
-            tl_gammaT(i,j) = tl_ustar/(turb + Pradj - 6.0_r8)-           &
+            tl_gammaT(i,j) = tl_ustar/(turb + Pradj - 6.0_r8)-          &
      &                       tl_turb*gammaT(i,j)/(turb + Pradj - 6.0_r8)
 
             gammaS(i,j) = ustar/(turb + Scadj - 6.0_r8)
-            tl_gammaS(i,j) = tl_ustar/(turb + Scadj - 6.0_r8)-           &
+            tl_gammaS(i,j) = tl_ustar/(turb + Scadj - 6.0_r8)-          &
      &                       tl_turb*gammaS(i,j)/(turb + Scadj - 6.0_r8)
 #    else
             gammaT(i,j) = 1.00e-4_r8
@@ -705,7 +710,7 @@
           tl_Ep31 = 0.0_r8
 #else
           Ep31 = -rho_r*cp_i*dt_i/zice(i,j)
-          tl_Ep31 = -tl_rho_r*cp_i*dt_i/zice(i,j)+                       &
+          tl_Ep31 = -tl_rho_r*cp_i*dt_i/zice(i,j)+                      &
                               tl_zice(i,j)*Ep31/zice(i,j)
 #endif
           Ep4  = b+c*z_w(i,j,N(ng))
@@ -721,7 +726,7 @@
             Ex1 = a*(Ep1+Ep31)
             tl_Ex1 = a*(tl_Ep1+tl_Ep31)
             Ex2 = Ep1*(Tm-Ep4)+Ep3+Ep31*(Ti-Ep4)
-            tl_Ex2 = tl_Ep1*(Tm-Ep4)+Ep1*(tl_Tm-tl_Ep4)+tl_Ep3+           &
+            tl_Ex2 = tl_Ep1*(Tm-Ep4)+Ep1*(tl_Tm-tl_Ep4)+tl_Ep3+         &
      &               tl_Ep31*(Ti-Ep4)-Ep31*tl_Ep4
             Ex3 = Ep3*Sm
             tl_Ex3 = tl_Ep3*Sm+Ep3*tl_Sm
@@ -732,12 +737,13 @@
             Ex1 = a*(Ep1-Ep2)
             tl_Ex1 = a*(tl_Ep1-tl_Ep2)
             Ex2 = Ep1*(Ep4-Tm)+Ep2*(Ti+a*Sm-Ep4)-Ep3
-            tl_Ex2= tl_Ep1*(Ep4-Tm)+Ep1*(tl_Ep4-tl_Tm)+tl_Ep2*(Ti+a*Sm-Ep4)&
+            tl_Ex2= tl_Ep1*(Ep4-Tm)+Ep1*(tl_Ep4-tl_Tm)                  &
+     &             +tl_Ep2*(Ti+a*Sm-Ep4)                                &
      &             +Ep2*(a*tl_Sm-tl_Ep4)-tl_Ep3
             Ex3 = Sm*(Ep2*(Ep4-Ti)+Ep3)
-            tl_Ex3 = tl_Sm*(Ep2*(Ep4-Ti)+Ep3)+Sm*(tl_Ep2*(Ep4-Ti)+         &
+            tl_Ex3 = tl_Sm*(Ep2*(Ep4-Ti)+Ep3)+Sm*(tl_Ep2*(Ep4-Ti)+      &
      &                                              Ep2*tl_Ep4+tl_Ep3)
-            Ex6 = -0.5r_r8
+            Ex6 = -0.5_r8
             tl_Ex6 = 0.0_r8
           endif
           Ex4 = Ex2/Ex1
@@ -771,18 +777,18 @@
          endif
 !
          m(i,j) = -Ep5*(1.0-Sm/Sb(i,j))
-         tl_m(i,j) = -tl_Ep5*(1.0-Sm/Sb(i,j))-Ep5*(-tl_Sm/Sb(i,j)+         &
+         tl_m(i,j) = -tl_Ep5*(1.0-Sm/Sb(i,j))-Ep5*(-tl_Sm/Sb(i,j)+      &
      &                 tl_Sb(i,j)*Sm/(Sb(i,j)*Sb(i,j)))
 !         m(i,j)= Seta * dtfast
 !
 ! Calculates fluxes:
 !        stflx(i,j,itemp)=(gammaT(i,j)-rho_r*m(i,j))*(Tb(i,j)-Tm)
-         tl_stflx(i,j,itemp)=(tl_gammaT(i,j)-tl_rho_r*m(i,j)-              &
-     &                           rho_r*tl_m(i,j))*(Tb(i,j)-Tm)+            &
+         tl_stflx(i,j,itemp)=(tl_gammaT(i,j)-tl_rho_r*m(i,j)-           &
+     &                           rho_r*tl_m(i,j))*(Tb(i,j)-Tm)+         &
      &                    (gammaT(i,j)-rho_r*m(i,j))*(tl_Tb(i,j)-tl_Tm)
 !        stflx(i,j,isalt)=(gammaS(i,j)-rho_r*m(i,j))*(Sb(i,j)-Sm)
-         tl_stflx(i,j,isalt)=(tl_gammaS(i,j)-tl_rho_r*m(i,j)-              &
-     &                           rho_r*tl_m(i,j))*(Sb(i,j)-Sm)+            &
+         tl_stflx(i,j,isalt)=(tl_gammaS(i,j)-tl_rho_r*m(i,j)-           &
+     &                           rho_r*tl_m(i,j))*(Sb(i,j)-Sm)+         &
      &                    (gammaS(i,j)-rho_r*m(i,j))*(tl_Sb(i,j)-tl_Sm)
 
 # else
@@ -798,15 +804,15 @@
 ! Calculate coefficents in quadratic to be solved:
            cff1 = L/cp_w + mflag*(cp_i/cp_w)*(TFi-Ti)
            tl_cff1 = mflag*(cp_i/cp_w)*tl_TFi
-           cff2 = gammaS(i,j)*(L/cp_w + mflag*(cp_i/cp_w)*(TFb-Ti))        &
+           cff2 = gammaS(i,j)*(L/cp_w + mflag*(cp_i/cp_w)*(TFb-Ti))     &
      &          + gammaT(i,j)*(TFi-Tm)
-           tl_cff2 = gammaS(i,j)*mflag*(cp_i/cp_w)*tl_TFb                  &
-     &          + gammaT(i,j)*(tl_TFi-tl_Tm)+tl_gammaS(i,j)*(L/cp_w +      &
-     &                                  mflag*(cp_i/cp_w)*(TFb-Ti))        &
+           tl_cff2 = gammaS(i,j)*mflag*(cp_i/cp_w)*tl_TFb               &
+     &          + gammaT(i,j)*(tl_TFi-tl_Tm)+tl_gammaS(i,j)*(L/cp_w +   &
+     &                                  mflag*(cp_i/cp_w)*(TFb-Ti))     &
      &          +tl_gammaT(i,j)*(TFi-Tm)
            cff3 = gammaS(i,j)*gammaT(i,j)*(TFb - Tm)
-           tl_cff3 = gammaS(i,j)*gammaT(i,j)*(tl_TFb - tl_Tm)+             &
-                     tl_gammaS(i,j)*gammaT(i,j)*(TFb - Tm)+                &
+           tl_cff3 = gammaS(i,j)*gammaT(i,j)*(tl_TFb - tl_Tm)+          &
+                     tl_gammaS(i,j)*gammaT(i,j)*(TFb - Tm)+             &
                      gammaS(i,j)*tl_gammaT(i,j)*(TFb - Tm)
 
 ! Calculate melt rate:
@@ -816,31 +822,31 @@
            tl_fac=0.5_r8*(2.0_r8*tl_cff2*cff2 -                         &
      &                   4.0_r8*(tl_cff1*cff3+cff1*tl_cff3))/fac
            m(i,j) = -(cff2 - fac)/(2.0_r8*cff1)
-           tl_m(i,j) = -(tl_cff2 -tl_fac)/(2.0_r8*cff1)+                   &
+           tl_m(i,j) = -(tl_cff2 -tl_fac)/(2.0_r8*cff1)+                &
      &                                  tl_cff1*m(i,j)/cff1
 
 ! Calculate basal temperature and salinity:
-           Tb(i,j) = (gammaT(i,j)*Tm+mflag*(cp_i/cp_w)*m(i,j)*Ti           &
-     &             - (L/cp_w)*m(i,j))                                      &
+           Tb(i,j) = (gammaT(i,j)*Tm+mflag*(cp_i/cp_w)*m(i,j)*Ti        &
+     &             - (L/cp_w)*m(i,j))                                   &
      &             /(gammaT(i,j) + mflag*(cp_i/cp_w)*m(i,j))
-           tl_Tb(i,j) = (tl_gammaT(i,j)*Tm+gammaT(i,j)*tl_Tm+              &
-     &                   mflag*(cp_i/cp_w)*(tl_m(i,j)*Ti+m(i,j)*tl_Ti)-    &
-     &                   (L/cp_w)*tl_m(i,j))                               &
-     &             /(gammaT(i,j) + mflag*(cp_i/cp_w)*m(i,j))               &
-     &           -(tl_gammaT(i,j) + mflag*(cp_i/cp_w)*tl_m(i,j))*Tb(i,j)   &
+           tl_Tb(i,j) = (tl_gammaT(i,j)*Tm+gammaT(i,j)*tl_Tm+           &
+     &                   mflag*(cp_i/cp_w)*(tl_m(i,j)*Ti+m(i,j)*tl_Ti)- &
+     &                   (L/cp_w)*tl_m(i,j))                            &
+     &             /(gammaT(i,j) + mflag*(cp_i/cp_w)*m(i,j))            &
+     &           -(tl_gammaT(i,j) + mflag*(cp_i/cp_w)*tl_m(i,j))*Tb(i,j)&
      &             /(gammaT(i,j) + mflag*(cp_i/cp_w)*m(i,j))
            Sb(i,j) = (Tb(i,j) - b - c*zice(i,j))/a
            tl_Sb(i,j) = (tl_Tb(i,j) - c*tl_zice(i,j))/a
 
          stflx(i,j,itemp)=(gammaT(i,j)+rhoi_on_rho0*m(i,j))*(Tb(i,j)-Tm)
-         tl_stflx(i,j,itemp)=(tl_gammaT(i,j)+rhoi_on_rho0*tl_m(i,j))*      &
-     &                           (Tb(i,j)-Tm)+                             &
-     &                (gammaT(i,j)+rhoi_on_rho0*m(i,j))*(tl_Tb(i,j)-tl_Tm)
+         tl_stflx(i,j,itemp)=(tl_gammaT(i,j)+rhoi_on_rho0*tl_m(i,j))*   &
+     &                           (Tb(i,j)-Tm)+                          &
+     &            (gammaT(i,j)+rhoi_on_rho0*m(i,j))*(tl_Tb(i,j)-tl_Tm)
 
          stflx(i,j,isalt)=(gammaS(i,j)+rhoi_on_rho0*m(i,j))*(Sb(i,j)-Sm)
-         tl_stflx(i,j,isalt)=(tl_gammaS(i,j)+rhoi_on_rho0*tl_m(i,j))*      &
-     &                           (Sb(i,j)-Sm)+                             &
-     &                (gammaS(i,j)+rhoi_on_rho0*m(i,j))*(tl_Sb(i,j)-tl_Sm)
+         tl_stflx(i,j,isalt)=(tl_gammaS(i,j)+rhoi_on_rho0*tl_m(i,j))*   &
+     &                           (Sb(i,j)-Sm)+                          &
+     &            (gammaS(i,j)+rhoi_on_rho0*m(i,j))*(tl_Sb(i,j)-tl_Sm)
 
 !           write(6,*) gammaT,gammaS,Tb,Sb,Tm,Sm,rhoi_on_rho0
 # endif
@@ -959,6 +965,8 @@
 !   calls            : cp0_F and ct_from_theta
 !   check value      : theta_from_ct(20,20) = 19.55627910604363
 !   DRJ on 03/06/05
+      USE iceshelf_vbc_mod, ONLY : de_dt0_F
+      USE iceshelf_vbc_mod, ONLY : ct_from_theta
 
       implicit real*8(a-h,o-z)
 
@@ -1013,7 +1021,7 @@
       tl_dct_dth = tl_theta*de_dt0_F(s,theta)*rec_Cp0+                  &
      &       (theta+273.15d0)*tl_de_dt0_F(s,tl_s,theta,tl_theta)*rec_Cp0
 
-      theta_from_ct = theta-dct/dct_dth
+!      theta_from_ct = theta-dct/dct_dth
       tl_theta_from_ct = tl_theta-tl_dct/dct_dth+                       &
      &                   tl_dct_dth*dct/(dct_dth*dct_dth)
 !       NOTE: theta has a maximum error of 6.0x10^-14
@@ -1112,9 +1120,9 @@
      &                    y*(tl_y*(a4+y*(a5+(a6+a7*y)*y))+              &
      &                          y*(tl_y*(a5+(a6+a7*y)*y)+               &
      &                                y*((a6+a7*y)*tl_y+a7*y*tl_y)      &
-     &                            )
-     &                      )
-     &                )
+     &                            )                                     &
+     &                      )                                           &
+     &                )                                                 &
      &          )
 
 
@@ -1141,7 +1149,7 @@
      &           y*(tl_y*(a19+y*(a20+y*(a21+a22*y)))+                   &
      &                 y*(tl_y*(a20+y*(a21+a22*y))+                     &
      &                       y*(tl_y*(a21+a22*y)+y*a22*tl_y)            &
-     &                   )
+     &                   )                                              &
      &             )
 
 !     penthalpy_F =a0+fac1+x2*(a8+fac2+fac3)
@@ -1211,7 +1219,7 @@
      &           y*(tl_y*(a9+y*(a10+(a11+a12*y)*y))+                    &
      &                 y*(tl_y*(a10+(a11+a12*y)*y)+                     &
      &                       y*((a11+a12*y)*tl_y+a12*y*tl_y)            &
-     &                   )
+     &                   )                                              &
      &             )
 
 !     de_dt = a0+x2*(a1+fac1+fac2)+fac3
@@ -1766,7 +1774,7 @@
 
          hTp =hTp-(fac1+y*(fac2+fac3))
 
-         tl_fac1=tl_z*(s1+z*(s2+s3*z))+
+         tl_fac1=tl_z*(s1+z*(s2+s3*z))+                                 &
      &              z*(tl_z*(s2+s3*z)+tl_z*s3*z)
 
          tl_fac2=tl_y*(s4*z+s5*y*z)+y*(s4*tl_z+s5*(tl_y*z+y*tl_z))
@@ -1777,9 +1785,9 @@
 
       end if
 
-      entropy_diff_F = 2.5d-2*(fTp+x2*(gTp+x*hTp+x2*kTp))
+!      entropy_diff_F = 2.5d-2*(fTp+x2*(gTp+x*hTp+x2*kTp))
 
-      tl_entropy_diff_F = 2.5d-2*(tl_fTp+tl_x2*(gTp+x*hTp+x2*kTp)+       &
+      tl_entropy_diff_F = 2.5d-2*(tl_fTp+tl_x2*(gTp+x*hTp+x2*kTp)+      &
      &              x2*(tl_gTp+tl_x*hTp+x*tl_hTp+tl_x2*kTp+x2*tl_kTp))
 
       RETURN
@@ -1970,7 +1978,7 @@
  
         tl_de_dt = tl_de_dt +                                           &
      &       tl_z*(b1+fac1+fac2+z*(b13+fac3+fac4+z*(b22+fac5+fac6+      &
-     &                     z*(b31+fac7+fac8+fac9))))+
+     &                     z*(b31+fac7+fac8+fac9))))+                   &
      &          z*(tl_fac1+tl_fac2+tl_z*(b13+fac3+fac4+z*(b22+fac5+fac6+&
      &                     z*(b31+fac7+fac8+fac9)))+                    &
      &                                z*(tl_fac3+tl_fac4+               &
@@ -2006,6 +2014,7 @@
 !                                                      loops in
 !                                                      theta_from_ct
 !   DRJ on 11/10/03
+      USE iceshelf_vbc_mod, ONLY : theta_from_ct
 
       implicit real*8(a-h,o-z)
 
@@ -2042,6 +2051,8 @@
 !                                                           nloops=2)
 !
 !   DRJ on 10/12/03
+      USE iceshelf_vbc_mod, ONLY : entropy_diff_F
+      USE iceshelf_vbc_mod, ONLY : de_dt_F
 
       implicit real*8(a-h,o-z)
       integer :: nloops, n

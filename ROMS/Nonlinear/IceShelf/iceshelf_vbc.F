@@ -48,7 +48,12 @@
       implicit none
 
       PRIVATE
+# if defined ICESHELF_TEOS10
+      PUBLIC  :: iceshelf_vbc,ct_from_theta,t_from_ct,entropy_diff_F
+      PUBLIC  :: de_dt0_F,theta_from_ct,de_dt_F
+# else
       PUBLIC  :: iceshelf_vbc,dTemp,thetaa,potit
+# endif
 
       CONTAINS
 !
@@ -249,7 +254,7 @@
       real(r8) :: ct
 #endif
 #  if (!defined BBL_MODEL) && defined UV_LOGDRAG
-      real(r8), dimension(PRIVATE_2D_SCRATCH_ARRAY) :: wrk
+      real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: wrk
 #  endif
 #  include "set_bounds.h"
 !

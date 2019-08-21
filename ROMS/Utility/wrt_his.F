@@ -146,6 +146,7 @@
             RETURN
           END IF
          END IF
+# if !defined ICESHELF_2EQN_VBC
         IF (Hout(idisTb,ng)) THEN
             scale=1.0_r8
           gtype=gfactor*r2dvar
@@ -186,7 +187,7 @@
             RETURN
           END IF
          END IF
-
+# endif
 # if defined ICESHELF_MORPH
 !
 !  Write out time-dependent ice draft (m)
