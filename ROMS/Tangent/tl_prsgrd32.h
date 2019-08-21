@@ -295,6 +295,8 @@
      &                 (z_w(i,j,N(ng))-z_r(i,j,N(ng)))
           tl_P(i,j,N(ng))=GRho0*(tl_z_w(i,j,N(ng))-tl_zice(i,j))-       &
      &             GRho*(tl_rho(i,j,N(ng))+0.5_r8*drhodz*tl_zice(i,j))* &
+     &                 zice(i,j)-                                       &
+     &                 GRho*(rho(i,j,N(ng))+0.5_r8*drhodz*zice(i,j))*   &
      &                 tl_zice(i,j)+                                    &
      &                 GRho*((tl_rho(i,j,N(ng))+tl_cff2)*               &
      &                 (z_w(i,j,N(ng))-z_r(i,j,N(ng)))+                 &

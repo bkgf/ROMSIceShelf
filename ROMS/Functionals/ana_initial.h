@@ -909,6 +909,18 @@
           END DO
         END DO
       END DO
+#  if defined TL_ICETEST
+      DO k=N(ng),N(ng)/2,-1
+        DO j=JstrR,JendR
+          DO i=IstrR,IendR
+            tl_t(i,j,k,1,itemp)=-1.9_r8/100.0_r8
+            tl_t(i,j,k,1,isalt)=34.6_r8/100.0_r8
+            tl_t(i,j,k,2,itemp)=tl_t(i,j,k,1,itemp)
+            tl_t(i,j,k,2,isalt)=tl_t(i,j,k,1,isalt)
+          END DO
+        END DO
+      END DO
+#  endif
 # endif
       RETURN
       END SUBROUTINE ana_TLMinitial_tile

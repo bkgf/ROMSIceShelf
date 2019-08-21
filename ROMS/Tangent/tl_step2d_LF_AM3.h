@@ -1396,8 +1396,13 @@
 # endif
      &                      (gzeta(i-1,j)-                              &
      &                       gzeta(i  ,j))+                             &
+# ifdef ICESHELF
+     &                      (hw(i-1,j)+                                 &
+     &                       hw(i ,j))*                                 &
+# else
      &                      (h(i-1,j)+                                  &
      &                       h(i ,j))*                                  &
+# endif
      &                      (tl_gzeta(i-1,j)-                           &
      &                       tl_gzeta(i  ,j))+                          &
 # if defined VAR_RHO_2D && defined SOLVE3D
@@ -1414,8 +1419,13 @@
      &                             rhoA(i  ,j))*                        &
      &                            (zwrk(i-1,j)-                         &
      &                             zwrk(i  ,j)))+                       &
+#  ifdef ICESHELF
+     &                      (hw(i-1,j)-                                 &
+     &                       hw(i  ,j))*                                &
+#  else
      &                      (h(i-1,j)-                                  &
      &                       h(i  ,j))*                                 &
+#  endif
      &                      (tl_gzetaSA(i-1,j)+                         &
      &                       tl_gzetaSA(i  ,j)+                         &
      &                       cff2*((tl_rhoA(i-1,j)-                     &
@@ -1486,8 +1496,13 @@
 # endif
      &                        (gzeta(i,j-1)-                            &
      &                         gzeta(i,j  ))+                           &
+# ifdef ICESHELF
+     &                       (hw(i,j-1)+                                &
+     &                         hw(i,j  ))*                              &
+# else
      &                        (h(i,j-1)+                                &
      &                         h(i,j  ))*                               &
+# endif
      &                        (tl_gzeta(i,j-1)-                         &
      &                         tl_gzeta(i,j  ))+                        &
 # if defined VAR_RHO_2D && defined SOLVE3D
@@ -1504,8 +1519,13 @@
      &                               rhoA(i,j  ))*                      &
      &                              (zwrk(i,j-1)-                       &
      &                               zwrk(i,j  )))+                     &
+#  ifdef ICESHELF
+     &                        (hw(i,j-1)-                               &
+     &                         hw(i,j  ))*                              &
+#  else
      &                        (h(i,j-1)-                                &
      &                         h(i,j  ))*                               &
+#  endif
      &                        (tl_gzetaSA(i,j-1)+                       &
      &                         tl_gzetaSA(i,j  )+                       &
      &                         cff2*((tl_rhoA(i,j-1)-                   &
