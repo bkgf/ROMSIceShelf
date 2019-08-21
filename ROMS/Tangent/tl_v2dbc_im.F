@@ -1340,7 +1340,7 @@
      &                        ABS(GRID(ng)%zice(Istr,j-1))+             &
      &                        GRID(ng)%h(Istr,j  )-                     &
      &                        ABS(GRID(ng)%zice(Istr,j  ))))
-          tl_cff1=-g*0.25_r8*(GRID(ng)%tl_h(Istr,j-1)-                  &
+          tl_cff1=g*0.25_r8*(GRID(ng)%tl_h(Istr,j-1)-                   &
      &                        SIGN(1.0_r8,GRID(ng)%zice(Istr,j-1))*     &
      &                           GRID(ng)%tl_zice(Istr,j-1)+            &
      &                        GRID(ng)%tl_h(Istr,j  )-                  &

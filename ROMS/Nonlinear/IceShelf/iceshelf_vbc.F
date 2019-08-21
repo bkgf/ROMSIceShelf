@@ -48,7 +48,7 @@
       implicit none
 
       PRIVATE
-      PUBLIC  :: iceshelf_vbc
+      PUBLIC  :: iceshelf_vbc,dTemp,thetaa,potit
 
       CONTAINS
 !

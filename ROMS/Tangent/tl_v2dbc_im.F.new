@@ -642,7 +642,7 @@
      &                        GRID(ng)%tl_h(i,Jstr  )-                  &
      &                        SIGN(1.0_r8,GRID(ng)%zice(i,Jstr  ))*     &
      &                           GRID(ng)%tl_zice(i,Jstr  )+            &
-     &                        tl_zeta(i,Jstr  ,kout)))
+     &                        tl_zeta(i,Jstr  ,kout))
 #  else
               cff=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jstr-1)+                 &
      &                            zeta(i,Jstr-1,know)+                  &
@@ -895,7 +895,7 @@
      &                        ABS(GRID(ng)%zice(i,Jend  ))+             &
      &                        GRID(ng)%h(i,Jend+1)-                     &
      &                        ABS(GRID(ng)%zice(i,Jend+1))))
-          tl_cff=-cff*cff(0.5_r8*(GRID(ng)%tl_h(i,Jend  )-              &
+          tl_cff=-cff*cff*(0.5_r8*(GRID(ng)%tl_h(i,Jend  )-             &
      &                        SIGN(1.0_r8,GRID(ng)%zice(i,Jend  ))*     &
      &                           GRID(ng)%tl_zice(i,Jend  )+            &
      &                        GRID(ng)%tl_h(i,Jend+1)-                  &
@@ -1340,7 +1340,7 @@
      &                        ABS(GRID(ng)%zice(Istr,j-1))+             &
      &                        GRID(ng)%h(Istr,j  )-                     &
      &                        ABS(GRID(ng)%zice(Istr,j  ))))
-          tl_cff1=-g*0.25_r8*(GRID(ng)%tl_h(Istr,j-1)-                  &
+          tl_cff1=g*0.25_r8*(GRID(ng)%tl_h(Istr,j-1)-                   &
      &                        SIGN(1.0_r8,GRID(ng)%zice(Istr,j-1))*     &
      &                           GRID(ng)%tl_zice(Istr,j-1)+            &
      &                        GRID(ng)%tl_h(Istr,j  )-                  &

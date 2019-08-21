@@ -230,11 +230,11 @@
             cff1_w=SCALARS(ng)%Cs_w(k)
             DO i=IstrT,IendT
               hwater=h(i,j)
+              tl_hwater=tl_h(i,j)
 #  ifdef ICESHELF
               hwater=hwater-ABS(zice(i,j))
               tl_hwater=tl_hwater-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
 #  endif
-              tl_hwater=tl_h(i,j)
               hinv=1.0_r8/hwater
               tl_hinv=-hinv*hinv*tl_hwater
 
@@ -314,11 +314,11 @@
             cff1_w=SCALARS(ng)%Cs_w(k)
             DO i=IstrT,IendT
               hwater=h(i,j)
+              tl_hwater=tl_h(i,j)
 #  ifdef ICESHELF
               hwater=hwater-ABS(zice(i,j))
-              tl_hwater=tl_hwater-SIGN(1.0_r8,zice(i,j)).*tz_zice(i,j)  &
+              tl_hwater=tl_hwater-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)  
 #  endif
-              tl_hwater=tl_h(i,j)
               hinv=1.0_r8/(hc(ng)+hwater)
               tl_hinv=-hinv*hinv*tl_hwater
 
@@ -348,9 +348,9 @@
 !>            z_w(i,j,k)=z_w(i,j,k)-ABS(zice(i,j))
 !>            z_r(i,j,k)=z_r(i,j,k)-ABS(zice(i,j))
               tl_z_w(i,j,k)=tl_z_w(i,j,k)-                              &
-     &                 SIGN(1.0_r8,zice(i,j)).*tz_zice(i,j)             
+     &                 SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)             
               tl_z_r(i,j,k)=tl_z_r(i,j,k)-                              &
-     &                 SIGN(1.0_r8,zice(i,j)).*tz_zice(i,j)             
+     &                 SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)             
 #  endif
 !>            Hz(i,j,k)=z_w(i,j,k)-z_w(i,j,k-1)
 !>
