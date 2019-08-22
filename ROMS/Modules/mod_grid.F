@@ -216,6 +216,9 @@
 #  ifdef TANGENT
           real(r8), pointer :: tl_zice(:,:)
 #  endif
+#  ifdef ADJOINT
+          real(r8), pointer :: ad_zice(:,:)
+#  endif
 # endif
 #endif
 #ifdef MASKING
@@ -404,6 +407,9 @@
       allocate ( GRID(ng) % zice(LBi:UBi,LBj:UBj) )
 #  ifdef TANGENT
       allocate ( GRID(ng) % tl_zice(LBi:UBi,LBj:UBj) )
+#  endif
+#  ifdef ADJOINT
+      allocate ( GRID(ng) % ad_zice(LBi:UBi,LBj:UBj) )
 #  endif
 # endif
 
@@ -647,6 +653,9 @@
             GRID(ng) % zice(i,j) = IniVal
 #  ifdef TANGENT
             GRID(ng) % tl_zice(i,j) = IniVal
+#  endif
+#  ifdef ADJOINT
+            GRID(ng) % ad_zice(i,j) = IniVal
 #  endif
 #endif
 

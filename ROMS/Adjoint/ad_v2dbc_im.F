@@ -396,10 +396,17 @@
             IF (LBC_apply(ng)%east(j)) THEN
               cff=dt2d*0.5_r8*(GRID(ng)%pm(Iend,j-1)+                   &
      &                         GRID(ng)%pm(Iend,j  ))
+# ifdef ICESHELF
+              cff1=SQRT(g*0.5_r8*(GRID(ng)%h(Iend,j-1)-                 &
+     &                        ABS(GRID(ng)%zice(Iend,j-1))+             &
+     &                        GRID(ng)%h(Iend,j  )-                     &
+     &                        ABS(GRID(ng)%zice(Iend,j  ))))
+# else
               cff1=SQRT(g*0.5_r8*(GRID(ng)%h(Iend,j-1)+                 &
      &                            zeta(Iend,j-1,know)+                  &
      &                            GRID(ng)%h(Iend,j  )+                 &
      &                            zeta(Iend,j  ,know)))
+# endif
               Cx=cff*cff1
               cff2=1.0_r8/(1.0_r8+Cx)
 # ifdef MASKING
@@ -431,6 +438,22 @@
 !>
               ad_cff1=ad_cff1+cff*ad_Cx
               ad_Cx=0.0_r8
+# ifdef ICESHELF
+!>            tl_cff1=g*0.25_r8*(GRID(ng)%tl_h(Iend,j-1)-               &
+!>   &                        SIGN(1.0_r8,GRID(ng)%zice(Iend,j-1))*     &
+!>   &                           GRID(ng)%tl_zice(Iend,j-1)+            &
+!>   &                        GRID(ng)%tl_h(Iend,j  )-                  &
+!>   &                        SIGN(1.0_r8,GRID(ng)%zice(Iend,j  ))*     &
+!>   &                           GRID(ng)%tl_zice(Iend,j  ))
+              adfac=0.25_r8*g*ad_cff1/cff1
+              GRID(ng)%ad_h(Iend,j-1)=GRID(ng)%ad_h(Iend,j-1)+adfac
+              GRID(ng)%ad_h(Iend,j  )=GRID(ng)%ad_h(Iend,j  )+adfac
+              GRID(ng)%ad_zice(Iend,j-1)=GRID(ng)%ad_zice(Iend,j-1)-    &
+     &                 SIGN(1.0_r8,GRID(ng)%zice(Iend,j-1))*adfac
+              GRID(ng)%ad_zice(Iend,j  )=GRID(ng)%ad_zice(Iend,j  )-    &
+     &                 SIGN(1.0_r8,GRID(ng)%zice(Iend,j  ))*adfac
+              ad_cff1=0.0_r8
+# else
 !>            tl_cff1=0.25_r8*g*(GRID(ng)%tl_h(Iend,j-1)+               &
 !>   &                           tl_zeta(Iend,j-1,know)+                &
 !>   &                           GRID(ng)%tl_h(Iend,j  )+               &
@@ -442,6 +465,7 @@
               ad_zeta(Iend,j-1,know)=ad_zeta(Iend,j-1,know)+adfac
               ad_zeta(Iend,j  ,know)=ad_zeta(Iend,j  ,know)+adfac
               ad_cff1=0.0_r8
+# endif
             END IF
           END DO
 !
@@ -600,10 +624,17 @@
             IF (LBC_apply(ng)%west(j)) THEN
               cff=dt2d*0.5_r8*(GRID(ng)%pm(Istr,j-1)+                   &
      &                         GRID(ng)%pm(Istr,j  ))
+# ifdef ICESHELF
+              cff1=SQRT(g*0.5_r8*(GRID(ng)%h(Istr,j-1)-                 &
+     &                        ABS(GRID(ng)%zice(Istr,j-1))+             &
+     &                        GRID(ng)%h(Istr,j  )-                     &
+     &                        ABS(GRID(ng)%zice(Istr,j  ))))
+# else
               cff1=SQRT(g*0.5_r8*(GRID(ng)%h(Istr,j-1)+                 &
      &                            zeta(Istr,j-1,know)+                  &
      &                            GRID(ng)%h(Istr,j  )+                 &
      &                            zeta(Istr,j  ,know)))
+# endif
               Cx=cff*cff1
               cff2=1.0_r8/(1.0_r8+Cx)
 # ifdef MASKING
@@ -635,6 +666,22 @@
 !>
               ad_cff1=ad_cff1+cff*ad_Cx
               ad_Cx=0.0_r8
+# ifdef ICESHELF
+!>            tl_cff1=g*0.25_r8*(GRID(ng)%tl_h(Istr,j-1)-               &
+!>   &                        SIGN(1.0_r8,GRID(ng)%zice(Istr,j-1))*     &
+!>   &                           GRID(ng)%tl_zice(Istr,j-1)+            &
+!>   &                        GRID(ng)%tl_h(Istr,j  )-                  &
+!>   &                        SIGN(1.0_r8,GRID(ng)%zice(Istr,j  ))*     &
+!>   &                           GRID(ng)%tl_zice(Istr,j  ))/cff1
+              adfac=0.25_r8*g*ad_cff1/cff1
+              GRID(ng)%ad_h(Istr,j-1)=GRID(ng)%ad_h(Istr,j-1)+adfac
+              GRID(ng)%ad_h(Istr,j  )=GRID(ng)%ad_h(Istr,j  )+adfac
+              GRID(ng)%ad_zice(Istr,j-1)=GRID(ng)%ad_zice(Istr,j-1)-    &
+     &                  SIGN(1.0_r8,GRID(ng)%zice(Istr,j-1))*adfac
+              GRID(ng)%ad_zice(Istr,j  )=GRID(ng)%ad_zice(Istr,j  )-    &
+     &                  SIGN(1.0_r8,GRID(ng)%zice(Istr,j  ))*adfac
+              ad_cff1=0.0_r8
+# else
 !>            tl_cff1=0.25_r8*g*(GRID(ng)%tl_h(Istr,j-1)+               &
 !>   &                           tl_zeta(Istr,j-1,know)+                &
 !>   &                           GRID(ng)%tl_h(Istr,j  )+               &
@@ -646,6 +693,7 @@
               ad_zeta(Istr,j-1,know)=ad_zeta(Istr,j-1,know)+adfac
               ad_zeta(Istr,j  ,know)=ad_zeta(Istr,j  ,know)+adfac
               ad_cff1=0.0_r8
+# endif
             END IF
           END DO
 !
@@ -800,10 +848,17 @@
         ELSE IF (ad_LBC(inorth,isVbar,ng)%Flather) THEN
           DO i=Istr,Iend
             IF (LBC_apply(ng)%north(i)) THEN
+# ifdef ICESHELF
+          cff=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jend  )-                     &
+     &                        ABS(GRID(ng)%zice(i,Jend  ))+             &
+     &                        GRID(ng)%h(i,Jend+1)-                     &
+     &                        ABS(GRID(ng)%zice(i,Jend+1))))
+# else
               cff=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jend  )+                 &
      &                            zeta(i,Jend  ,know)+                  &
      &                            GRID(ng)%h(i,Jend+1)+                 &
      &                            zeta(i,Jend+1,know)))
+# endif
               Ce=SQRT(g*cff)
 # ifdef MASKING
 !>            tl_vbar(i,Jend+1,kout)=tl_vbar(i,Jend+1,kout)*            &
@@ -844,6 +899,22 @@
 !>
               ad_cff=ad_cff+0.5_r8*g*ad_Ce/Ce
               ad_Ce=0.0_r8
+# ifdef ICESHELF
+!>            tl_cff=-cff*cff(0.5_r8*(GRID(ng)%tl_h(i,Jend  )-          &
+!>   &                        SIGN(1.0_r8,GRID(ng)%zice(i,Jend  ))*     &
+!>   &                           GRID(ng)%tl_zice(i,Jend  )+            &
+!>   &                        GRID(ng)%tl_h(i,Jend+1)-                  &
+!>   &                        SIGN(1.0_r8,GRID(ng)%zice(i,Jend+1))*     &
+!>   &                           GRID(ng)%tl_zice(i,Jend+1)))
+              adfac=-cff*cff*0.5_r8*ad_cff
+              GRID(ng)%ad_h(i,Jend  )=GRID(ng)%ad_h(i,Jend  )+adfac
+              GRID(ng)%ad_zice(i,Jend  )=GRID(ng)%ad_zice(i,Jend  )-    &
+     &                     SIGN(1.0_r8,GRID(ng)%zice(i,Jend  ))*adfac
+              GRID(ng)%ad_h(i,Jend+1)=GRID(ng)%ad_h(i,Jend+1)+adfac
+              GRID(ng)%ad_zice(i,Jend+1)=GRID(ng)%ad_zice(i,Jend+1)-    &
+     &                     SIGN(1.0_r8,GRID(ng)%zice(i,Jend+1))*adfac
+              ad_cff=0.0_r8
+# else
 !>            tl_cff=-cff*cff*(0.5_r8*(GRID(ng)%tl_h(i,Jend  )+         &
 !>   &                                 tl_zeta(i,Jend  ,know)+          &
 !>   &                                 GRID(ng)%tl_h(i,Jend+1)+         &
@@ -855,6 +926,7 @@
               ad_zeta(i,Jend  ,know)=ad_zeta(i,Jend  ,know)+adfac
               ad_zeta(i,Jend+1,know)=ad_zeta(i,Jend+1,know)+adfac
               ad_cff=0.0_r8
+# endif
 
 # if defined SSH_TIDES_NOT_YET && !defined UV_TIDES_NOT_YET
               IF (ad_LBC(inorth,isFsur,ng)%acquire) THEN
@@ -877,16 +949,34 @@
 #  else
               bry_cor=0.0_r8
 #  endif
+# ifdef ICESHELF
+          cff1=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jend  )-                    &
+     &                         ABS(GRID(ng)%zice(i,Jend  ))+            &
+     &                         zeta(i,Jend  ,kout)+                     &
+     &                         GRID(ng)%h(i,Jend+1)-                    &
+     &                         ABS(GRID(ng)%zice(i,Jend+1))+            &
+     &                         zeta(i,Jend+1,kout)))
+# else
               cff1=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jend  )+                &
      &                             zeta(i,Jend  ,know)+                 &
      &                             GRID(ng)%h(i,Jend+1)+                &
      &                             zeta(i,Jend+1,know)))
+# endif
               bry_str=cff1*(FORCES(ng)%svstr(i,Jend+1)-                 &
      &                      FORCES(ng)%bvstr(i,Jend+1))
+# ifdef ICESHELF
+          Ce=1.0_r8/SQRT(g*0.5_r8*(GRID(ng)%h(i,Jend+1)-                &
+     &                             ABS(GRID(ng)%zice(i,Jend+1))+        &
+     &                             zeta(i,Jend+1,kout)+                 &
+     &                             GRID(ng)%h(i,Jend  )-                &
+     &                             ABS(GRID(ng)%zice(i,Jend  ))+        &
+     &                             zeta(i,Jend  ,kout)))
+# else
               Ce=1.0_r8/SQRT(g*0.5_r8*(GRID(ng)%h(i,Jend+1)+            &
      &                                 zeta(i,Jend+1,know)+             &
      &                                 GRID(ng)%h(i,Jend  )+            &
      &                                 zeta(i,Jend  ,know)))
+# endif
               cff2=GRID(ng)%on_v(i,Jend+1)*Ce
 !>            tl_bry_val=tl_vbar(i,Jend,know)+                          &
 !>   &                   tl_cff2*(bry_pgr+                              &
@@ -909,6 +999,26 @@
 !>
               ad_Ce=ad_Ce+GRID(ng)%on_v(i,Jend+1)*ad_cff2
               ad_cff2=0.0_r8
+# ifdef ICESHELF
+!>            tl_Ce=-Ce*Ce*Ce*g*0.5_r8*(GRID(ng)%tl_h(i,Jend+1)-        &
+!>   &                             SIGN(1.0_r8,GRID(ng)%zice(i,Jend+1))*&
+!>   &                                GRID(ng)%tl_zice(i,Jend+1)+       &
+!>   &                             tl_zeta(i,Jend+1,kout)+              &
+!>   &                             GRID(ng)%tl_h(i,Jend  )-             &
+!>   &                             SIGN(1.0_r8,GRID(ng)%zice(i,Jend  ))*&
+!>   &                                GRID(ng)%tl_zice(i,Jend  )+       &
+!>   &                             tl_zeta(i,Jend  ,kout))
+              adfac=-Ce*Ce*Ce*0.25_r8*g*ad_Ce
+              GRID(ng)%ad_h(i,Jend  )=GRID(ng)%ad_h(i,Jend  )+adfac
+              GRID(ng)%ad_h(i,Jend+1)=GRID(ng)%ad_h(i,Jend+1)+adfac
+              ad_zeta(i,Jend  ,kout)=ad_zeta(i,Jend  ,kout)+adfac
+              ad_zeta(i,Jend+1,kout)=ad_zeta(i,Jend+1,kout)+adfac
+              GRID(ng)%ad_zice(i,Jend+1)=GRID(ng)%ad_zice(i,Jend+1)-    &
+     &                  SIGN(1.0_r8,GRID(ng)%zice(i,Jend+1))*adfac
+              GRID(ng)%ad_zice(i,Jend  )=GRID(ng)%ad_zice(i,Jend  )-    &
+     &                  SIGN(1.0_r8,GRID(ng)%zice(i,Jend  ))*adfac
+              ad_Ce=0.0_r8
+# else
 !>            tl_Ce=-Ce*Ce*Ce*0.25_r8*g*(GRID(ng)%tl_h(i,Jend+1)+       &
 !>   &                                   tl_zeta(i,Jend+1,know)+        &
 !>   &                                   GRID(ng)%tl_h(i,Jend  )+       &
@@ -920,6 +1030,7 @@
               GRID(ng)%ad_h(i,Jend  )=GRID(ng)%ad_h(i,Jend  )+adfac
               GRID(ng)%ad_h(i,Jend+1)=GRID(ng)%ad_h(i,Jend+1)+adfac
               ad_Ce=0.0_r8
+# endif
 !>            tl_bry_str=tl_cff1*(FORCES(ng)%svstr(i,Jend+1)-           &
 !>   &                            FORCES(ng)%bvstr(i,Jend+1))+          &
 !>   &                   cff1*(FORCES(ng)%tl_svstr(i,Jend+1)-           &
@@ -936,6 +1047,26 @@
      &                         FORCES(ng)%bvstr(i,Jend+1))*ad_bry_str
 
               ad_bry_str=0.0_r8
+# ifdef ICESHELF
+!>            tl_cff1=-cff1*cff1*0.5_r8*(GRID(ng)%tl_h(i,Jend  )-       &
+!>   &                         SIGN(1.0_r8,GRID(ng)%zice(i,Jend  ))*    &
+!>   &                             GRID(ng)%tl_zice(i,Jend  )+          &
+!>   &                         tl_zeta(i,Jend  ,kout)+                  &
+!>   &                         GRID(ng)%tl_h(i,Jend+1)-                 &
+!>   &                         SIGN(1.0_r8,GRID(ng)%zice(i,Jend+1))*    &
+!>   &                             GRID(ng)%tl_zice(i,Jend+1)+          &
+!>   &                         tl_zeta(i,Jend+1,kout))
+              adfac=-cff1*cff1*0.5_r8*ad_cff1
+              ad_zeta(i,Jend  ,kout)=ad_zeta(i,Jend  ,kout)+adfac
+              ad_zeta(i,Jend+1,kout)=ad_zeta(i,Jend+1,kout)+adfac
+              GRID(ng)%ad_h(i,Jend  )=GRID(ng)%ad_h(i,Jend  )+adfac
+              GRID(ng)%ad_h(i,Jend+1)=GRID(ng)%ad_h(i,Jend+1)+adfac
+              GRID(ng)%ad_zice(i,Jend  )=GRID(ng)%ad_zice(i,Jend  )-    &
+     &               SIGN(1.0_r8,GRID(ng)%zice(i,Jend  ))*adfac
+              GRID(ng)%ad_zice(i,Jend+1)=GRID(ng)%ad_zice(i,Jend+1)-    &
+     &               SIGN(1.0_r8,GRID(ng)%zice(i,Jend+1))*adfac
+              ad_cff1=0.0_r8
+# else
 !>            tl_cff1=-cff1*cff1*0.5_r8*(GRID(ng)%tl_h(i,Jend  )+       &
 !>   &                                   tl_zeta(i,Jend  ,know)+        &
 !>   &                                   GRID(ng)%tl_h(i,Jend+1)+       &
@@ -947,6 +1078,7 @@
               GRID(ng)%ad_h(i,Jend  )=GRID(ng)%ad_h(i,Jend  )+adfac
               GRID(ng)%ad_h(i,Jend+1)=GRID(ng)%ad_h(i,Jend+1)+adfac
               ad_cff1=0.0_r8
+# endif
 #  ifdef UV_COR
 !>            tl_bry_cor=-0.125_r8*(tl_ubar(i  ,Jend  ,know)+           &
 !>   &                              tl_ubar(i+1,Jend  ,know)+           &
@@ -1367,10 +1499,19 @@
         ELSE IF (ad_LBC(inorth,isVbar,ng)%reduced) THEN
           DO i=Istr,Iend
             IF (LBC_apply(ng)%north(i)) THEN
+# ifdef ICESHELF
+              cff=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jend  )-                 &
+     &                        ABS(GRID(ng)%zice(i,Jend  ))+             &
+     &                        zeta(i,Jend  ,kout)+                      &
+     &                        GRID(ng)%h(i,Jend+1)-                     &
+     &                        ABS(GRID(ng)%zice(i,Jend+1))+             &
+     &                        zeta(i,Jend+1,kout)))
+# else
               cff=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jend  )+                 &
      &                            zeta(i,Jend  ,know)+                  &
      &                            GRID(ng)%h(i,Jend+1)+                 &
      &                            zeta(i,Jend+1,know)))
+# endif
 # ifdef MASKING
 !>            tl_vbar(i,Jend+1,kout)=tl_vbar(i,Jend+1,kout)*            &
 !>   &                               GRID(ng)%vmask(i,Jend+1)
@@ -1405,6 +1546,26 @@
               ad_cff=ad_cff+(FORCES(ng)%svstr(i,Jend+1)-                &
      &                       FORCES(ng)%bvstr(i,Jend+1))*ad_bry_str
               ad_bry_str=0.0_r8
+# ifdef ICESHELF
+!>            tl_cff=-cff*cff*0.5_r8*(GRID(ng)%tl_h(i,Jend  )-          &
+!>   &                        SIGN(1.0_r8,GRID(ng)%zice(i,Jend  ))*     &
+!>   &                           GRID(ng)%tl_zice(i,Jend  )+            &
+!>   &                        tl_zeta(i,Jend  ,kout)+                   &
+!>   &                        GRID(ng)%tl_h(i,Jend+1)-                  &
+!>   &                        SIGN(1.0_r8,GRID(ng)%zice(i,Jend+1))*     &
+!>   &                           GRID(ng)%tl_zice(i,Jend+1)+            &
+!>   &                        tl_zeta(i,Jend+1,kout))
+              adfac=-cff*cff*0.5_r8*ad_cff
+              ad_zeta(i,Jend  ,kout)=ad_zeta(i,Jend  ,kout)+adfac
+              ad_zeta(i,Jend+1,kout)=ad_zeta(i,Jend+1,kout)+adfac
+              GRID(ng)%ad_h(i,Jend  )=GRID(ng)%ad_h(i,Jend  )+adfac
+              GRID(ng)%ad_h(i,Jend+1)=GRID(ng)%ad_h(i,Jend+1)+adfac
+              GRID(ng)%ad_zice(i,Jend  )=GRID(ng)%ad_zice(i,Jend  )-    &
+     &                    SIGN(1.0_r8,GRID(ng)%zice(i,Jend  ))*adfac
+              GRID(ng)%ad_zice(i,Jend+1)=GRID(ng)%ad_zice(i,Jend+1)-    &
+     &                    SIGN(1.0_r8,GRID(ng)%zice(i,Jend+1))*adfac
+              ad_cff=0.0_r8
+# else
 !>            tl_cff=-cff*cff*0.5_r8*(GRID(ng)%tl_h(i,Jend  )+          &
 !>   &                                tl_zeta(i,Jend  ,know)+           &
 !>   &                                GRID(ng)%tl_h(i,Jend+1)+          &
@@ -1416,6 +1577,7 @@
               GRID(ng)%ad_h(i,Jend  )=GRID(ng)%ad_h(i,Jend  )+adfac
               GRID(ng)%ad_h(i,Jend+1)=GRID(ng)%ad_h(i,Jend+1)+adfac
               ad_cff=0.0_r8
+# endif
 # ifdef UV_COR
 !>            tl_bry_cor=-0.125_r8*(tl_ubar(i  ,Jend  ,know)+           &
 !>   &                              tl_ubar(i+1,Jend  ,know)+           &
@@ -1551,10 +1713,17 @@
         ELSE IF (ad_LBC(isouth,isVbar,ng)%Flather) THEN
           DO i=Istr,Iend
             IF (LBC_apply(ng)%south(i)) THEN
+#  ifdef ICESHELF
+          cff=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jstr-1)-                     &
+     &                        ABS(GRID(ng)%zice(i,Jstr-1))+             &
+     &                        GRID(ng)%h(i,Jstr  )-                     &
+     &                        ABS(GRID(ng)%zice(i,Jstr  ))))
+#  else
               cff=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jstr-1)+                 &
      &                            zeta(i,Jstr-1,know)+                  &
      &                            GRID(ng)%h(i,Jstr  )+                 &
      &                            zeta(i,Jstr  ,know)))
+#  endif
               Ce=SQRT(g*cff)
 # ifdef MASKING
 !>            tl_vbar(i,Jstr,kout)=tl_vbar(i,Jstr,kout)*                &
@@ -1595,6 +1764,22 @@
 !>
               ad_cff=ad_cff+0.5_r8*g*ad_Ce/Ce
               ad_Ce=0.0_r8
+#  ifdef ICESHELF
+!>            tl_cff=-cff*cff*(0.5_r8*(GRID(ng)%tl_h(i,Jstr-1)-         &
+!>   &                        SIGN(1.0_r8,GRID(ng)%zice(i,Jstr-1))*     &
+!>   &                           GRID(ng)%tl_zice(i,Jstr-1)+            &
+!>   &                        GRID(ng)%tl_h(i,Jstr  )-                  &
+!>   &                        SIGN(1.0_r8,GRID(ng)%zice(i,Jstr  ))*     &
+!>   &                           GRID(ng)%tl_zice(i,Jstr  )))
+              adfac=cff*cff*0.5_r8*ad_cff
+              GRID(ng)%ad_h(i,Jstr-1)=GRID(ng)%ad_h(i,Jstr-1)+adfac 
+              GRID(ng)%ad_zice(i,Jstr-1)=GRID(ng)%ad_zice(i,Jstr-1)-    &
+     &                      SIGN(1.0_r8,GRID(ng)%zice(i,Jstr-1))*adfac
+              GRID(ng)%ad_h(i,Jstr  )=GRID(ng)%ad_h(i,Jstr  )+adfac
+              GRID(ng)%ad_zice(i,Jstr  )=GRID(ng)%ad_zice(i,Jstr  )-    &
+     &                      SIGN(1.0_r8,GRID(ng)%zice(i,Jstr  ))*adfac
+              ad_cff=0.0_r8
+#  else
 !>            tl_cff=-cff*cff*(0.5_r8*(GRID(ng)%tl_h(i,Jstr-1)+         &
 !>   &                                 tl_zeta(i,Jstr-1,know)+          &
 !>   &                                 GRID(ng)%tl_h(i,Jstr  )+         &
@@ -1606,6 +1791,7 @@
               ad_zeta(i,Jstr-1,know)=ad_zeta(i,Jstr-1,know)+adfac
               ad_zeta(i,Jstr  ,know)=ad_zeta(i,Jstr  ,know)+adfac
               ad_cff=0.0_r8
+#  endif
 
 # if defined SSH_TIDES_NOT_YET && !defined UV_TIDES_NOT_YET
               IF (ad_LBC(isouth,isFsur,ng)%acquire) THEN
@@ -1628,16 +1814,34 @@
 #  else
               bry_cor=0.0_r8
 #  endif
+#   ifdef ICESHELF
+          cff1=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jstr-1)-                    &
+     &                         ABS(GRID(ng)%zice(i,Jstr-1))+            &
+     &                         zeta(i,Jstr-1,kout)+                     &
+     &                         GRID(ng)%h(i,Jstr  )-                    &
+     &                         ABS(GRID(ng)%zice(i,Jstr  ))+            &
+     &                         zeta(i,Jstr  ,kout)))
+#   else
               cff1=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jstr-1)+                &
      &                             zeta(i,Jstr-1,know)+                 &
      &                             GRID(ng)%h(i,Jstr  )+                &
      &                             zeta(i,Jstr  ,know)))
+#   endif
               bry_str=cff1*(FORCES(ng)%svstr(i,Jstr)-                   &
      &                      FORCES(ng)%bvstr(i,Jstr))
+#   ifdef ICESHELF
+              Ce=1.0_r8/SQRT(g*0.5_r8*(GRID(ng)%h(i,Jstr-1)-            &
+     &                             ABS(GRID(ng)%zice(i,Jstr-1))+        &
+     &                             zeta(i,Jstr-1,kout)+                 &
+     &                             GRID(ng)%h(i,Jstr  )-                &
+     &                             ABS(GRID(ng)%zice(i,Jstr  ))+        &
+     &                             zeta(i,Jstr  ,kout)))
+#  else
               Ce=1.0_r8/SQRT(g*0.5_r8*(GRID(ng)%h(i,Jstr-1)+            &
      &                                 zeta(i,Jstr-1,know)+             &
      &                                 GRID(ng)%h(i,Jstr  )+            &
      &                                 zeta(i,Jstr  ,know)))
+#  endif
               cff2=GRID(ng)%on_v(i,Jstr)*Ce
 !>            tl_bry_val=tl_vbar(i,Jstr+1,know)+                        &
 !>   &                   tl_cff2*(bry_pgr+                              &
@@ -1660,6 +1864,26 @@
 !>
               ad_Ce=ad_Ce+GRID(ng)%on_v(i,Jstr)*ad_cff2
               ad_cff2=0.0_r8
+#   ifdef ICESHELF
+!>            tl_Ce=-Ce*Ce*Ce*g*0.25_r8*(GRID(ng)%tl_h(i,Jstr-1)-       &
+!>   &                            SIGN(1.0_r8,GRID(ng)%zice(i,Jstr-1))* &
+!>   &                                 GRID(ng)%tl_zice(i,Jstr-1)+      &
+!>   &                             tl_zeta(i,Jstr-1,kout)+              &
+!>   &                             GRID(ng)%tl_h(i,Jstr  )-             &
+!>   &                             SIGN(1.0_r8,GRID(ng)%zice(i,Jstr  ))*&
+!>   &                                 GRID(ng)%tl_zice(i,Jstr  )+      &
+!>   &                             tl_zeta(i,Jstr  ,kout))
+              adfac=-Ce*Ce*Ce*g*0.25_r8*ad_Ce
+              GRID(ng)%ad_h(i,Jstr-1)=GRID(ng)%ad_h(i,Jstr-1)+adfac
+              GRID(ng)%ad_zice(i,Jstr-1)=GRID(ng)%ad_zice(i,Jstr-1)-    &
+     &                 SIGN(1.0_r8,GRID(ng)%zice(i,Jstr-1))*adfac
+              ad_zeta(i,Jstr-1,kout)=ad_zeta(i,Jstr-1,kout)+adfac
+              GRID(ng)%ad_h(i,Jstr  )=GRID(ng)%ad_h(i,Jstr  )+adfac
+              GRID(ng)%ad_zice(i,Jstr  )=GRID(ng)%ad_zice(i,Jstr  )-    &
+     &                 SIGN(1.0_r8,GRID(ng)%zice(i,Jstr  ))*adfac
+              ad_zeta(i,Jstr  ,kout)=ad_zeta(i,Jstr  ,kout)+adfac
+              ad_Ce=0.0_r8
+#  else
 !>            tl_Ce=-Ce*Ce*Ce*0.25_r8*g*(GRID(ng)%tl_h(i,Jstr-1)+       &
 !>   &                                   tl_zeta(i,Jstr-1,know)+        &
 !>   &                                   GRID(ng)%tl_h(i,Jstr  )+       &
@@ -1671,6 +1895,7 @@
               GRID(ng)%ad_h(i,Jstr-1)=GRID(ng)%ad_h(i,Jstr-1)+adfac
               GRID(ng)%ad_h(i,Jstr  )=GRID(ng)%ad_h(i,Jstr  )+adfac
               ad_Ce=0.0_r8
+#  endif
 !>            tl_bry_str=tl_cff1*(FORCES(ng)%svstr(i,Jstr)-             &
 !>   &                            FORCES(ng)%bvstr(i,Jstr))+            &
 !>   &                   cff1*(FORCES(ng)%tl_svstr(i,Jstr)-             &
@@ -1684,6 +1909,26 @@
               ad_cff1=ad_cff1+(FORCES(ng)%svstr(i,Jstr)-                &
      &                         FORCES(ng)%bvstr(i,Jstr))*ad_bry_str
               ad_bry_str=0.0_r8
+#   ifdef ICESHELF
+!>            tl_cff1=-cff1*cff1*(0.5_r8*(GRID(ng)%tl_h(i,Jstr-1)-      &
+!>   &                         SIGN(1.0_r8,GRID(ng)%zice(i,Jstr-1))*    &
+!>   &                          GRID(ng)%tl_zice(i,Jstr-1)+             &
+!>   &                         tl_zeta(i,Jstr-1,kout)+                  &
+!>   &                         GRID(ng)%tl_h(i,Jstr  )-                 &
+!>   &                         SIGN(1.0_r8,GRID(ng)%zice(i,Jstr  ))*    &
+!>   &                          GRID(ng)%tl_zice(i,Jstr  )+             &
+!>   &                         tl_zeta(i,Jstr  ,kout)))
+              adfac=-cff1*cff1*0.5_r8*ad_cff1
+              GRID(ng)%ad_h(i,Jstr-1)=GRID(ng)%ad_h(i,Jstr-1)+adfac
+              GRID(ng)%ad_zice(i,Jstr-1)=GRID(ng)%ad_zice(i,Jstr-1)-    &
+     &                  SIGN(1.0_r8,GRID(ng)%zice(i,Jstr-1))*adfac
+              ad_zeta(i,Jstr-1,kout)=ad_zeta(i,Jstr-1,kout)+adfac
+              GRID(ng)%ad_h(i,Jstr  )=GRID(ng)%ad_h(i,Jstr  )+adfac
+              GRID(ng)%ad_zice(i,Jstr  )=GRID(ng)%ad_zice(i,Jstr  )-    &
+                        SIGN(1.0_r8,GRID(ng)%zice(i,Jstr  ))*adfac
+              ad_zeta(i,Jstr  ,kout)=ad_zeta(i,Jstr  ,kout)+adfac
+              ad_cff1=0.0_r8
+#   else
 !>            tl_cff1=-cff1*cff1*(0.5_r8*(GRID(ng)%tl_h(i,Jstr-1)+      &
 !>   &                                    tl_zeta(i,Jstr-1,know)+       &
 !>   &                                    GRID(ng)%tl_h(i,Jstr  )+      &
@@ -1695,6 +1940,7 @@
               GRID(ng)%ad_h(i,Jstr-1)=GRID(ng)%ad_h(i,Jstr-1)+adfac
               GRID(ng)%ad_h(i,Jstr  )=GRID(ng)%ad_h(i,Jstr  )+adfac
               ad_cff1=0.0_r8
+#  endif
 #  ifdef UV_COR
 !>            tl_bry_cor=-0.125_r8*(tl_ubar(i  ,Jstr-1,know)+           &
 !>   &                              tl_ubar(i+1,Jstr-1,know)+           &
@@ -2114,10 +2360,19 @@
         ELSE IF (ad_LBC(isouth,isVbar,ng)%reduced) THEN
           DO i=Istr,Iend
             IF (LBC_apply(ng)%south(i)) THEN
+#  ifdef ICESHELF
+              cff=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jstr-1)-                 &
+     &                        ABS(GRID(ng)%zice(i,Jstr-1))+             &
+     &                        zeta(i,Jstr-1,kout)+                      &
+     &                        GRID(ng)%h(i,Jstr  )-                     &
+     &                        ABS(GRID(ng)%zice(i,Jstr  ))+             &
+     &                        zeta(i,Jstr  ,kout)))
+#  else
               cff=1.0_r8/(0.5_r8*(GRID(ng)%h(i,Jstr-1)+                 &
      &                            zeta(i,Jstr-1,know)+                  &
      &                            GRID(ng)%h(i,Jstr  )+                 &
      &                            zeta(i,Jstr  ,know)))
+#  endif
 # ifdef MASKING
 !>            tl_vbar(i,Jstr,kout)=tl_vbar(i,Jstr,kout)*                &
 !>   &                             GRID(ng)%vmask(i,Jstr)
@@ -2150,6 +2405,26 @@
               ad_cff=ad_cff+(FORCES(ng)%svstr(i,Jstr)-                  &
      &                       FORCES(ng)%bvstr(i,Jstr))*ad_bry_str
               ad_bry_str=0.0_r8
+#  ifdef ICESHELF
+!>        tl_cff=-cff*cff*0.5_r8*(GRID(ng)%tl_h(i,Jstr-1)-              &
+!>   &                        SIGN(1.0_r8,GRID(ng)%zice(i,Jstr-1))*     &
+!>   &                           GRID(ng)%tl_zice(i,Jstr-1)+            &
+!>   &                        tl_zeta(i,Jstr-1,kout)+                   &
+!>   &                        GRID(ng)%tl_h(i,Jstr  )-                  &
+!>   &                        SIGN(1.0_r8,GRID(ng)%zice(i,Jstr  ))*     &
+!>   &                           GRID(ng)%tl_zice(i,Jstr  )+            &
+!>   &                        tl_zeta(i,Jstr  ,kout)))
+              adfac=-cff*cff*0.5_r8*ad_cff
+              GRID(ng)%ad_h(i,Jstr-1)=GRID(ng)%ad_h(i,Jstr-1)+adfac
+              GRID(ng)%ad_zice(i,Jstr-1)=GRID(ng)%ad_zice(i,Jstr-1)-    &
+     &                     SIGN(1.0_r8,GRID(ng)%zice(i,Jstr-1))*adfac
+              ad_zeta(i,Jstr-1,kout)=ad_zeta(i,Jstr-1,kout)+adfac
+              GRID(ng)%ad_h(i,Jstr  )=GRID(ng)%ad_h(i,Jstr  )+adfac
+              GRID(ng)%ad_zice(i,Jstr  )=GRID(ng)%ad_zice(i,Jstr  )-    &
+     &                     SIGN(1.0_r8,GRID(ng)%zice(i,Jstr  ))*adfac
+              ad_zeta(i,Jstr  ,kout)=ad_zeta(i,Jstr  ,kout)+adfac
+              ad_cff=0.0_r8
+#  else
 !>            tl_cff=-cff*cff*0.5_r8*(GRID(ng)%tl_h(i,Jstr-1)+          &
 !>   &                                tl_zeta(i,Jstr-1,know)+           &
 !>   &                                GRID(ng)%tl_h(i,Jstr  )+          &
@@ -2161,6 +2436,7 @@
               GRID(ng)%ad_h(i,Jstr-1)=GRID(ng)%ad_h(i,Jstr-1)+adfac
               GRID(ng)%ad_h(i,Jstr  )=GRID(ng)%ad_h(i,Jstr  )+adfac
               ad_cff=0.0_r8
+#  endif
 # ifdef UV_COR
 !>            tl_bry_cor=-0.125_r8*(tl_ubar(i  ,Jstr-1,know)+           &
 !>   &                              tl_ubar(i+1,Jstr-1,know)+           &

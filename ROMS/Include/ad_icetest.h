@@ -11,8 +11,8 @@
 ** Application flag:   ICETEST
 ** Input script:       ocean_icetest.in
 */
-#define TLM_DRIVER
-#ifdef TLM_DRIVER
+#define ADM_DRIVER
+#ifdef ADM_DRIVER
 # define FORWARD_READ
 # define FORWARD_MIXING
 #endif
@@ -20,7 +20,7 @@
 #define DJ_GRADPS
 #define UV_COR
 #define UV_VIS2
-#define UV_LDRAG
+#define UV_LOGDRAG
 #define MIX_GEO_UV
 #undef MIX_S_UV
 #define TS_C4HADVECTION
@@ -57,8 +57,8 @@
 *  * VBC_ICE_2EQN
 *  * VBC_ICE_3EQN       
 *  * Note that both undef will set surface fluf of salt and temp to zero */
-#undef ICESHELF_2EQN_VBC
-#define ICESHELF_3EQN_VBC
+#define ICESHELF_2EQN_VBC
+#undef ICESHELF_3EQN_VBC
 #undef ICESHELF_TEOS10
 
 

@@ -104,6 +104,9 @@
 # if defined SSH_TIDES_NOT_YET || defined UV_TIDES_NOT_YET
 !!    USE ad_set_tides_mod, ONLY : ad_set_tides
 # endif
+# ifdef ICESHELF
+      USE ad_iceshelf_mod, ONLY : ad_iceshelf
+# endif
       USE ad_set_vbc_mod, ONLY : ad_set_vbc
       USE ad_set_zeta_mod, ONLY : ad_set_zeta
       USE ad_step2d_mod, ONLY : ad_step2d
@@ -556,6 +559,9 @@
           DO tile=first_tile(ng),last_tile(ng),+1
 # if defined SSH_TIDES_NOT_YET || defined UV_TIDES_NOT_YET
             CALL ad_set_tides (ng, tile)
+# endif
+# ifdef ICESHELF
+            CALL ad_iceshelf (ng,tile)
 # endif
             CALL ad_set_vbc (ng, tile)
 # ifdef BBL_MODEL_NOT_YET

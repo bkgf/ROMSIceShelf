@@ -127,7 +127,7 @@
      &                   FORCES(ng) % srflx,                            &
      &                   FORCES(ng) % ad_srflx,                         &
 #   endif
-     &                   FORCES(ng) % stflx                             &
+     &                   FORCES(ng) % stflx,                            &
      &                   FORCES(ng) % ad_stflx                          &
      &                   )
 # ifdef PROFILE
@@ -172,7 +172,7 @@
      &                         srflx,                                   &
      &                         ad_srflx,                                &
 #   endif
-     &                         stflx, ad_stflx)                                   
+     &                         stflx, ad_stflx)                         
 !***********************************************************************
 !
       USE mod_param
@@ -185,12 +185,21 @@
 #ifdef ICESHELF_DYNAM
       USE mod_iceshelfdyn
 #endif
-      USE bc_2d_mod
-      USE exchange_2d_mod, ONLY : exchange_r2d_tile
+      USE ad_bc_2d_mod, ONLY: ad_bc_r2d_tile
+      USE ad_bc_2d_mod, ONLY: ad_bc_u2d_tile
+      USE ad_bc_2d_mod, ONLY: ad_bc_v2d_tile
+      USE ad_exchange_2d_mod, ONLY : ad_exchange_r2d_tile
 # ifdef DISTRIBUTE
-      USE mp_exchange_mod, ONLY : mp_exchange2d
+      USE mp_exchange_mod, ONLY : ad_mp_exchange2d
 # endif
-      USE iceshelf_vbc_mod
+# if defined ICESHELF_TEOS10
+      USE iceshelf_vbc_mod, ONLY : ct_from_theta
+      USE iceshelf_vbc_mod, ONLY : t_from_ct
+# else
+      USE iceshelf_vbc_mod, ONLY : dTemp
+      USE iceshelf_vbc_mod, ONLY : thetaa
+      USE iceshelf_vbc_mod, ONLY : potit
+# endif
 !
 !  Imported variable declarations.
 !
@@ -204,14 +213,14 @@
       real(r8), intent(out) :: sustr(LBi:,LBj:)
       real(r8), intent(out) :: svstr(LBi:,LBj:)
       real(r8), intent(in) :: rho(LBi:,LBj:,:)
-      real(r8), intent(in) :: ad_u(LBi:,LBj:,:,:)
-      real(r8), intent(in) :: ad_v(LBi:,LBj:,:,:)
-      real(r8), intent(out) :: ad_sustr(LBi:,LBj:)
-      real(r8), intent(out) :: ad_svstr(LBi:,LBj:)
-      real(r8), intent(in) :: ad_rho(LBi:,LBj:,:)
+      real(r8), intent(inout) :: ad_u(LBi:,LBj:,:,:)
+      real(r8), intent(inout) :: ad_v(LBi:,LBj:,:,:)
+      real(r8), intent(inout) :: ad_sustr(LBi:,LBj:)
+      real(r8), intent(inout) :: ad_svstr(LBi:,LBj:)
+      real(r8), intent(inout) :: ad_rho(LBi:,LBj:,:)
 #if defined ICESHELF_3EQN_VBC || defined ANA_SEAICE
       real(r8), intent(in) :: Hz(LBi:,LBj:,:)
-      real(r8), intent(in) :: ad_Hz(LBi:,LBj:,:)
+      real(r8), intent(inout) :: ad_Hz(LBi:,LBj:,:)
 #endif
 #ifdef MASKING
       real(r8), intent(in) :: rmask(LBi:,LBj:)
@@ -219,28 +228,28 @@
       real(r8), intent(in) :: z_r(LBi:,LBj:,:)
       real(r8), intent(in) :: z_w(LBi:,LBj:,0:)
       real(r8), intent(in) :: zice(LBi:,LBj:)
-      real(r8), intent(in) :: ad_z_r(LBi:,LBj:,:)
-      real(r8), intent(in) :: ad_z_w(LBi:,LBj:,0:)
-      real(r8), intent(in) :: ad_zice(LBi:,LBj:)
+      real(r8), intent(inout) :: ad_z_r(LBi:,LBj:,:)
+      real(r8), intent(inout) :: ad_z_w(LBi:,LBj:,0:)
+      real(r8), intent(inout) :: ad_zice(LBi:,LBj:)
       real(r8), intent(in) :: f(LBi:,LBj:)
 #ifdef ICESHELF_MORPH
       real(r8), intent(inout) :: iceshelf_draft(LBi:,LBj:,:)
       real(r8), intent(inout) :: ad_iceshelf_draft(LBi:,LBj:,:)
 #endif
       real(r8), intent(in) :: t(LBi:,LBj:,:,:,:)
-      real(r8), intent(in) :: ad_t(LBi:,LBj:,:,:,:)
+      real(r8), intent(inout) :: ad_t(LBi:,LBj:,:,:,:)
 #ifdef ICESHELF_3EQN_VBC
       real(r8), intent(out) :: gammaT(LBi:,LBj:)
       real(r8), intent(out) :: gammaS(LBi:,LBj:)
-      real(r8), intent(out) :: Tb(LBi:,LBj:)
-      real(r8), intent(out) :: Sb(LBi:,LBj:)
-      real(r8), intent(out) :: ad_gammaT(LBi:,LBj:)
-      real(r8), intent(out) :: ad_gammaS(LBi:,LBj:)
-      real(r8), intent(out) :: ad_Tb(LBi:,LBj:)
-      real(r8), intent(out) :: ad_Sb(LBi:,LBj:)
+      real(r8), intent(inout) :: Tb(LBi:,LBj:)
+      real(r8), intent(inout) :: Sb(LBi:,LBj:)
+      real(r8), intent(inout) :: ad_gammaT(LBi:,LBj:)
+      real(r8), intent(inout) :: ad_gammaS(LBi:,LBj:)
+      real(r8), intent(inout) :: ad_Tb(LBi:,LBj:)
+      real(r8), intent(inout) :: ad_Sb(LBi:,LBj:)
 #endif
       real(r8), intent(out) :: m(LBi:,LBj:)
-      real(r8), intent(out) :: ad_m(LBi:,LBj:)
+      real(r8), intent(inout) :: ad_m(LBi:,LBj:)
 # ifdef SHORTWAVE
       real(r8), intent(inout) :: srflx(LBi:,LBj:)
       real(r8), intent(inout) :: ad_srflx(LBi:,LBj:)
@@ -250,17 +259,17 @@
 # else
       real(r8), intent(in) :: u(LBi:UBi,LBj:UBj,N(ng),2)
       real(r8), intent(in) :: v(LBi:UBi,LBj:UBj,N(ng),2)
-      real(r8), intent(out) :: sustr(LBi:UBi,LBj:UBj)
-      real(r8), intent(out) :: svstr(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: sustr(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: svstr(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: rho(LBi:UBi,LBj:UBj,N(ng))
-      real(r8), intent(in) :: ad_u(LBi:UBi,LBj:UBj,N(ng),2)
-      real(r8), intent(in) :: ad_v(LBi:UBi,LBj:UBj,N(ng),2)
-      real(r8), intent(out) :: ad_sustr(LBi:UBi,LBj:UBj)
-      real(r8), intent(out) :: ad_svstr(LBi:UBi,LBj:UBj)
-      real(r8), intent(in) :: ad_rho(LBi:UBi,LBj:UBj,N(ng))
+      real(r8), intent(inout) :: ad_u(LBi:UBi,LBj:UBj,N(ng),2)
+      real(r8), intent(inout) :: ad_v(LBi:UBi,LBj:UBj,N(ng),2)
+      real(r8), intent(inout) :: ad_sustr(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: ad_svstr(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: ad_rho(LBi:UBi,LBj:UBj,N(ng))
 #if defined ICESHELF_3EQN_VBC || defined ANA_SEAICE
       real(r8), intent(in) :: Hz(LBi:UBi,LBj:UBj,N(ng))
-      real(r8), intent(in) :: ad_Hz(LBi:UBi,LBj:UBj,N(ng))
+      real(r8), intent(inout) :: ad_Hz(LBi:UBi,LBj:UBj,N(ng))
 #endif
 #ifdef MASKING
       real(r8), intent(in) :: rmask(LBi:UBi,LBj:UBj)
@@ -268,28 +277,28 @@
       real(r8), intent(in) :: z_r(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(in) :: z_w(LBi:UBi,LBj:UBj,0:N(ng))
       real(r8), intent(in) :: zice(LBi:UBi,LBj:UBj)
-      real(r8), intent(in) :: ad_z_r(LBi:UBi,LBj:UBj,N(ng))
-      real(r8), intent(in) :: ad_z_w(LBi:UBi,LBj:UBj,0:N(ng))
-      real(r8), intent(in) :: ad_zice(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: ad_z_r(LBi:UBi,LBj:UBj,N(ng))
+      real(r8), intent(inout) :: ad_z_w(LBi:UBi,LBj:UBj,0:N(ng))
+      real(r8), intent(inout) :: ad_zice(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: f(LBi:UBi,LBj:UBj)
 #ifdef ICESHELF_MORPH
       real(r8), intent(in) :: iceshelf_draft(LBi:UBi,LBj:UBj,2)
-      real(r8), intent(in) :: ad_iceshelf_draft(LBi:UBi,LBj:UBj,2)
+      real(r8), intent(inout) :: ad_iceshelf_draft(LBi:UBi,LBj:UBj,2)
 #endif
       real(r8), intent(in) :: t(LBi:UBi,LBj:UBj,N(ng),3,NT(ng))
-      real(r8), intent(in) :: ad_t(LBi:UBi,LBj:UBj,N(ng),3,NT(ng))
+      real(r8), intent(inout) :: ad_t(LBi:UBi,LBj:UBj,N(ng),3,NT(ng))
 #ifdef ICESHELF_3EQN_VBC
       real(r8), intent(out) :: gammaT(LBi:UBi,LBj:UBj)
       real(r8), intent(out) :: gammaS(LBi:UBi,LBj:UBj)
-      real(r8), intent(out) :: Tb(LBi:UBi,LBj:UBj)
-      real(r8), intent(out) :: Sb(LBi:UBi,LBj:UBj)
-      real(r8), intent(out) :: ad_gammaT(LBi:UBi,LBj:UBj)
-      real(r8), intent(out) :: ad_gammaS(LBi:UBi,LBj:UBj)
-      real(r8), intent(out) :: ad_Tb(LBi:UBi,LBj:UBj)
-      real(r8), intent(out) :: ad_Sb(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: Tb(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: Sb(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: ad_gammaT(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: ad_gammaS(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: ad_Tb(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: ad_Sb(LBi:UBi,LBj:UBj)
 #endif
       real(r8), intent(out) :: m(LBi:UBi,LBj:UBj)
-      real(r8), intent(out) :: ad_m(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: ad_m(LBi:UBi,LBj:UBj)
 # ifdef SHORTWAVE
       real(r8), intent(inout) :: srflx(LBi:UBi,LBj:UBj)
       real(r8), intent(inout) :: ad_srflx(LBi:UBi,LBj:UBj)
@@ -310,21 +319,23 @@
       real(r8) :: ad_RPres
 #ifdef ICESHELF_VBC_HFPROPTOM
       real(r8) :: Ex1,Ex2,Ex3,Ex4,Ex5,Ex6,Ep1,Ep2,Ep3,Ep31,Ep4,Ep5
-      real(r8) :: ad_Ex1,ad_Ex2,ad_Ex3,ad_Ex4,ad_Ex5,ad_Ex6,ad_Ep1,      &
+      real(r8) :: ad_Ex1,ad_Ex2,ad_Ex3,ad_Ex4,ad_Ex5,ad_Ex6,ad_Ep1,     &
      &                         ad_Ep2,ad_Ep3,ad_Ep31,ad_Ep4,ad_Ep5
       real(r8) :: Sr1,Sr2,Sf1,Sf2,Tf1,Tf2,rho_r
       real(r8) :: ad_Sr1,ad_Sr2,ad_Sf1,ad_Sf2,ad_Tf1,ad_Tf2,ad_rho_r
 #else
-      real(r8) :: mflag,TFi,cff3 
-      real(r8) :: ad_TFi,ad_cff3
+      real(r8) :: mflag,TFi 
+      real(r8) :: ad_TFi
 #endif
-      real(r8) :: cff1, cff2
-      real(r8) :: ad_cff1, ad_cff2
+      real(r8) :: cff1, cff2, cff3
+      real(r8) :: ad_cff1, ad_cff2, ad_cff3, fac, adfac, adfac1,ad_fac
+      real(r8) :: ad_Ti
 #ifdef ICESHELF_TEOS10
       real(r8) :: ct, ad_ct
 #endif
 #  if (!defined BBL_MODEL) && defined UV_LOGDRAG
-      real(r8), dimension(PRIVATE_2D_SCRATCH_ARRAY) :: wrk
+      real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: wrk
+      real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: ad_wrk
 #  endif
 #  include "set_bounds.h"
 
@@ -332,6 +343,7 @@
 !  Clear adjoint variables
 !
       ad_RPres=0.0_r8
+#ifdef ICESHELF_VBC_HFPROPTOM
       ad_Ex1=0.0_r8
       ad_Ex2=0.0_r8
       ad_Ex3=0.0_r8
@@ -351,6 +363,7 @@
       ad_Tf1=0.0_r8
       ad_Tf2=0.0_r8
       ad_rho_r=0.0_r8
+#endif
       ad_cff1=0.0_r8
       ad_cff2=0.0_r8
       ad_cff3=0.0_r8
@@ -360,10 +373,12 @@
       ad_ustar=0.0_r8
       ad_TFb=0.0_r8
       ad_turb=0.0_r8
+      ad_TFi=0.0_r8
+      ad_Ti=0.0_r8
+#ifdef ICESHELF_TEOS10
       ad_ct=0.0_r8
+#endif
 
-      etc
-      etc
 !
 !     Compute basic state stresses for use below.
 !
@@ -580,6 +595,11 @@
 
       DO j=Jstr,JEND
         DO i=Istr,IEND
+# ifdef SALINITY
+          Sm=MAX(0.0_r8,t(i,j,N(ng),nrhs,isalt))
+# else
+          Sm=0.0_r8
+# endif
 
           IF (zice(i,j).ne.0.0_r8) THEN
 #if defined ICESHELF_2EQN_VBC
@@ -590,20 +610,6 @@
 # else
          CALL potit(Sm,t(i,j,N(ng),nrhs,itemp),-zice(i,j),0.0_r8,Tm,i,j)
 # endif
-!
-!    Calculate exchange coefficients. Note that this assumes log profile
-!            ustar = SQRT(SQRT((0.5_r8*(sustr(i,j)+sustr(i+1,j)))**2+   &
-!     &                        (0.5_r8*(svstr(i,j)+svstr(i,j+1)))**2))
-            cff1=(0.5_r8*(sustr(i,j)+sustr(i+1,j)))**2
-            cff2=(0.5_r8*(svstr(i,j)+svstr(i,j+1)))**2
-            cff3=SQRT(cff1+cff2)
-            ustar = SQRT(cff3)
-#    ifdef MASKING
-            ustar = ustar*rmask(i,j)
-#    endif
-           if(ustar.lt.small)then
-              ustar = small
-           end
 !
             stflx(i,j,itemp)=gamma*(TFb-Tm)
             stflx(i,j,isalt)=Cp*stflx(i,j,itemp)*refSalt/L
@@ -647,9 +653,12 @@
 !    &                          tl_t(i,j,N(ng),nrhs,itemp),            &
 !    &             -zice(i,j),-tl_zice(i,j),0.0_r8,tl_RPres,Tm,tl_Tm,i,j)
 
+         fac=-ad_zice(i,j)
          CALL ad_potit(Sm,ad_Sm,t(i,j,N(ng),nrhs,itemp),               &
      &                          ad_t(i,j,N(ng),nrhs,itemp),            &
-     &           -zice(i,j),-ad_zice(i,j),0.0_r8,ad_RPres,Tm,ad_Tm,i,j)
+     &           -zice(i,j),fac,0.0_r8,ad_RPres,Tm,ad_Tm,i,j)
+!AMM     &           -zice(i,j),-ad_zice(i,j),0.0_r8,ad_RPres,Tm,ad_Tm,i,j)
+         ad_zice(i,j)=fac
 # endif
 
 !         tl_TFb = a*tl_Sm+c*tl_zice(i,j)
@@ -723,7 +732,7 @@
          ad_gammaS(i,j)=ad_gammaS(i,j)+ad_stflx(i,j,isalt)*(Sb(i,j)-Sm)
          ad_rho_r=ad_rho_r-m(i,j)*ad_stflx(i,j,isalt)*(Sb(i,j)-Sm)
          ad_m(i,j)=ad_m(i,j)-rho_r*ad_stflx(i,j,isalt)*(Sb(i,j)-Sm)
-         ad_Sb(i,j)=ad_Sb(i,j)+(gammaS(i,j)-rho_r*m(i,j))*                 &
+         ad_Sb(i,j)=ad_Sb(i,j)+(gammaS(i,j)-rho_r*m(i,j))*              &
      &                               ad_stflx(i,j,isalt)
          ad_Sm=ad_Sm-(gammaS(i,j)-rho_r*m(i,j))*ad_stflx(i,j,isalt)
          ad_stflx(i,j,isalt)=0.0_r8
@@ -893,7 +902,7 @@
           ad_Ep1=0.0_r8
 
 !         tl_rho_r= -tl_rho(i,j,N(ng))*rho_r/(1000.0_r8+rho(i,j,N(ng)))
-          ad_rho(i,j,N(ng))=ad_rho(i,j,N(ng))-ad_rho_r*rho_r/            &
+          ad_rho(i,j,N(ng))=ad_rho(i,j,N(ng))-ad_rho_r*rho_r/           &
                       (1000.0_r8+rho(i,j,N(ng)))
           ad_rho_r=0.0_r8
 # else
@@ -906,7 +915,7 @@
 
 ! Calculate coefficents in quadratic to be solved:
            cff1 = L/cp_w + mflag*(cp_i/cp_w)*(TFi-Ti)
-           cff2 = gammaS(i,j)*(L/cp_w + mflag*(cp_i/cp_w)*(TFb-Ti))        &
+           cff2 = gammaS(i,j)*(L/cp_w + mflag*(cp_i/cp_w)*(TFb-Ti))     &
      &          + gammaT(i,j)*(TFi-Tm)
            cff3 = gammaS(i,j)*gammaT(i,j)*(TFb - Tm)
 
@@ -916,8 +925,8 @@
            fac=SQRT(cff2*cff2 - 4.0_r8*cff1*cff3)
            m(i,j) = -(cff2 - fac)/(2.0_r8*cff1)
 ! Calculate basal temperature and salinity:
-           Tb(i,j) = (gammaT(i,j)*Tm+mflag*(cp_i/cp_w)*m(i,j)*Ti           &
-     &             - (L/cp_w)*m(i,j))                                      &
+           Tb(i,j) = (gammaT(i,j)*Tm+mflag*(cp_i/cp_w)*m(i,j)*Ti        &
+     &             - (L/cp_w)*m(i,j))                                   &
      &             /(gammaT(i,j) + mflag*(cp_i/cp_w)*m(i,j))
 
 
@@ -926,10 +935,12 @@
 !    &                (gammaS(i,j)+rhoi_on_rho0*m(i,j))*(tl_Sb(i,j)-tl_Sm)
 
          ad_gammaS(i,j)=ad_gammaS(i,j)+ad_stflx(i,j,isalt)*(Sb(i,j)-Sm)
-         ad_m(i,j)=ad_m(i,j)+rhoi_on_rho0*ad_stflx(i,j,isalt)*(Sb(i,j)-Sm)
-         ad_Sb(i,j)=ad_Sb(i,j)+(gammaS(i,j)+rhoi_on_rho0*m(i,j))*          &
+         ad_m(i,j)=ad_m(i,j)+                                           &
+     &             rhoi_on_rho0*ad_stflx(i,j,isalt)*(Sb(i,j)-Sm)
+         ad_Sb(i,j)=ad_Sb(i,j)+(gammaS(i,j)+rhoi_on_rho0*m(i,j))*       &
      &                                   ad_stflx(i,j,isalt)
-         ad_Sm=ad_Sm-(gammaS(i,j)+rhoi_on_rho0*m(i,j))*ad_stflx(i,j,isalt)
+         ad_Sm=ad_Sm-(gammaS(i,j)+rhoi_on_rho0*m(i,j))*                 &
+     &                            ad_stflx(i,j,isalt)
          ad_stflx(i,j,isalt)=0.0_r8
 
 !        tl_stflx(i,j,itemp)=(tl_gammaT(i,j)+rhoi_on_rho0*tl_m(i,j))*      &
@@ -937,10 +948,12 @@
 !    &                (gammaT(i,j)+rhoi_on_rho0*m(i,j))*(tl_Tb(i,j)-tl_Tm)
 
          ad_gammaT(i,j)=ad_gammaT(i,j)+ad_stflx(i,j,itemp)*(Tb(i,j)-Tm)
-         ad_m(i,j)=ad_m(i,j)+rhoi_on_rho0*ad_stflx(i,j,itemp)*(Tb(i,j)-Tm)
-         ad_Tb(i,j)=ad_Tb(i,j)+(gammaT(i,j)+rhoi_on_rho0*m(i,j))*          &
+         ad_m(i,j)=ad_m(i,j)+rhoi_on_rho0*ad_stflx(i,j,itemp)*          &
+     &                                    (Tb(i,j)-Tm)
+         ad_Tb(i,j)=ad_Tb(i,j)+(gammaT(i,j)+rhoi_on_rho0*m(i,j))*       &
      &                                    ad_stflx(i,j,itemp)
-         ad_Tm=ad_Tm-(gammaT(i,j)+rhoi_on_rho0*m(i,j))*ad_stflx(i,j,itemp)
+         ad_Tm=ad_Tm-(gammaT(i,j)+rhoi_on_rho0*m(i,j))*                 &
+     &                            ad_stflx(i,j,itemp)
          ad_stflx(i,j,itemp)=0.0_r8
 
 !        tl_Sb(i,j) = (tl_Tb(i,j) - c*tl_zice(i,j))/a
@@ -1003,7 +1016,7 @@
            ad_TFb=ad_TFb+gammaS(i,j)*mflag*(cp_i/cp_w)*ad_cff2
            ad_TFi=ad_TFi+gammaT(i,j)*ad_cff2
            ad_Tm=ad_Tm-gammaT(i,j)*ad_cff2
-           ad_gammaS(i,j)=ad_gammaS(i,j)+ad_cff2*(L/cp_w +                 &
+           ad_gammaS(i,j)=ad_gammaS(i,j)+ad_cff2*(L/cp_w +              &
      &                                  mflag*(cp_i/cp_w)*(TFb-Ti))
            ad_cff2=0.0_r8
 
@@ -1025,6 +1038,23 @@
 
 # endif
 
+!
+!    Calculate exchange coefficients. Note that this assumes log profile 
+!            ustar = SQRT(SQRT((0.5_r8*(sustr(i,j)+sustr(i+1,j)))**2+
+!            &
+!     &                        (0.5_r8*(svstr(i,j)+svstr(i,j+1)))**2))
+            cff1=(0.5_r8*(sustr(i,j)+sustr(i+1,j)))**2
+            cff2=(0.5_r8*(svstr(i,j)+svstr(i,j+1)))**2
+            cff3=SQRT(cff1+cff2)
+            ustar = SQRT(cff3)
+#    ifdef MASKING
+            ustar = ustar*rmask(i,j)
+#    endif
+           if(ustar.lt.small)then
+              ustar = small
+           end if
+
+! AMM1
 #    ifdef GAMMAS_KY1972
 !           turb = 2.12_r8*LOG((ustar*Hz(i,j,N(ng)))/visc)
             cff1=ustar*Hz(i,j,N(ng))/visc
@@ -1073,7 +1103,7 @@
 !           tl_gammaS(i,j) = tl_ustar/(turb + Scadj - 6.0_r8)-           &
 !    &                       tl_turb*gammaS(i,j)/(turb + Scadj - 6.0_r8)
             ad_ustar=ad_ustar+ad_gammaS(i,j)/(turb + Scadj - 6.0_r8)
-            ad_turb=ad_turb-ad_gammaS(i,j)*gammaS(i,j)/                  &
+            ad_turb=ad_turb-ad_gammaS(i,j)*gammaS(i,j)/                 &
      &                               (turb + Scadj - 6.0_r8)
             ad_gammaS(i,j)=0.0_r8
 
@@ -1081,7 +1111,7 @@
 !    &                       tl_turb*gammaT(i,j)/(turb + Pradj - 6.0_r8)
 
             ad_ustar=ad_ustar+ad_gammaT(i,j)/(turb + Pradj - 6.0_r8)
-            ad_turb=ad_turb-ad_gammaT(i,j)*gammaT(i,j)/                  &
+            ad_turb=ad_turb-ad_gammaT(i,j)*gammaT(i,j)/                 &
      &                               (turb + Pradj - 6.0_r8)
             ad_gammaT(i,j)=0.0_r8
 
@@ -1091,7 +1121,8 @@
               ad_turb=0.0_r8
              
 !             tl_cff1=2.0_r8*5300.0_r8*tl_ustar*ustar/ABS(f(i,j))
-              ad_ustar=ad_ustar+2.0_r8*5300.0_r8*ustar*ad_cff1/ABS(f(i,j))
+              ad_ustar=ad_ustar+2.0_r8*5300.0_r8*ustar*ad_cff1/         &
+     &                          ABS(f(i,j))
               ad_cff1=0.0_r8
 
             ELSE
@@ -1110,7 +1141,7 @@
            if(ustar.lt.small)then
 !             tl_ustar = 0.0_r8
               ad_ustar = 0.0_r8
-           end
+           end if
 
 #    ifdef MASKING
 !           tl_ustar = tl_ustar*rmask(i,j)
@@ -1143,6 +1174,8 @@
 
 ! Get the insitu salinity and temperature
 # ifdef ICESHELF_TEOS10
+          ct = ct_from_theta(Sm,t(i,j,N(ng),nrhs,itemp))
+
 !         tl_Tm = tl_t_from_ct(Sm,tl_Sm,ct,tl_ct,-zice(i,j),            &
 !    &                                           -tl_zice(i,j))
           ad_Sm=ad_Sm+ad_t_from_ct(1,ad_Tm,Sm,ct,-zice(i,j))
@@ -1155,18 +1188,22 @@
 !    &                                      tl_t(i,j,N(ng),nrhs,itemp))
           ad_Sm=ad_Sm+                                                  &
      &            ad_ct_from_theta(1,ad_ct,Sm,t(i,j,N(ng),nrhs,itemp))
-          ad_t(i,j,N(ng),nrhs,itemp))=ad_t(i,j,N(ng),nrhs,itemp))+      &
+          ad_t(i,j,N(ng),nrhs,itemp)=ad_t(i,j,N(ng),nrhs,itemp)+        &
      &            ad_ct_from_theta(2,ad_ct,Sm,t(i,j,N(ng),nrhs,itemp))
           ad_ct=0.0_r8
 # else
 !        CALL tl_potit(Sm,tl_Sm,t(i,j,N(ng),nrhs,itemp),                &
 !    &                 tl_t(i,j,N(ng),nrhs,itemp),-zice(i,j),           &
 !    &                 -tl_zice(i,j),0.0_r8,Tm,tl_Tm,i,j)
+         fac=-ad_zice(i,j)
          CALL ad_potit(Sm,ad_Sm,t(i,j,N(ng),nrhs,itemp),                &
      &                 ad_t(i,j,N(ng),nrhs,itemp),-zice(i,j),           &
-     &                 -ad_zice(i,j),0.0_r8,ad_RPres,Tm,ad_Tm,i,j)
+     &                 fac,0.0_r8,ad_RPres,Tm,ad_Tm,i,j)
+!AMM     &                 -ad_zice(i,j),0.0_r8,ad_RPres,Tm,ad_Tm,i,j)
+         ad_zice(i,j)=fac
 # endif
 
+! AMM2
 #else
       DO itrc=1,NT(ng)
 !             tl_stflx(i,j,itrc)=0.0_r8
@@ -1228,7 +1265,7 @@
 !    &                    LBi, UBi, LBj, UBj,                           &
 !    &                    NghostPoints, EWperiodic(ng), NSperiodic(ng), &
 !    &                    tl_sustr,tl_svstr)
-      CALL ad_mp_exchange2d (ng, tile, iNLM, 2,                            &
+      CALL ad_mp_exchange2d (ng, tile, iNLM, 2,                         &
      &                    LBi, UBi, LBj, UBj,                           &
      &                    NghostPoints, EWperiodic(ng), NSperiodic(ng), &
      &                    ad_sustr,ad_svstr)
@@ -1289,7 +1326,7 @@
 !             tl_cff2=(cff1*tl_cff1+                                    &
 !    &                  v(i,j,N(ng),nrhs)*tl_v(i,j,N(ng),nrhs))/cff2
               ad_cff1=ad_cff1+cff1*ad_cff2/cff2
-              ad_v(i,j,N(ng),nrhs))=ad_v(i,j,N(ng),nrhs))+              &
+              ad_v(i,j,N(ng),nrhs)=ad_v(i,j,N(ng),nrhs)+                &
      &                          ad_cff2*v(i,j,N(ng),nrhs)/cff2
               ad_cff2=0.0_r8
             ELSE
@@ -1333,7 +1370,7 @@
      &                                  ad_sustr(i,j)
             ad_u(i,j,N(ng),nrhs)=ad_u(i,j,N(ng),nrhs)-0.5_r8*           &
      &                   (wrk(i-1,j)+wrk(i,j))*cff2*ad_sustr(i,j)
-            ad_cff2=ad_cff2)-0.5_r8*(wrk(i-1,j)+wrk(i,j))*              &
+            ad_cff2=ad_cff2-0.5_r8*(wrk(i-1,j)+wrk(i,j))*               &
      &                   u(i,j,N(ng),nrhs)*ad_sustr(i,j)
             ad_sustr(i,j)=0.0_r8
 
@@ -1411,9 +1448,9 @@
 !           tl_svstr(i,j)=-rdrg2(ng)*(tl_v(i,j,N(ng),nrhs)*cff2+        &
 !    &                                v(i,j,N(ng),nrhs)*tl_cff2)
             ad_v(i,j,N(ng),nrhs)=ad_v(i,j,N(ng),nrhs)-rdrg2(ng)*cff2*   &
-     &                           adsvstr(i,j)
-            ad_cff2=ad_cff2-rdrg2(ng)*v(i,j,N(ng),nrhs)*adsvstr(i,j)
-            adsvstr(i,j)=0.0_r8
+     &                           ad_svstr(i,j)
+            ad_cff2=ad_cff2-rdrg2(ng)*v(i,j,N(ng),nrhs)*ad_svstr(i,j)
+            ad_svstr(i,j)=0.0_r8
 
             IF (cff2.ne.0.0_r8) THEN
 !             tl_cff2=(cff1*tl_cff1+                                    &
@@ -1491,7 +1528,7 @@
         DO i=Istr,IEND
           IF (zice(i,j)*zice(i,j-1).ne.0.0_r8) THEN
 !           tl_svstr(i,j)=-rdrg(ng)*tl_v(i,j,N(ng),nrhs)
-            ad_v(i,j,N(ng),nrhs)=ad_v(i,j,N(ng),nrhs)-rdrg(ng)*          &
+            ad_v(i,j,N(ng),nrhs)=ad_v(i,j,N(ng),nrhs)-rdrg(ng)*         &
      &                          ad_svstr(i,j)
             ad_svstr(i,j)=0.0_r8
           END IF
@@ -1501,7 +1538,7 @@
         DO i=IstrU,IEND
           IF (zice(i,j)*zice(i-1,j).ne.0.0_r8) THEN
 !           tl_sustr(i,j)=-rdrg(ng)*tl_u(i,j,N(ng),nrhs)
-            ad_u(i,j,N(ng),nrhs)=ad_u(i,j,N(ng),nrhs)-rdrg(ng)*          &
+            ad_u(i,j,N(ng),nrhs)=ad_u(i,j,N(ng),nrhs)-rdrg(ng)*         &
      &                          ad_sustr(i,j)
             ad_sustr(i,j)=0.0_r8
           END IF
@@ -3535,11 +3572,13 @@
 
       USE mod_kinds
 
-      real(r8), intent(in) :: Sal, Temp, Pres
+      real(r8), intent(in) :: Sal, Temp, Pres, ain
       real(r8)             :: ad_Sal, ad_Temp, ad_Pres
       real(r8)             :: s0,a0,a1,a2,a3,b0,b1,c0,c1,c2,c3
-      real(r8)             :: d0,d1,e0,e1,e2,ds,tl_ds
+      real(r8)             :: d0,d1,e0,e1,e2,ds,ad_ds
       real(r8)             :: fac1, fac2, ad_fac1, ad_fac2
+
+      integer :: iflag
 
       data s0 /35.0D0/
       data a0,a1,a2,a3 /3.5803D-5, 8.5258D-6, -6.8360D-8, 6.6228D-10/
@@ -3618,16 +3657,14 @@
 !               rfpres =     0.000    dbar
 
       USE mod_kinds
+      USE iceshelf_vbc_mod, ONLY : dTemp
 
-      real(r8), intent(in) ::  Sal,Temp,Pres,RPres
+      real(r8), intent(in) ::  Sal,Temp,Pres,RPres,ain
       real(r8)             ::  ad_Sal,ad_Temp,ad_Pres,ad_RPres
       real(r8)             ::  p,t,dp,dt,q,ct2,ct3,cq2a,cq2b,cq3a,cq3b
       real(r8)             ::  ad_p,ad_t,ad_dp,ad_dt,ad_q
 
-      real*8, intent(in) ::  Sal,Temp,Pres,RPres
-      real*8             ::  ad_Sal,ad_Temp,ad_Pres,ad_RPres
-      real*8             ::  p,t,dp,dt,q,ct2,ct3,cq2a,cq2b,cq3a,cq3b
-      real*8             ::  ad_p,ad_t,ad_dp,ad_dt,ad_q
+      integer :: iflag
 
       data ct2 ,ct3  /0.29289322 ,  1.707106781/
       data cq2a,cq2b /0.58578644 ,  0.121320344/
@@ -3641,7 +3678,6 @@
       ad_dp=0.0_r8
       ad_dt=0.0_r8
       ad_q=0.0_r8
-      ad_dq=0.0_r8
       ad_Sal=0.0_r8
       ad_Temp=0.0_r8
       ad_Pres=0.0_r8
@@ -3790,6 +3826,7 @@
 ! (rfpres, dbar) with the help of an iterative method.
 
       USE mod_kinds
+      USE iceshelf_vbc_mod, ONLY : thetaa
 
       integer, intent(in)   :: i, j
       real(r8), intent(in)  :: Sal, Pres,theta, RPres

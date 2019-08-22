@@ -39,6 +39,9 @@
       USE mod_coupling
       USE mod_grid
       USE mod_ocean
+# if defined ICESHELF && defined ICESHELF_MORPH
+      USE mod_iceshelfvar
+# endif
 # if defined SEDIMENT && defined SED_MORPH
       USE mod_sediment
 # endif
@@ -61,9 +64,14 @@
      &                        nstp(ng), nnew(ng),                       &
      &                        GRID(ng) % h,                             &
      &                        GRID(ng) % ad_h,                          &
-# ifdef ICESHELF
+#  ifdef ICESHELF
      &                        GRID(ng) % zice,                          &
-# endif
+     &                        GRID(ng) % ad_zice,                       &
+#   ifdef ICESHELF_MORPH
+     &                     ICESHELFVAR(ng) % iceshelf_draft,            &
+     &                     ICESHELFVAR(ng) % ad_iceshelf_draft,         &
+#  endif
+#  endif
 # if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
      &                        SEDIMENTS(ng) % ad_bed,                   &
      &                        SEDIMEMTS(ng) % ad_bed_thick0,            &
@@ -86,9 +94,15 @@
      &                              IminS, ImaxS, JminS, JmaxS,         &
      &                              nstp, nnew,                         &
      &                              h, ad_h,                            &
-# ifdef ICESHELF
+#  ifdef ICESHELF
      &                              zice,                               &
-# endif
+     &                              ad_zice,                            &
+#   ifdef ICESHELF_MORPH
+     &                              iceshelf_draft                      &
+     &                              ad_iceshelf_draft,                  &
+#   endif
+#  endif
+
 # if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
      &                              ad_bed, bed_thick0,                 &
 # endif
@@ -119,7 +133,12 @@
       real(r8), intent(in) :: h(LBi:,LBj:)
       real(r8), intent(in) :: Zt_avg1(LBi:,LBj:)
 #  ifdef ICESHELF
-      real(r8), intent(in) :: zice(LBi:,LBj:)
+      real(r8), intent(inout) :: zice(LBi:,LBj:)
+      real(r8), intent(inout) :: ad_zice(LBi:,LBj:)
+#    ifdef ICESHELF_MORPH
+      real(r8), intent(in):: iceshelf_draft(LBi:,LBj:,:)
+      real(r8), intent(inout):: ad_iceshelf_draft(LBi:,LBj:,:)
+#    endif
 #  endif
 #  if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
       real(r8), intent(in) :: ad_bed(LBi:,LBj:,:,:)
@@ -135,7 +154,13 @@
       real(r8), intent(in) :: Zt_avg1(LBi:UBi,LBj:UBj)
 #  ifdef ICESHELF
       real(r8), intent(in) :: zice(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: ad_zice(LBi:UBi,LBj:UBj)
+#   ifdef ICESHELF_MORPH
+      real(r8), intent(in):: iceshelf_draft(LBi:UBi,LBj:UBj,2)
+      real(r8), intent(inout):: tl_iceshelf_draft(LBi:UBi,LBj:UBj,2)
+#   endif
 #  endif
+
 #  if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
       real(r8), intent(inout) :: ad_bed(LBi:UBi,LBj:UBj,Nbed,MBEDP)
       real(r8), intent(inout) :: ad_bed_thick0(LBi:UBi,LBj:UBi)
@@ -263,9 +288,9 @@
             cff1_w=SCALARS(ng)%Cs_w(k)
             DO i=IstrT,IendT
               hwater=h(i,j)
-# ifdef ICESHELF
+#  ifdef ICESHELF
               hwater=hwater-ABS(zice(i,j))
-# endif
+#  endif
               hinv=1.0_r8/hwater
               z_w0=cff_w+cff1_w*hwater
               z_r0=cff_r+cff1_r*hwater
@@ -275,6 +300,16 @@
               ad_z_w(i,j,k  )=ad_z_w(i,j,k  )+ad_Hz(i,j,k)
               ad_z_w(i,j,k-1)=ad_z_w(i,j,k-1)-ad_Hz(i,j,k)
               ad_Hz(i,j,k)=0.0_r8
+#  ifdef ICESHELF
+!>            tl_z_r(i,j,k)=tl_z_r(i,j,k)-                              &
+!>   &                  SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+              ad_zice(i,j)=ad_zice(i,j)-                                &
+     &                        SIGN(1.0_r8,zice(i,j))*ad_z_r(i,j,k)
+!>            tl_z_w(i,j,k)=tl_z_w(i,j,k)-                              &
+!>   &                  SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+              ad_zice(i,j)=ad_zice(i,j)-                                &
+     &                        SIGN(1.0_r8,zice(i,j))*ad_z_w(i,j,k)
+#  endif
 !>            tl_z_r(i,j,k)=tl_z_r0+                                    &
 !>   &                      tl_Zt_avg1(i,j)*(1.0_r8+z_r0*hinv)+         &
 !>   &                      Zt_avg1(i,j)*(tl_z_r0*hinv+z_r0*tl_hinv)
@@ -307,6 +342,11 @@
 !>
               ad_hwater=ad_hwater-hinv*hinv*ad_hinv
               ad_hinv=0.0_r8
+#  ifdef ICESHELF
+!>            tl_hwater=tl_hwater-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+              ad_zice(i,j)=ad_zice(i,j)-                                 &
+     &                         SIGN(1.0_r8,zice(i,j))*ad_hwater
+#  endif
 !>            tl_hwater=tl_h(i,j)
 !>
               ad_h(i,j)=ad_h(i,j)+ad_hwater
@@ -335,6 +375,14 @@
 
             ad_bed_thick(i,j,nstp)=ad_bed_thick(i,j,nstp)-              &
      &                             ad_h(i,j)
+# endif
+# if defined ICESHELF && defined ICESHELF_MORPH
+!>          tl_zice(i,j)=tl_zice(i,j)-tl_iceshelf_draft(i,j,nstp)       &
+!>   &                         +tl_iceshelf_draft(i,j,nnew)
+            ad_iceshelf_draft(i,j,nstp)=ad_iceshelf_draft(i,j,nstp)-    &
+     &                   ad_zice(i,j)
+            ad_iceshelf_draft(i,j,nnew)=ad_iceshelf_draft(i,j,nnew)+    &
+     &                   ad_zice(i,j)
 # endif
           END DO
         END DO
@@ -370,6 +418,16 @@
               ad_z_w(i,j,k  )=ad_z_w(i,j,k  )+ad_Hz(i,j,k)
               ad_z_w(i,j,k-1)=ad_z_w(i,j,k-1)-ad_Hz(i,j,k)
               ad_Hz(i,j,k)=0.0_r8
+#  ifdef ICESHELF
+!>            tl_z_r(i,j,k)=tl_z_r(i,j,k)-                              &
+!>   &                 SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+              ad_zice(i,j)=ad_zice(i,j)-                                &
+     &                 SIGN(1.0_r8,zice(i,j))*ad_z_r(i,j,k)
+!>            tl_z_w(i,j,k)=tl_z_w(i,j,k)-                              &
+!>   &                 SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+              ad_zice(i,j)=ad_zice(i,j)-                                &
+     &                 SIGN(1.0_r8,zice(i,j))*ad_z_w(i,j,k)
+#  endif
 !>            tl_z_r(i,j,k)=tl_Zt_avg1(i,j)+                            &
 !>   &                      (tl_Zt_avg1(i,j)+tl_hwater)*cff2_r+         &
 !>   &                      (Zt_avg1(i,j)+hwater)*tl_cff2_r
@@ -410,6 +468,11 @@
 !>
               ad_hwater=ad_hwater-hinv*hinv*ad_hinv
               ad_hinv=0.0_r8
+#  ifdef ICESHELF
+!>            tl_hwater=tl_hwater-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j) 
+              ad_zice(i,j)=ad_zice(i,j)-                                &
+     &                     SIGN(1.0_r8,zice(i,j))*ad_hwater
+#  endif
 !>            tl_hwater=tl_h(i,j)
 !>
               ad_h(i,j)=ad_h(i,j)+ad_hwater
@@ -438,6 +501,14 @@
 
             ad_bed_thick(i,j,nstp)=ad_bed_thick(i,j,nstp)-              &
      &                             ad_h(i,j)
+# endif
+# if defined ICESHELF && defined ICESHELF_MORPH
+!>          tl_zice(i,j)=tl_zice(i,j)-tl_iceshelf_draft(i,j,nstp)       &
+!>   &                         +tl_iceshelf_draft(i,j,nnew)
+            ad_iceshelf_draft(i,j,nstp)=ad_iceshelf_draft(i,j,nstp)-    &
+     &                                        ad_zice(i,j)
+            ad_iceshelf_draft(i,j,nnew)=ad_iceshelf_draft(i,j,nnew)+    &
+     &                                        ad_zice(i,j)
 # endif
           END DO
         END DO
@@ -473,6 +544,7 @@
      &                            GRID(ng) % ad_h,                      &
 #  ifdef ICESHELF
      &                            GRID(ng) % zice,                      &
+     &                            GRID(ng) % ad_zice,                   &
 #  endif
      &                            GRID(ng) % ad_Hz_bry)
 #  ifdef PROFILE
@@ -488,6 +560,7 @@
      &                                  h, ad_h,                        &
 #  ifdef ICESHELF
      &                                  zice,                           &
+     &                                  ad_zice,                        &
 #  endif
      &                                  ad_Hz_bry)
 !***********************************************************************
@@ -512,6 +585,7 @@
       real(r8), intent(inout) :: ad_h(LBi:,LBj:)
 #   ifdef ICESHELF
       real(r8), intent(in) :: zice(LBi:,LBj:)
+      real(r8), intent(inout) :: ad_zice(LBi:,LBj:)
 #   endif
       real(r8), intent(out) :: ad_Hz_bry(LBij:,:,:)
 #  else
@@ -519,6 +593,7 @@
       real(r8), intent(inout) :: ad_h(LBi:UBi,LBj:UBj)
 #   ifdef ICESHELF
       real(r8), intent(in) :: zice(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: ad_zice(LBi:UBi,LBj:UBj)
 #   endif
       real(r8), intent(out) :: ad_Hz_bry(LBij:UBij,N(ng),4)
 #  endif
@@ -598,6 +673,10 @@
               ad_Zw(k-1)=ad_Zw(k-1)-ad_Hz_bry(i,k,inorth)
               ad_Zw(k  )=ad_Zw(k  )+ad_Hz_bry(i,k,inorth)
               ad_Hz_bry(i,k,inorth)=0.0_r8
+#   ifdef ICESHELF
+!>            tl_Zw(k)=tl_Zw(k)-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+              ad_zice(i,j)=ad_zice(i,j)-SIGN(1.0_r8,zice(i,j))*ad_Zw(k)
+#   endif
 !>            tl_Zw(k)=tl_z_w0+                                         &
 !>   &                 BOUNDARY(ng)%tl_zeta_north(i)*                   &
 !>   &                 (1.0_r8+z_w0*hinv)+                              &
@@ -624,6 +703,10 @@
 !>
             ad_hwater=ad_hwater-hinv*hinv*ad_hinv
             ad_hinv=0.0_r8
+#   ifdef ICESHELF
+!>          tl_hwater=tl_hwater-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+            ad_zice(i,j)=ad_zice(i,j)-SIGN(1.0_r8,zice(i,j))*ad_hwater
+#   endif
 !>          tl_hwater=tl_h(i,j)
 !>
             ad_h(i,j)=ad_h(i,j)+ad_hwater
@@ -649,6 +732,10 @@
               ad_Zw(k-1)=ad_Zw(k-1)-ad_Hz_bry(i,k,isouth)
               ad_Zw(k  )=ad_Zw(k  )+ad_Hz_bry(i,k,isouth)
               ad_Hz_bry(i,k,isouth)=0.0_r8
+#   ifdef ICESHELF
+!>            tl_Zw(k)=tl_Zw(k)-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+              ad_zice(i,j)=ad_zice(i,j)-SIGN(1.0_r8,zice(i,j))*ad_Zw(k)
+#   endif
 !>            tl_Zw(k)=tl_z_w0+                                         &
 !>   &                 BOUNDARY(ng)%tl_zeta_south(i)*                   &
 !>   &                 (1.0_r8+z_w0*hinv)+                              &
@@ -675,6 +762,10 @@
 !>
             ad_hwater=ad_hwater-hinv*hinv*ad_hinv
             ad_hinv=0.0_r8
+#   ifdef ICESHELF
+!>          tl_hwater=tl_hwater-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+            ad_zice(i,j)=ad_zice(i,j)-SIGN(1.0_r8,zice(i,j))*ad_hwater
+#   endif
 !>          tl_hwater=tl_h(i,j)
 !>
             ad_h(i,j)=ad_h(i,j)+ad_hwater
@@ -700,6 +791,10 @@
               ad_Zw(k-1)=ad_Zw(k-1)-ad_Hz_bry(i,k,ieast)
               ad_Zw(k  )=ad_Zw(k  )+ad_Hz_bry(i,k,ieast)
               ad_Hz_bry(i,k,ieast)=0.0_r8
+#   ifdef ICESHELF
+!>            tl_Zw(k)=tl_Zw(k)-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+              ad_zice(i,j)=ad_zice(i,j)-SIGN(1.0_r8,zice(i,j))*ad_Zw(k)
+#   endif
 !>            tl_Zw(k)=tl_z_w0+                                         &
 !>   &                 BOUNDARY(ng)%tl_zeta_east(j)*                    &
 !>   &                 (1.0_r8+z_w0*hinv)+                              &
@@ -726,6 +821,10 @@
 !>
             ad_hwater=ad_hwater-hinv*hinv*ad_hinv
             ad_hinv=0.0_r8
+#   ifdef ICESHELF
+!>          tl_hwater=tl_hwater-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+            ad_zice(i,j)=ad_zice(i,j)-SIGN(1.0_r8,zice(i,j))*ad_hwater
+#   endif
 !>          tl_hwater=tl_h(i,j)
 !>
             ad_h(i,j)=ad_h(i,j)+ad_hwater
@@ -751,6 +850,10 @@
               ad_Zw(k-1)=ad_Zw(k-1)-ad_Hz_bry(i,k,iwest)
               ad_Zw(k  )=ad_Zw(k  )+ad_Hz_bry(i,k,iwest)
               ad_Hz_bry(i,k,iwest)=0.0_r8
+#   ifdef ICESHELF
+!>            tl_Zw(k)=tl_Zw(k)-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+              ad_zice(i,j)=ad_zice(i,j)-SIGN(1.0_r8,zice(i,j))*ad_Zw(k)
+#   endif
 !>            tl_Zw(k)=tl_z_w0+                                         &
 !>   &                 BOUNDARY(ng)%tl_zeta_west(j)*                    &
 !>   &                 (1.0_r8+z_w0*hinv)+                              &
@@ -777,6 +880,10 @@
 !>
             ad_hwater=ad_hwater-hinv*hinv*ad_hinv
             ad_hinv=0.0_r8
+#   ifdef ICESHELF
+!>          tl_hwater=tl_hwater-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+            ad_zice(i,j)=ad_zice(i,j)-SIGN(1.0_r8,zice(i,j))*ad_hwater
+#   endif
 !>          tl_hwater=tl_h(i,j)
 !>
             ad_h(i,j)=ad_h(i,j)+ad_hwater
@@ -815,6 +922,10 @@
               ad_Zw(k-1)=ad_Zw(k-1)-ad_Hz_bry(i,k,inorth)
               ad_Zw(k  )=ad_Zw(k  )+ad_Hz_bry(i,k,inorth)
               ad_Hz_bry(i,k,inorth)=0.0_r8
+#   ifdef ICESHELF
+!>            tl_Zw(k)=tl_Zw(k)-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+              ad_zice(i,j)=ad_zice(i,j)-SIGN(1.0_r8,zice(i,j))*ad_Zw(k)
+#   endif
 !>            tl_Zw(k)=BOUNDARY(ng)%tl_zeta_north(i)+                   &
 !>   &                 (BOUNDARY(ng)%tl_zeta_north(i)+                  &
 !>   &                  tl_hwater)*cff2_w+                              &
@@ -846,6 +957,10 @@
 !>
             ad_hwater=ad_hwater-hinv*hinv*ad_hinv
             ad_hinv=0.0_r8
+#   ifdef ICESHELF
+!>          tl_hwater=tl_hwater-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+            ad_zice(i,j)=ad_zice(i,j)-SIGN(1.0_r8,zice(i,j))*ad_hwater
+#   endif
 !>          tl_hwater=tl_h(i,j)
 !>
             ad_h(i,j)=ad_h(i,j)+ad_hwater
@@ -871,6 +986,10 @@
               ad_Zw(k-1)=ad_Zw(k-1)-ad_Hz_bry(i,k,isouth)
               ad_Zw(k  )=ad_Zw(k  )+ad_Hz_bry(i,k,isouth)
               ad_Hz_bry(i,k,isouth)=0.0_r8
+#   ifdef ICESHELF
+!>            tl_Zw(k)=tl_Zw(k)-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+              ad_zice(i,j)=ad_zice(i,j)-SIGN(1.0_r8,zice(i,j))*ad_Zw(k)
+#   endif
 !>            tl_Zw(k)=BOUNDARY(ng)%tl_zeta_south(i)+                   &
 !>   &                 (BOUNDARY(ng)%tl_zeta_south(i)+                  &
 !>   &                  tl_hwater)*cff2_w+                              &
@@ -902,6 +1021,10 @@
 !>
             ad_hwater=ad_hwater-hinv*hinv*ad_hinv
             ad_hinv=0.0_r8
+#   ifdef ICESHELF
+!>          tl_hwater=tl_hwater-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+            ad_zice(i,j)=ad_zice(i,j)-SIGN(1.0_r8,zice(i,j))*ad_hwater
+#   endif
 !>          tl_hwater=tl_h(i,j)
 !>
             ad_h(i,j)=ad_h(i,j)+ad_hwater
@@ -927,6 +1050,10 @@
               ad_Zw(k-1)=ad_Zw(k-1)-ad_Hz_bry(i,k,ieast)
               ad_Zw(k  )=ad_Zw(k  )+ad_Hz_bry(i,k,ieast)
               ad_Hz_bry(i,k,ieast)=0.0_r8
+#   ifdef ICESHELF
+!>            tl_Zw(k)=tl_Zw(k)-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+              ad_zice(i,j)=ad_zice(i,j)-SIGN(1.0_r8,zice(i,j))*ad_Zw(k)
+#   endif
 !>            tl_Zw(k)=BOUNDARY(ng)%tl_zeta_east(j)+                    &
 !>   &                 (BOUNDARY(ng)%tl_zeta_east(j)+                   &
 !>   &                  tl_hwater)*cff2_w+                              &
@@ -958,6 +1085,10 @@
 !>
             ad_hwater=ad_hwater-hinv*hinv*ad_hinv
             ad_hinv=0.0_r8
+#   ifdef ICESHELF
+!>          tl_hwater=tl_hwater-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+            ad_zice(i,j)=ad_zice(i,j)-SIGN(1.0_r8,zice(i,j))*ad_hwater
+#   endif
 !>          tl_hwater=tl_h(i,j)
 !>
             ad_h(i,j)=ad_h(i,j)+ad_hwater
@@ -983,6 +1114,10 @@
               ad_Zw(k-1)=ad_Zw(k-1)-ad_Hz_bry(i,k,iwest)
               ad_Zw(k  )=ad_Zw(k  )+ad_Hz_bry(i,k,iwest)
               ad_Hz_bry(i,k,iwest)=0.0_r8
+#   ifdef ICESHELF
+!>            tl_Zw(k)=tl_Zw(k)-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+              ad_zice(i,j)=ad_zice(i,j)-SIGN(1.0_r8,zice(i,j))*ad_Zw(k)
+#   endif
 !>            tl_Zw(k)=BOUNDARY(ng)%tl_zeta_west(j)+                    &
 !>   &                 (BOUNDARY(ng)%tl_zeta_west(j)+                   &
 !>   &                  tl_hwater)*cff2_w+                              &
@@ -1014,6 +1149,10 @@
 !>
             ad_hwater=ad_hwater-hinv*hinv*ad_hinv
             ad_hinv=0.0_r8
+#   ifdef ICESHELF
+!>          tl_hwater=tl_hwater-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+            ad_zice(i,j)=ad_zice(i,j)-SIGN(1.0_r8,zice(i,j))*ad_hwater
+#   endif
 !>          tl_hwater=tl_h(i,j)
 !>
             ad_h(i,j)=ad_h(i,j)+ad_hwater

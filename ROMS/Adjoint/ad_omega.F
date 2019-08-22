@@ -33,13 +33,17 @@
       USE mod_param
       USE mod_grid
       USE mod_ocean
+# if defined ICESHELF && defined ICESHELF_MORPH
+      USE mod_iceshelfvar
+# endif
 # if defined SEDIMENT && defined SED_MORPH
       USE mod_sedbed
 # endif
 # ifdef Q_PSOURCE
       USE mod_sources
 # endif
-# if defined Q_PSOURCE || (defined SEDIMENT && defined SED_MORPH)
+# if defined Q_PSOURCE || (defined SEDIMENT && defined SED_MORPH) || \
+                        (defined ICESHELF && defined ICESHELF_MORPH)
       USE mod_stepping
 # endif
 !
@@ -57,7 +61,8 @@
       CALL ad_omega_tile (ng, tile,                                     &
      &                    LBi, UBi, LBj, UBj,                           &
      &                    IminS, ImaxS, JminS, JmaxS,                   &
-# if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
+# if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET || \
+      defined ICESHELF && defined ICESHELF_MORPH
      &                    nstp(ng), nnew(ng),                           &
 # endif
 # ifdef Q_PSOURCE
@@ -67,8 +72,15 @@
      &                    SOURCES(ng) % Dsrc,                           &
      &                    SOURCES(ng) % Qsrc,                           &
 # endif
-# if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
+# if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET || \
+      defined ICESHELF && defined ICESHELF_MORPH
      &                    GRID(ng) % omn,                               &
+# endif
+# if defined ICESHELF && defined ICESHELF_MORPH
+     &              ICESHELFVAR(ng) % iceshelf_draft,                   &
+     &              ICESHELFVAR(ng) % ad_iceshelf_draft,                &
+# endif
+# if defined SEDIMENT && defined SED_MORPH
      &                    SEDBED(ng) % bed_thick,                       &
      &                    SEDBED(ng) % ad_bed_thick,                    &
 # endif
@@ -90,15 +102,23 @@
       SUBROUTINE ad_omega_tile (ng, tile,                               &
      &                          LBi, UBi, LBj, UBj,                     &
      &                          IminS, ImaxS, JminS, JmaxS,             &
-# if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
+# if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET || \
+      defined ICESHELF && defined ICESHELF_MORPH
      &                          nstp, nnew,                             &
 # endif
 # ifdef Q_PSOURCE
      &                          Msrc, Nsrc,                             &
      &                          Isrc, Jsrc, Dsrc, Qsrc,                 &
 # endif
-# if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
+# if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET || \
+      defined ICESHELF && defined ICESHELF_MORPH
      &                          omn,
+# endif
+# if defined ICESHELF && defined ICESHELF_MORPH
+     &                       iceshelf_draft,                            &
+     &                       ad_iceshelf_draft,                         &
+# endif
+# if defined SEDIMENT && defined SED_MORPH
      &                          bed_thick, ad_bed_thick,                &
 # endif
      &                          Huon, Hvom, z_w,                        &
@@ -121,7 +141,8 @@
       integer, intent(in) :: ng, tile
       integer, intent(in) :: LBi, UBi, LBj, UBj
       integer, intent(in) :: IminS, ImaxS, JminS, JmaxS
-# if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
+# if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET || \
+      defined ICESHELF && defined ICESHELF_MORPH
       integer, intent(in) :: nstp, nnew
 # endif
 # ifdef Q_PSOURCE
@@ -139,8 +160,15 @@
       real(r8), intent(in) :: Huon(LBi:,LBj:,:)
       real(r8), intent(in) :: Hvom(LBi:,LBj:,:)
       real(r8), intent(in) :: z_w(LBi:,LBj:,0:)
-#  if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
+#  if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET || \
+      defined ICESHELF && defined ICESHELF_MORPH
       real(r8), intent(in) :: omn(LBi:,LBj:)
+#  endif
+#  if defined ICESHELF && defined ICESHELF_MORPH
+      real(r8), intent(in):: iceshelf_draft(LBi:,LBj:,:)
+      real(r8), intent(in):: tl_iceshelf_draft(LBi:,LBj:,:)
+#  endif
+#  if defined SEDIMENT && defined SED_MORPH
       real(r8), intent(in):: bed_thick(LBi:,LBj:,:)
       real(r8), intent(inout):: ad_bed_thick(LBi:,LBj:,:)
 #  endif
@@ -163,8 +191,15 @@
       real(r8), intent(in) :: Huon(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(in) :: Hvom(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(in) :: z_w(LBi:UBi,LBj:UBj,0:N(ng))
-#  if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
+#  if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET || \
+      defined ICESHELF && defined ICESHELF_MORPH
       real(r8), intent(in) :: omn(LBi:UBi,LBj:UBj)
+#  endif
+#  if defined ICESHELF && defined ICESHELF_MORPH
+      real(r8), intent(in):: iceshelf_draft(LBi:,LBj:,:)
+      real(r8), intent(in):: tl_iceshelf_draft(LBi:,LBj:,:)
+#  endif
+#  if defined SEDIMENT && defined SED_MORPH
       real(r8), intent(in):: bed_thick(LBi:UBi,LBj:UBj,2)
       real(r8), intent(inout):: ad_bed_thick(LBi:UBi,LBj:UBj,2)
 #  endif
@@ -184,7 +219,8 @@
 # endif
       real(r8) :: cff
       real(r8) :: ad_cff, adfac
-# if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
+# if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET || \
+      defined ICESHELF && defined ICESHELF_MORPH
       real(r8) :: cff1
 # endif
       real(r8), dimension(IminS:ImaxS) :: wrk
@@ -238,7 +274,8 @@
 !  Notice that here we need to recompute the intermediate value
 !  of W which is needed for wrk.
 !
-# if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
+# if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET || \
+      defined ICESHELF && defined ICESHELF_MORPH
       cff1=1.0_r8/dt(ng)
 # endif
       DO j=Jstr,Jend
@@ -256,6 +293,12 @@
             W(i,j,k)=W(i,j,k-1)-                                        &
      &               (Huon(i+1,j,k)-Huon(i,j,k)+                        &
      &                Hvom(i,j+1,k)-Hvom(i,j,k))
+# if defined ICESHELF && defined ICESHELF_MORPH
+             IF(k.eq.N(ng)) THEN
+            W(i,j,N(ng))=W(i,j,N(ng))-cff1*(iceshelf_draft(i,j,nstp)-   &
+     &                    iceshelf_draft(i,j,nnew))*omn(i,j)
+             END IF
+# endif
           END DO
         END DO
 # ifdef Q_PSOURCE
@@ -337,6 +380,18 @@
 !>
         DO k=N(ng),1,-1
           DO i=Istr,Iend
+# if defined ICESHELF && defined ICESHELF_MORPH
+            IF(k.eq.N(ng)) THEN
+!>             tl_W(i,j,N(ng))=tl_W(i,j,N(ng))-                         &
+!>   &                            cff1*(tl_iceshelf_draft(i,j,nstp)-    &
+!>   &                    tl_iceshelf_draft(i,j,nnew))*omn(i,j)
+               ad_iceshelf_draft(i,j,nstp)=ad_iceshelf_draft(i,j,nstp)- &
+    &                               cff1*omn(i,j)*ad_W(i,j,N(ng))
+               ad_iceshelf_draft(i,j,nnew)=ad_iceshelf_draft(i,j,nnew)+ &
+    &                               cff1*omn(i,j)*ad_W(i,j,N(ng))
+            
+            END IF
+# endif
 !>          tl_W(i,j,k)=tl_W(i,j,k-1)-                                  &
 !>   &                  (tl_Huon(i+1,j,k)-tl_Huon(i,j,k)+               &
 !>   &                   tl_Hvom(i,j+1,k)-tl_Hvom(i,j,k))

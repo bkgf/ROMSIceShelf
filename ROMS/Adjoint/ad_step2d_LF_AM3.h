@@ -61,6 +61,10 @@
      &                     GRID(ng) % pmask,       GRID(ng) % rmask,    &
      &                     GRID(ng) % umask,       GRID(ng) % vmask,    &
 # endif
+# if defined SOLVE3D && defined ICESHELF
+     &                  GRID(ng) % zice,                                &
+     &                  GRID(ng) % ad_zice,                             &
+# endif
 # ifdef WET_DRY_NOT_YET
      &                     GRID(ng) % pmask_wet,   GRID(ng) % pmask_io, &
      &                     GRID(ng) % rmask_wet,   GRID(ng) % rmask_io, &
@@ -171,6 +175,10 @@
 # endif
 # ifdef MASKING
      &                           pmask, rmask, umask, vmask,            &
+# endif
+# if defined SOLVE3D && defined ICESHELF
+     &                        zice,                                     &
+     &                        ad_zice,                                  &
 # endif
 # ifdef WET_DRY_NOT_YET
      &                           pmask_wet, pmask_io,                   &
@@ -293,6 +301,10 @@
       real(r8), intent(in) :: umask(LBi:,LBj:)
       real(r8), intent(in) :: vmask(LBi:,LBj:)
 #  endif
+#  if defined SOLVE3D && defined ICESHELF
+      real(r8), intent(in) :: zice(LBi:,LBj:)
+      real(r8), intent(inout) :: ad_zice(LBi:,LBj:)
+#  endif
       real(r8), intent(in) :: fomn(LBi:,LBj:)
       real(r8), intent(in) :: h(LBi:,LBj:)
       real(r8), intent(in) :: om_u(LBi:,LBj:)
@@ -383,6 +395,10 @@
       real(r8), intent(inout) :: rmask_io(LBi:,LBj:)
       real(r8), intent(inout) :: umask_io(LBi:,LBj:)
       real(r8), intent(inout) :: vmask_io(LBi:,LBj:)
+#  if defined SOLVE3D && defined ICESHELF
+      real(r8), intent(in) :: zice(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: ad_zice(LBi:UBi,LBj:UBj)
+#  endif
 
       real(r8), intent(inout) :: pmask_wet(LBi:,LBj:)
       real(r8), intent(inout) :: rmask_wet(LBi:,LBj:)
@@ -605,6 +621,10 @@
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: rhs_zeta
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: zeta_new
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: zwrk
+# ifdef ICESHELF
+      real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: hw
+      real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: ad_hw
+# endif
 # ifdef WET_DRY_NOT_YET
 !>    real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: wetdry
 # endif
@@ -708,6 +728,9 @@
           ad_zwrk(i,j)=0.0_r8
           ad_DUon(i,j)=0.0_r8
           ad_DVom(i,j)=0.0_r8
+# ifdef ICESHELF
+          ad_hw(i,j)=0.0_r8
+# endif
         END DO
       END DO
 !
@@ -727,9 +750,16 @@
 !
       DO j=JstrV-2,Jendp2
         DO i=IstrU-2,Iendp2
+# ifdef ICESHELF
+          hw(i,j)=h(i,j)-ABS(zice(i,j))
+          Drhs(i,j)=zeta(i,j,krhs)+hw(i,j)
+          Dnew(i,j)=zeta(i,j,knew)+hw(i,j)
+          Dstp(i,j)=zeta(i,j,kstp)+hw(i,j)
+# else
           Dnew(i,j)=zeta(i,j,knew)+h(i,j)
           Drhs(i,j)=zeta(i,j,krhs)+h(i,j)
           Dstp(i,j)=zeta(i,j,kstp)+h(i,j)
+# endif
         END DO
       END DO
       DO j=JstrV-2,Jendp2
@@ -918,6 +948,50 @@
 !  Apply adjoint of mass point sources.
 !-----------------------------------------------------------------------
 !
+#ifdef ICESHELF
+     DO is=1,Nsrc
+        i=Isrc(is)
+        j=Jsrc(is)
+        IF (((IstrR.le.i).and.(i.le.IendR)).and.                        &
+     &      ((JstrR.le.j).and.(j.le.JendR))) THEN
+          IF (INT(Dsrc(is)).eq.0) THEN
+            cff=1.0_r8/(on_u(i,j)*                                      &
+     &                  0.5_r8*(zeta(i-1,j,knew)+hw(i-1,j)+             &
+     &                          zeta(i  ,j,knew)+hw(i  ,j)))
+!>          tl_ubar(i,j,knew)=Qbar(is)*tl_cff
+            ad_cff=ad_cff+Qbar(is)*ad_ubar(i,j,knew)
+            ad_ubar(i,j,knew)=0.0_r8
+
+!>          tl_cff=-cff*cff*on_u(i,j)*                                  &
+!>   &                  0.5_r8*(tl_zeta(i-1,j,knew)+tl_hw(i-1,j)+       &
+!>   &                          tl_zeta(i  ,j,knew)+tl_hw(i  ,j))
+             adfac=-cff*cff*on_u(i,j)*0.5_r8*ad_cff
+             ad_hw(i-1,j)=ad_hw(i-1,j)+adfac
+             ad_hw(i  ,j)=ad_hw(i  ,j)+adfac
+             ad_zeta(i-1,j,knew)=ad_zeta(i-1,j,knew)+adfac
+             ad_zeta(i  ,j,knew)=ad_zeta(i  ,j,knew)+adfac
+             ad_cff=0.0_r8
+          ELSE
+            cff=1.0_r8/(om_v(i,j)*                                      &
+     &                  0.5_r8*(zeta(i,j-1,knew)+hw(i,j-1)+             &
+     &                          zeta(i,j  ,knew)+hw(i,j  )))
+!>          tl_vbar(i,j,knew)=Qbar(is)*tl_cff
+            ad_cff=ad_cff+Qbar(is)*ad_vbar(i,j,knew)
+            ad_vbar(i,j,knew)=0.0_r8
+
+!>          tl_cff=-cff*cff*om_v(i,j)*                                  &
+!>   &                  0.5_r8*(tl_zeta(i,j-1,knew)+tl_hw(i,j-1)+       &
+!>   &                          tl_zeta(i,j  ,knew)+tl_hw(i,j  )))
+            adfac=-cff*cff*om_v(i,j)*0.5_r8*ad_cff
+            ad_hw(i,j-1)=ad_hw(i,j-1)+adfac
+            ad_hw(i,j  )=ad_hw(i,j  )+adfac
+            ad_zeta(i,j-1,knew)=ad_zeta(i,j-1,knew)+adfac
+            ad_zeta(i,j  ,knew)=ad_zeta(i,j  ,knew)+adfac
+            ad_cff=0.0_r8
+          END IF
+        END IF
+      END DO
+#  else
         DO is=1,Nsrc
           i=Isrc(is)
           j=Jsrc(is)
@@ -962,6 +1036,7 @@
             END IF
           END IF
         END DO
+#  endif
 # endif
         IF (ANY(ad_VolCons(:,ng))) THEN
 !>        CALL tl_obc_flux_tile (ng, tile,                              &
@@ -971,7 +1046,11 @@
 #  ifdef MASKING
 !>   &                           umask, vmask,                          &
 #  endif
+#  ifdef ICESHELF
+!>   &                           hw, tl_hw, om_v, on_u,                 &
+#  else
 !>   &                           h, tl_h, om_v, on_u,                   &
+#  endif
 !>   &                           ubar, vbar, zeta,                      &
 !>   &                           tl_ubar, tl_vbar, tl_zeta)
 !>
@@ -982,7 +1061,11 @@
 #  ifdef MASKING
      &                           umask, vmask,                          &
 #  endif
+#  ifdef ICESHELF
+     &                           hw, ad_hw, om_v, on_u,                 &
+#  else
      &                           h, ad_h, om_v, on_u,                   &
+#  endif
      &                           ubar, vbar, zeta,                      &
      &                           ad_ubar, ad_vbar, ad_zeta)
         END IF
@@ -1692,11 +1775,18 @@
 !
         DO j=JstrV-1,Jend
           DO i=IstrU-1,Iend
+# ifdef ICESHELF
+!>          tl_Dstp(i,j)=tl_zeta(i,j,kstp)+tl_hw(i,j)
+            ad_zeta(i,j,kstp)=ad_zeta(i,j,kstp)+ad_Dstp(i,j)
+            ad_hw(i,j)=ad_hw(i,j)+ad_Dstp(i,j)
+            ad_Dstp(i,j)=0.0_r8
+# else
 !>          tl_Dstp(i,j)=tl_zeta(i,j,kstp)+tl_h(i,j)
 !>
             ad_zeta(i,j,kstp)=ad_zeta(i,j,kstp)+ad_Dstp(i,j)
             ad_h(i,j)=ad_h(i,j)+ad_Dstp(i,j)
             ad_Dstp(i,j)=0.0_r8
+# endif
           END DO
         END DO
 !
@@ -4182,25 +4272,45 @@
               ad_gzeta(i,j  )=ad_gzeta(i,j  )+adfac
 # endif
 !>            tl_rhs_vbar(i,j)=cff1*om_v(i,j)*                          &
+# ifdef ICESHELF
+!>   &                         ((tl_hw(i,j-1)+                          &
+!>   &                           tl_hw(i,j  ))*                         &
+# else
 !>   &                         ((tl_h(i,j-1)+                           &
 !>   &                           tl_h(i,j  ))*                          &
+# endif
 !>   &                          (gzeta(i,j-1)-                          &
 !>   &                           gzeta(i,j  ))+                         &
+# ifdef ICESHELF
+!>   &                          (hw(i,j-1)+                             &
+!>   &                            hw(i,j  ))*                           &
+# else
 !>   &                          (h(i,j-1)+                              &
 !>   &                           h(i,j  ))*                             &
+# endif
 !>   &                          (tl_gzeta(i,j-1)-                       &
 !>   &                           tl_gzeta(i,j  ))+                      &
 # if defined VAR_RHO_2D && defined SOLVE3D
+#  ifdef ICESHELF
+!>   &                          (tl_hw(i,j-1)-                          &
+!>   &                           tl_hw(i,j  ))*                         &
+#  else
 !>   &                          (tl_h(i,j-1)-                           &
 !>   &                           tl_h(i,j  ))*                          &
+#  endif
 !>   &                          (gzetaSA(i,j-1)+                        &
 !>   &                           gzetaSA(i,j  )+                        &
 !>   &                           cff2*(rhoA(i,j-1)-                     &
 !>   &                                 rhoA(i,j  ))*                    &
 !>   &                                (zwrk(i,j-1)-                     &
 !>   &                                 zwrk(i,j  )))+                   &
+#  ifdef ICESHELF
+!>   &                          (hw(i,j-1)-                             &
+!>   &                           hw(i,j  ))*                            &
+#  else
 !>   &                          (h(i,j-1)-                              &
 !>   &                           h(i,j  ))*                             &
+#  endif
 !>   &                          (tl_gzetaSA(i,j-1)+                     &
 !>   &                           tl_gzetaSA(i,j  )+                     &
 !>   &                           cff2*((tl_rhoA(i,j-1)-                 &
@@ -4218,8 +4328,13 @@
               adfac=cff1*om_v(i,j)*ad_rhs_vbar(i,j)
               adfac1=adfac*(gzeta(i,j-1)-gzeta(i,j  ))
               adfac2=adfac*(h(i,j-1)+h(i,j  ))
+# ifdef ICESHELF
+              ad_hw(i,j-1)=ad_hw(i,j-1)+adfac1
+              ad_hw(i,j  )=ad_hw(i,j  )+adfac1
+# else
               ad_h(i,j-1)=ad_h(i,j-1)+adfac1
               ad_h(i,j  )=ad_h(i,j  )+adfac1
+# endif
               ad_gzeta(i,j-1)=ad_gzeta(i,j-1)+adfac2
               ad_gzeta(i,j  )=ad_gzeta(i,j  )-adfac2
               ad_gzeta2(i,j-1)=ad_gzeta2(i,j-1)+adfac
@@ -4234,8 +4349,13 @@
               adfac2=adfac*(h(i,j-1)-h(i,j))
               adfac3=adfac2*cff2*(zwrk(i,j-1)-zwrk(i,j))
               adfac4=adfac2*cff2*(rhoA(i,j-1)-rhoA(i,j))
+#  ifdef ICESHELF
+              ad_hw(i,j-1)=ad_hw(i,j-1)+adfac1
+              ad_hw(i,j  )=ad_hw(i,j  )-adfac1
+#  else
               ad_h(i,j-1)=ad_h(i,j-1)+adfac1
               ad_h(i,j  )=ad_h(i,j  )-adfac1
+#  endif
               ad_gzetaSA(i,j-1)=ad_gzetaSA(i,j-1)+adfac2
               ad_gzetaSA(i,j  )=ad_gzetaSA(i,j  )+adfac2
               ad_rhoA(i,j-1)=ad_rhoA(i,j-1)+adfac3
@@ -4265,25 +4385,45 @@
             ad_gzeta(i  ,j)=ad_gzeta(i  ,j)+adfac
 # endif
 !>          tl_rhs_ubar(i,j)=cff1*on_u(i,j)*                            &
+# ifdef ICESHELF
+!>   &                     ((tl_hw(i-1,j)+                              &
+!>   &                       tl_hw(i ,j))*                              &
+# else
 !>   &                       ((tl_h(i-1,j)+                             &
 !>   &                         tl_h(i ,j))*                             &
+# endif
 !>   &                        (gzeta(i-1,j)-                            &
 !>   &                         gzeta(i  ,j))+                           &
+# ifdef ICESHELF
+!>   &                        (hw(i-1,j)+                               &
+!>   &                         hw(i ,j))*                               &
+# else
 !>   &                        (h(i-1,j)+                                &
 !>   &                         h(i  ,j))*                               &
+# endif
 !>   &                        (tl_gzeta(i-1,j)-                         &
 !>   &                         tl_gzeta(i  ,j))+                        &
 # if defined VAR_RHO_2D && defined SOLVE3D
+#  ifdef ICESHELF
+!>   &                      (tl_hw(i-1,j)-                              &
+!>   &                       tl_hw(i  ,j))*                             &
+#  else
 !>   &                        (tl_h(i-1,j)-                             &
 !>   &                         tl_h(i  ,j))*                            &
+# endif
 !>   &                        (gzetaSA(i-1,j)+                          &
 !>   &                         gzetaSA(i  ,j)+                          &
 !>   &                         cff2*(rhoA(i-1,j)-                       &
 !>   &                               rhoA(i  ,j))*                      &
 !>   &                              (zwrk(i-1,j)-                       &
 !>   &                               zwrk(i  ,j)))+                     &
+#  ifdef ICESHELF
+!>   &                        (hw(i-1,j)-                               &
+!>   &                         hw(i  ,j))*                              &
+#  else
 !>   &                        (h(i-1,j)-                                &
 !>   &                         h(i  ,j))*                               &
+#  endif
 !>   &                        (tl_gzetaSA(i-1,j)+                       &
 !>   &                         tl_gzetaSA(i  ,j)+                       &
 !>   &                         cff2*((tl_rhoA(i-1,j)-                   &
@@ -4301,8 +4441,13 @@
             adfac=cff1*on_u(i,j)*ad_rhs_ubar(i,j)
             adfac1=adfac*(gzeta(i-1,j)-gzeta(i  ,j))
             adfac2=adfac*(h(i-1,j)+h(i  ,j))
+# ifdef ICESHELF
+            ad_hw(i-1,j)=ad_hw(i-1,j)+adfac1
+            ad_hw(i  ,j)=ad_hw(i  ,j)+adfac1
+# else
             ad_h(i-1,j)=ad_h(i-1,j)+adfac1
             ad_h(i  ,j)=ad_h(i  ,j)+adfac1
+# endif
             ad_gzeta(i-1,j)=ad_gzeta(i-1,j)+adfac2
             ad_gzeta(i  ,j)=ad_gzeta(i  ,j)-adfac2
             ad_gzeta2(i-1,j)=ad_gzeta2(i-1,j)+adfac
@@ -4317,8 +4462,13 @@
             adfac2=adfac*(h(i-1,j)-h(i  ,j))
             adfac3=adfac2*cff2*(zwrk(i-1,j)-zwrk(i,j))
             adfac4=adfac2*cff2*(rhoA(i-1,j)-rhoA(i,j))
+#  ifdef ICESHELF
+            ad_hw(i-1,j)=ad_hw(i-1,j)+adfac1
+            ad_hw(i  ,j)=ad_hw(i  ,j)-adfac1
+#  else
             ad_h(i-1,j)=ad_h(i-1,j)+adfac1
             ad_h(i  ,j)=ad_h(i  ,j)-adfac1
+#  endif
             ad_gzetaSA(i-1,j)=ad_gzetaSA(i-1,j)+adfac2
             ad_gzetaSA(i  ,j)=ad_gzetaSA(i  ,j)+adfac2
             ad_rhoA(i-1,j)=ad_rhoA(i-1,j)+adfac3
@@ -4501,11 +4651,19 @@
               ad_zeta(i,j,kstp)=ad_zeta(i,j,kstp)+adfac
               ad_zeta_new(i,j)=ad_zeta_new(i,j)+adfac
               ad_zwrk(i,j)=0.0_r8
+# ifdef ICESHELF
+!>            tl_Dnew(i,j)=tl_zeta_new(i,j)+tl_hw(i,j)
+
+              ad_hw(i,j)=ad_hw(i,j)+ad_Dnew(i,j)
+              ad_zeta_new(i,j)=ad_zeta_new(i,j)+ad_Dnew(i,j)
+              ad_Dnew(i,j)=0.0_r8
+# else
 !>            tl_Dnew(i,j)=tl_zeta_new(i,j)+tl_h(i,j)
 !>
               ad_zeta_new(i,j)=ad_zeta_new(i,j)+ad_Dnew(i,j)
               ad_h(i,j)=ad_h(i,j)+ad_Dnew(i,j)
               ad_Dnew(i,j)=0.0_r8
+# endif
 # ifdef MASKING
 !>            tl_zeta_new(i,j)=tl_zeta_new(i,j)*rmask(i,j)
 !>
@@ -4574,11 +4732,19 @@
               ad_zeta(i,j,kstp)=ad_zeta(i,j,kstp)+adfac
               ad_zeta_new(i,j)=ad_zeta_new(i,j)+adfac
               ad_zwrk(i,j)=0.0_r8
+# ifdef ICESHELF
+!>            tl_Dnew(i,j)=tl_zeta_new(i,j)+tl_hw(i,j)
+
+              ad_hw(i,j)=ad_hw(i,j)+ad_Dnew(i,j)
+              ad_zeta_new(i,j)=ad_zeta_new(i,j)+ad_Dnew(i,j)
+              ad_Dnew(i,j)=0.0_r8
+# else
 !>            tl_Dnew(i,j)=tl_zeta_new(i,j)+tl_h(i,j)
 !>
               ad_zeta_new(i,j)=ad_zeta_new(i,j)+ad_Dnew(i,j)
               ad_h(i,j)=ad_h(i,j)+ad_Dnew(i,j)
               ad_Dnew(i,j)=0.0_r8
+# endif
 # ifdef MASKING
 !>            tl_zeta_new(i,j)=tl_zeta_new(i,j)*rmask(i,j)
 !>
@@ -4646,11 +4812,18 @@
               ad_zeta_new(i,j)=ad_zeta_new(i,j)+cff5*ad_zwrk(i,j)
               ad_zeta(i,j,krhs)=ad_zeta(i,j,krhs)+cff4*ad_zwrk(i,j)
               ad_zwrk(i,j)=0.0_r8
+# ifdef ICESHELF
+!>            tl_Dnew(i,j)=tl_zeta_new(i,j)+tl_hw(i,j)
+              ad_hw(i,j)=ad_hw(i,j)+ad_Dnew(i,j)
+              ad_zeta_new(i,j)=ad_zeta_new(i,j)+ad_Dnew(i,j)
+              ad_Dnew(i,j)=0.0_r8
+# else
 !>            tl_Dnew(i,j)=tl_zeta_new(i,j)+tl_h(i,j)
 !>
               ad_zeta_new(i,j)=ad_zeta_new(i,j)+ad_Dnew(i,j)
               ad_h(i,j)=ad_h(i,j)+ad_Dnew(i,j)
               ad_Dnew(i,j)=0.0_r8
+# endif
 # ifdef MASKING
 !>            tl_zeta_new(i,j)=tl_zeta_new(i,j)*rmask(i,j)
 !>
@@ -5041,11 +5214,22 @@
 !
       DO j=JstrV-2,Jendp2
         DO i=IstrU-2,Iendp2
+# ifdef ICESHELF
+!>        tl_Drhs(i,j)=tl_zeta(i,j,krhs)+tl_hw(i,j)
+          ad_hw(i,j)=ad_hw(i,j)+ad_Drhs(i,j)
+          ad_zeta(i,j,krhs)=ad_zeta(i,j,krhs)+ad_Drhs(i,j)
+          ad_Drhs(i,j)=0.0_r8
+!>        tl_hw(i,j)=tl_h(i,j)-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+          ad_h(i,j)=ad_h(i,j)+ad_hw(i,j)
+          ad_zice(i,j)=ad_zice(i,j)-SIGN(1.0_r8,zice(i,j))*ad_hw(i,j)
+          ad_hw(i,j)=0.0_r8
+# else
 !>        tl_Drhs(i,j)=tl_zeta(i,j,krhs)+tl_h(i,j)
 !>
           ad_zeta(i,j,krhs)=ad_zeta(i,j,krhs)+ad_Drhs(i,j)
           ad_h(i,j)=ad_h(i,j)+ad_Drhs(i,j)
           ad_Drhs(i,j)=0.0_r8
+# endif
         END DO
       END DO
 
@@ -5114,11 +5298,22 @@
 !
       DO j=JstrVm2-1,Jendp2
         DO i=IstrUm2-1,Iendp2
+#  ifdef ICESHELF
+!>        tl_Drhs(i,j)=tl_zeta(i,j,krhs)+tl_hw(i,j)
+          ad_hw(i,j)=ad_hw(i,j)+ad_Drhs(i,j)
+          ad_zeta(i,j,krhs)=ad_zeta(i,j,krhs)+ad_Drhs(i,j)
+          ad_Drhs(i,j)=0.0_r8
+!>        tl_hw(i,j)=tl_h(i,j)-SIGN(1.0_r8,zice(i,j))*tl_zice(i,j)
+          ad_h(i,j)=ad_h(i,j)+ad_hw(i,j)
+          ad_zice(i,j)=ad_zice(i,j)-SIGN(1.0_r8,zice(i,j))*ad_hw(i,j)
+          ad_hw(i,j)=0.0_r8
+# else
 !>        tl_Drhs(i,j)=tl_zeta(i,j,krhs)+tl_h(i,j)
 !>
           ad_zeta(i,j,krhs)=ad_zeta(i,j,krhs)+ad_Drhs(i,j)
           ad_h(i,j)=ad_h(i,j)+ad_Drhs(i,j)
           ad_Drhs(i,j)=0.0_r8
+# endif
         END DO
       END DO
 # endif

@@ -67,6 +67,10 @@
      &                     GRID(ng) % ad_z_r,                           &
      &                     GRID(ng) % z_w,                              &
      &                     GRID(ng) % ad_z_w,                           &
+# ifdef ICESHELF
+     &                     GRID(ng) % zice,                             &
+     &                     GRID(ng) % ad_zice,                          &
+# endif
      &                     OCEAN(ng) % rho,                             &
      &                     OCEAN(ng) % ad_rho,                          &
 #ifdef ATM_PRESS
@@ -96,6 +100,9 @@
      &                           Hz, ad_Hz,                             &
      &                           z_r, ad_z_r,                           &
      &                           z_w, ad_z_w,                           &
+# ifdef ICESHELF
+     &                           zice, ad_zice,                         &
+# endif
      &                           rho, ad_rho,                           &
 #ifdef ATM_PRESS
      &                           Pair,                                  &
@@ -126,6 +133,10 @@
       real(r8), intent(in) :: Hz(LBi:,LBj:,:)
       real(r8), intent(in) :: z_r(LBi:,LBj:,:)
       real(r8), intent(in) :: z_w(LBi:,LBj:,0:)
+#  ifdef ICESHELF
+      real(r8), intent(in) :: zice(LBi:,LBj:)
+      real(r8), intent(inout) :: ad_zice(LBi:,LBj:)
+#  endif
       real(r8), intent(in) :: rho(LBi:,LBj:,:)
 # ifdef ATM_PRESS
       real(r8), intent(in) :: Pair(LBi:,LBj:)
@@ -150,6 +161,10 @@
       real(r8), intent(in) :: Hz(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(in) :: z_r(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(in) :: z_w(LBi:UBi,LBj:UBj,0:N(ng))
+#  ifdef ICESHELF
+      real(r8), intent(in) :: zice(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: ad_zice(LBi:UBi,LBj:UBj)
+#  endif
       real(r8), intent(in) :: rho(LBi:UBi,LBj:UBj,N(ng))
 # ifdef ATM_PRESS
       real(r8), intent(in) :: Pair(LBi:UBi,LBj:UBj)
@@ -173,6 +188,9 @@
       real(r8), parameter :: OneFifth = 0.2_r8
       real(r8), parameter :: OneTwelfth = 1.0_r8/12.0_r8
       real(r8), parameter :: eps = 1.0E-10_r8
+#ifdef ICESHELF
+      real(r8), parameter :: drhodz = 0.00478_r8
+#endif
 
       real(r8) :: GRho, GRho0, HalfGRho
       real(r8) :: cff, cff1, cff2
@@ -276,12 +294,20 @@
           cff1=1.0_r8/(z_r(i,j,N(ng))-z_r(i,j,N(ng)-1))
           cff2=0.5_r8*(rho(i,j,N(ng))-rho(i,j,N(ng)-1))*                &
      &         (z_w(i,j,N(ng))-z_r(i,j,N(ng)))*cff1
-          P(i,j,N(ng))=GRho0*z_w(i,j,N(ng))+                            &
-#ifdef ATM_PRESS
-     &                 fac*(Pair(i,j)-OneAtm)+                          &
-#endif
+#ifdef ICESHELF
+          P(i,j,N(ng))=GRho0*(z_w(i,j,N(ng))-zice(i,j))-                &
+     &                 GRho*(rho(i,j,N(ng))+0.5_r8*drhodz*zice(i,j))*   &
+     &                 zice(i,j)+                                       &
      &                 GRho*(rho(i,j,N(ng))+cff2)*                      &
      &                 (z_w(i,j,N(ng))-z_r(i,j,N(ng)))
+#else
+          P(i,j,N(ng))=GRho0*z_w(i,j,N(ng))+                            &
+# ifdef ATM_PRESS
+     &                 fac*(Pair(i,j)-OneAtm)+                          &
+# endif
+     &                 GRho*(rho(i,j,N(ng))+cff2)*                      &
+     &                 (z_w(i,j,N(ng))-z_r(i,j,N(ng)))
+#endif
         END DO
         DO k=N(ng)-1,1,-1
           DO i=IstrU-1,Iend
@@ -813,6 +839,31 @@
           cff1=1.0_r8/(z_r(i,j,N(ng))-z_r(i,j,N(ng)-1))
           cff2=0.5_r8*(rho(i,j,N(ng))-rho(i,j,N(ng)-1))*                &
      &         (z_w(i,j,N(ng))-z_r(i,j,N(ng)))*cff1
+#ifdef ICESHELF
+!>      tl_P(i,j,N(ng))=GRho0*(tl_z_w(i,j,N(ng))-tl_zice(i,j))-       &
+!>   &             GRho*(tl_rho(i,j,N(ng))+0.5_r8*drhodz*tl_zice(i,j))* &
+!>   &                 zice(i,j)-                                       &
+!>   &                 GRho*(rho(i,j,N(ng))+0.5_r8*drhodz*zice(i,j))*   &
+!>   &                 tl_zice(i,j)+                                    &
+!>   &                 GRho*((tl_rho(i,j,N(ng))+tl_cff2)*               &
+!>   &                 (z_w(i,j,N(ng))-z_r(i,j,N(ng)))+                 
+!>   &                 (rho(i,j,N(ng))+cff2)*                           &
+!>   &                 (tl_z_w(i,j,N(ng))-tl_z_r(i,j,N(ng))))
+          adfac=GRho*ad_P(i,j,N(ng))
+          adfac1=adfac*(z_w(i,j,N(ng))-z_r(i,j,N(ng)))
+          adfac2=adfac*(rho(i,j,N(ng))+cff2)
+          ad_zice(i,j)=ad_zice(i,j)-GRho0*ad_P(i,j,N(ng))
+          ad_z_r(i,j,N(ng))=ad_z_r(i,j,N(ng))-adfac2
+          ad_z_w(i,j,N(ng))=ad_z_w(i,j,N(ng))+adfac2+                   &
+     &                      GRho0*ad_P(i,j,N(ng))
+          ad_rho(i,j,N(ng))=ad_rho(i,j,N(ng))-zice(i,j)*adfac
+          ad_zice(i,j)=ad_zice(i,j)-0.5_r8*drhodz*zice(i,j)*adfac
+          ad_zice(i,j)=ad_zice(i,j)-                                    &
+     &             (rho(i,j,N(ng))+0.5_r8*drhodz*zice(i,j))*adfac
+          ad_rho(i,j,N(ng))=ad_rho(i,j,N(ng))+adfac1
+          ad_cff2=ad_cff2+adfac1
+          ad_P(i,j,N(ng))=0.0_r8
+#else
 !>        tl_P(i,j,N(ng))=GRho0*tl_z_w(i,j,N(ng))+                      &
 !>   &                    GRho*((tl_rho(i,j,N(ng))+tl_cff2)*            &
 !>   &                          (z_w(i,j,N(ng))-z_r(i,j,N(ng)))+        &
@@ -828,6 +879,7 @@
           ad_rho(i,j,N(ng))=ad_rho(i,j,N(ng))+adfac1
           ad_cff2=ad_cff2+adfac1
           ad_P(i,j,N(ng))=0.0_r8
+#endif
 !>        tl_cff2=0.5_r8*((tl_rho(i,j,N(ng))-tl_rho(i,j,N(ng)-1))*      &
 !>   &                    (z_w(i,j,N(ng))-z_r(i,j,N(ng)))*cff1+         &
 !>   &                    (rho(i,j,N(ng))-rho(i,j,N(ng)-1))*            &

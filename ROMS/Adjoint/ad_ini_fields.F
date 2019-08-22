@@ -36,6 +36,9 @@
       USE mod_coupling
 # endif
       USE mod_ocean
+# if defined SOLVE3D && defined ICESHELF
+      USE mod_iceshelfvar
+# endif
 # if defined SEDIMENT && defined SED_MORPH && defined SOLVE3D
       USE mod_sedbed
 # endif
@@ -911,6 +914,9 @@
       USE mod_coupling
 # endif
       USE mod_ocean
+# if defined SOLVE3D && defined ICESHELF && defined ICESHELF_MORPH
+      USE mod_iceshelfvar
+# endif
       USE mod_stepping
 !
 !  Imported variable declarations.
@@ -935,6 +941,11 @@
      &                       GRID(ng) % h,                              &
 # endif
 # ifdef SOLVE3D
+#  if defined ICESHELF && defined ICESHELF_MORPH
+     &                    GRID(ng) % ad_zice,                           &
+     &                    ICESHELFVAR(ng) % ad_iceshelf_draft0,         &
+     &                    ICESHELFVAR(ng) % ad_iceshelf_draft,          &
+#  endif
 #  if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
      &                       SEDBED(ng) % ad_bed,                       &
      &                       SEDBED(ng) % ad_bed_thick0,                &
@@ -963,6 +974,10 @@
      &                             h,                                   &
 # endif
 # ifdef SOLVE3D
+#  if defined ICESHELF && defined ICESHELF_MORPH
+     &                             ad_zice, ad_iceshelf_draft0,         &
+     &                             ad_iceshelf_draft,                   &
+#  endif
 #  if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
      &                             ad_bed,                              &
      &                             ad_bed_thick0, ad_bed_thick,         &
@@ -976,6 +991,9 @@
       USE mod_param
       USE mod_ncparam
       USE mod_scalars
+# if defined ICESHELF && defined ICESHELF_MORPH
+      USE mod_iceshelfvar
+# endif
 # if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
       USE mod_sediment
 # endif
@@ -1002,6 +1020,11 @@
 #  endif
       real(r8), intent(in) :: zeta(LBi:,LBj:,:)
 #  ifdef SOLVE3D
+#   if defined ICESHELF && defined ICESHELF_MORPH
+      real(r8), intent(inout) :: ad_zice(LBi:,LBj:)
+      real(r8), intent(inout) :: ad_iceshelf_draft0(LBi:,LBj:)
+      real(r8), intent(inout) :: ad_iceshelf_draft(LBi:,LBj:,:)
+#   endif
 #   if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET
       real(r8), intent(inout) :: ad_bed(LBi:,LBj:,:,:)
       real(r8), intent(inout) :: ad_bed_thick0(LBi:,LBj:)
@@ -1022,6 +1045,11 @@
 #  endif
       real(r8), intent(in) :: zeta(LBi:UBi,LBj:UBj,3)
 #  ifdef SOLVE3D
+#   if defined ICESHELF && defined ICESHELF_MORPH
+      real(r8), intent(inout) :: ad_zice(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: ad_iceshelf_draft0(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: ad_iceshelf_draft(LBi:UBi,LBj:UBj,2)
+#   endif
 #   if defined SOLVE3D && defined SEDIMENT && defined SED_MORPH
       real(r8), intent(inout) :: ad_bed(LBi:UBi,LBj:UBj,Nbed,MBEDP)
       real(r8), intent(inout) :: ad_bed_thick0(LBi:UBi,LBj:UBj)
@@ -1116,6 +1144,66 @@
           ad_bed_thick0(i,j)=0.0_r8
         END DO
       END DO
+#  endif
+#  if defined ICESHELF && defined ICESHELF_MORPH
+!
+!-----------------------------------------------------------------------
+!  Compute initial total thickness for ice shelf
+!-----------------------------------------------------------------------
+!
+
+#   ifdef DISTRIBUTE
+!>    CALL mp_exchange2d (ng, tile, model, 3,                           &
+!>   &                    LBi, UBi, LBj, UBj,                           &
+!>   &                    NghostPoints,                                 &
+!>   &                    EWperiodic(ng), NSperiodic(ng),               &
+!>   &                    tl_iceshelf_draft0,                           &
+!>   &               tl_iceshelf_draft(:,:,1), tl_iceshelf_draft(:,:,2))
+      CALL ad_mp_exchange2d (ng, tile, model, 3,                        &
+     &                    LBi, UBi, LBj, UBj,                           &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    ad_iceshelf_draft0,                           &
+     &               ad_iceshelf_draft(:,:,1), ad_iceshelf_draft(:,:,2))
+#   endif
+
+      IF (EWperiodic(ng).or.NSperiodic(ng)) THEN
+!>      CALL exchange_r2d_tile (ng, tile,                               &
+!>   &                          LBi, UBi, LBj, UBj,                     &
+!>   &                          tl_iceshelf_draft0)
+        CALL ad_exchange_r2d_tile (ng, tile,                            &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          ad_iceshelf_draft0)
+!>      CALL exchange_r2d_tile (ng, tile,                               &
+!>   &                          LBi, UBi, LBj, UBj,                     &
+!>   &                          tl_iceshelf_draft(:,:,1))
+        CALL ad_exchange_r2d_tile (ng, tile,                            &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          ad_iceshelf_draft(:,:,1))
+!>      CALL exchange_r2d_tile (ng, tile,                               &
+!>   &                          LBi, UBi, LBj, UBj,                     &
+!>   &                          tl_iceshelf_draft(:,:,2))
+        CALL ad_exchange_r2d_tile (ng, tile,                            &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          ad_iceshelf_draft(:,:,2))
+      END IF
+!
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+!>        tl_iceshelf_draft(i,j,2)=tl_iceshelf_draft0(i,j)
+          ad_iceshelf_draft0(i,j)=ad_iceshelf_draft0(i,j)+              &
+     &                            ad_iceshelf_draft(i,j,2)
+          ad_iceshelf_draft(i,j,2)=0.0_r8
+!>        tl_iceshelf_draft(i,j,1)=tl_iceshelf_draft0(i,j)
+          ad_iceshelf_draft0(i,j)=ad_iceshelf_draft0(i,j)+              &
+     &                            ad_iceshelf_draft(i,j,1)
+          ad_iceshelf_draft(i,j,1)=0.0_r8
+!>        tl_iceshelf_draft0(i,j)=tl_zice(i,j)
+          ad_zice(i,j)=ad_zice(i,j)+ad_iceshelf_draft0(i,j)
+          ad_iceshelf_draft0(i,j)=0.0_r8
+        END DO
+      END DO
+
 #  endif
 !
 !-----------------------------------------------------------------------
