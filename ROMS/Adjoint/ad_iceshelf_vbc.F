@@ -190,6 +190,7 @@
 # ifdef DISTRIBUTE
       USE mp_exchange_mod, ONLY : mp_exchange2d
 # endif
+      USE iceshelf_vbc_mod
 !
 !  Imported variable declarations.
 !
@@ -968,19 +969,19 @@
 
 ! Calculate melt rate:
 !          tl_m(i,j) = -(tl_cff2 -tl_fac)/(2.0_r8*cff1)+                   &
-!    &                              tl_cff1*m(i,j)/cff1
+!    &                              2.0_r8*tl_cff1*m(i,j)/cff1
 
            ad_cff2=ad_cff2-ad_m(i,j)/(2.0_r8*cff1)
            ad_fac=ad_fac+ad_m(i,j)/(2.0_r8*cff1)
-           ad_cff1=ad_cff1+ad_m(i,j)*m(i,j)/cff1
+           ad_cff1=ad_cff1+2.0_r8*ad_m(i,j)*m(i,j)/cff1
            ad_m(i,j)=0.0_r8
 
-!          tl_fac=0.5d0_r8*(2.0_r8*tl_cff2*cff2 -                          &
+!          tl_fac=0.5_r8*(2.0_r8*tl_cff2*cff2 -                          &
 !    &                   4.0_r8*(tl_cff1*cff3+cff1*tl_cff3))/fac
 
-           ad_cff2=ad_cff2+0.5d0_r8*2.0_r8*cff2*ad_fac/fac
-           ad_cff1=ad_cff1-0.5d0_r8*4.0_r8*cff3*ad_fac/fac
-           ad_cff3=ad_cff3-0.5d0_r8*4.0_r8*cff1*ad_fac/fac
+           ad_cff2=ad_cff2+0.5_r8*2.0_r8*cff2*ad_fac/fac
+           ad_cff1=ad_cff1-0.5_r8*4.0_r8*cff3*ad_fac/fac
+           ad_cff3=ad_cff3-0.5_r8*4.0_r8*cff1*ad_fac/fac
            ad_fac=0.0_r8
 
 ! Calculate coefficents in quadratic to be solved:
@@ -1285,10 +1286,10 @@
             ad_svstr(i,j)=0.0_r8
 
             IF (cff2.ne.0.0_r8) THEN
-!             tl_cff2=(2.0_r8*cff1*tl_cff1+                             &
-!    &              2.0_r8*v(i,j,N(ng),nrhs)*tl_v(i,j,N(ng),nrhs))/cff2
-              ad_cff1=ad_cff1+2.0_r8*cff1*ad_cff2/cff2
-              ad_v(i,j,N(ng),nrhs))=ad_v(i,j,N(ng),nrhs))+2.0_r8*       &
+!             tl_cff2=(cff1*tl_cff1+                                    &
+!    &                  v(i,j,N(ng),nrhs)*tl_v(i,j,N(ng),nrhs))/cff2
+              ad_cff1=ad_cff1+cff1*ad_cff2/cff2
+              ad_v(i,j,N(ng),nrhs))=ad_v(i,j,N(ng),nrhs))+              &
      &                          ad_cff2*v(i,j,N(ng),nrhs)/cff2
               ad_cff2=0.0_r8
             ELSE
@@ -1337,11 +1338,11 @@
             ad_sustr(i,j)=0.0_r8
 
             IF (cff2.ne.0.0_r8) THEN
-!             tl_cff2=(2.0_r8*u(i,j,N(ng),nrhs)*tl_u(i,j,N(ng),nrhs)+   &
-!    &                 2.0_r8*cff1*tl_cff1)/cff2
+!             tl_cff2=(u(i,j,N(ng),nrhs)*tl_u(i,j,N(ng),nrhs)+          &
+!    &                 cff1*tl_cff1)/cff2
               ad_u(i,j,N(ng),nrhs)=ad_u(i,j,N(ng),nrhs)+                &
-     &                     2.0_r8*u(i,j,N(ng),nrhs)*ad_cff2/cff2
-              ad_cff1=ad_cff1+2.0_r8*cff1*ad_cff2/cff2
+     &                     u(i,j,N(ng),nrhs)*ad_cff2/cff2
+              ad_cff1=ad_cff1+cff1*ad_cff2/cff2
               ad_cff2=0.0_r8
             ELSE
 !             tl_cff2=0.0_r8
@@ -1415,11 +1416,11 @@
             adsvstr(i,j)=0.0_r8
 
             IF (cff2.ne.0.0_r8) THEN
-!             tl_cff2=(2.0_r8*cff1*tl_cff1+                             &
-!    &              2.0_r8*v(i,j,N(ng),nrhs)*tl_v(i,j,N(ng),nrhs))/cff2
-              ad_cff1=ad_cff1+2.0_r8*cff1*ad_cff2/cff2
+!             tl_cff2=(cff1*tl_cff1+                                    &
+!    &              v(i,j,N(ng),nrhs)*tl_v(i,j,N(ng),nrhs))/cff2
+              ad_cff1=ad_cff1+cff1*ad_cff2/cff2
               ad_v(i,j,N(ng),nrhs)=ad_v(i,j,N(ng),nrhs)+                &
-     &                          2.0_r8*v(i,j,N(ng),nrhs)*ad_cff2/cff2
+     &                          v(i,j,N(ng),nrhs)*ad_cff2/cff2
               ad_cff2=0.0_r8
             ELSE
 !             tl_cff2=0.0_r8
@@ -1457,11 +1458,11 @@
             ad_sustr(i,j)=0.0_r8
 
             IF (cff2.ne.0.0_r8) THEN
-!             tl_cff2=(2.0_r8*u(i,j,N(ng),nrhs)*tl_u(i,j,N(ng),nrhs)+   &
-!    &                 2.0_r8*cff1*tl_cff1)/cff2
+!             tl_cff2=(u(i,j,N(ng),nrhs)*tl_u(i,j,N(ng),nrhs)+          &
+!    &                 cff1*tl_cff1)/cff2
               ad_u(i,j,N(ng),nrhs)=ad_u(i,j,N(ng),nrhs)+                &
-                          2.0_r8*u(i,j,N(ng),nrhs)*ad_cff2/cff2
-              ad_cff1=ad_cff1+2.0_r8*cff1*ad_cff2/cff2
+                          u(i,j,N(ng),nrhs)*ad_cff2/cff2
+              ad_cff1=ad_cff1+cff1*ad_cff2/cff2
               ad_cff2=0.0_r8
             ELSE
 !             tl_cff2=0.0_r8
