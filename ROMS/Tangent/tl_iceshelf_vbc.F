@@ -823,7 +823,7 @@
      &                   4.0_r8*(tl_cff1*cff3+cff1*tl_cff3))/fac
            m(i,j) = -(cff2 - fac)/(2.0_r8*cff1)
            tl_m(i,j) = -(tl_cff2 -tl_fac)/(2.0_r8*cff1)+                &
-     &                                  tl_cff1*m(i,j)/cff1
+     &                                 2.0_r8*tl_cff1*m(i,j)/cff1
 
 ! Calculate basal temperature and salinity:
            Tb(i,j) = (gammaT(i,j)*Tm+mflag*(cp_i/cp_w)*m(i,j)*Ti        &
