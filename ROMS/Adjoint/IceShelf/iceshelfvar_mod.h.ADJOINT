@@ -241,7 +241,7 @@
 #endif
 #ifdef ADJOINT
 !
-!  Tangent linear model state.
+!  Adjoint linear model state.
 !
       IF ((model.eq.0).or.(model.eq.iTLM)) THEN
 #if defined ICESHELF

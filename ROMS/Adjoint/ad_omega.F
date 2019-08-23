@@ -112,7 +112,7 @@
 # endif
 # if defined SEDIMENT_NOT_YET && defined SED_MORPH_NOT_YET || \
       defined ICESHELF && defined ICESHELF_MORPH
-     &                          omn,
+     &                          omn,                                    &
 # endif
 # if defined ICESHELF && defined ICESHELF_MORPH
      &                       iceshelf_draft,                            &
@@ -166,7 +166,7 @@
 #  endif
 #  if defined ICESHELF && defined ICESHELF_MORPH
       real(r8), intent(in):: iceshelf_draft(LBi:,LBj:,:)
-      real(r8), intent(in):: tl_iceshelf_draft(LBi:,LBj:,:)
+      real(r8), intent(inout):: ad_iceshelf_draft(LBi:,LBj:,:)
 #  endif
 #  if defined SEDIMENT && defined SED_MORPH
       real(r8), intent(in):: bed_thick(LBi:,LBj:,:)
@@ -197,7 +197,7 @@
 #  endif
 #  if defined ICESHELF && defined ICESHELF_MORPH
       real(r8), intent(in):: iceshelf_draft(LBi:,LBj:,:)
-      real(r8), intent(in):: tl_iceshelf_draft(LBi:,LBj:,:)
+      real(r8), intent(inout):: ad_iceshelf_draft(LBi:,LBj:,:)
 #  endif
 #  if defined SEDIMENT && defined SED_MORPH
       real(r8), intent(in):: bed_thick(LBi:UBi,LBj:UBj,2)

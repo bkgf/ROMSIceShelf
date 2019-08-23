@@ -35,7 +35,7 @@
 #define SPHERICAL
 #define SPLINES
 #define ICESHELF
-#undef ICESHELF_MORPH
+#define ICESHELF_MORPH
 #undef  AVERAGES
 #undef ATM_PRESS
 #undef ANA_PAIR
@@ -52,14 +52,14 @@
 /* Define SET_VBC.F for open ocean boundary layer. Can be one of:
 * * ANA_SEAICE
 *  Note that both undef will set surface fluf of salt and temp to zero*/
-#define ANA_SEAICE
+#undef ANA_SEAICE
 /* Define SET_VBC.F for ice-ocean Thermodynamics. Can be one of:
 *  * VBC_ICE_2EQN
 *  * VBC_ICE_3EQN       
 *  * Note that both undef will set surface fluf of salt and temp to zero */
-#define ICESHELF_2EQN_VBC
-#undef ICESHELF_3EQN_VBC
-#undef ICESHELF_TEOS10
+#undef ICESHELF_2EQN_VBC
+#define ICESHELF_3EQN_VBC
+#define ICESHELF_TEOS10
 
 
 

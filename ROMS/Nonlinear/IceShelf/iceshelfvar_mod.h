@@ -22,11 +22,37 @@
         real(r8), pointer :: gammaS(:,:)
         real(r8), pointer :: Tb(:,:)
         real(r8), pointer :: Sb(:,:)
+#  ifdef TANGENT
+        real(r8), pointer :: tl_gammaT(:,:)
+        real(r8), pointer :: tl_gammaS(:,:)
+        real(r8), pointer :: tl_Tb(:,:)
+        real(r8), pointer :: tl_Sb(:,:)
+#  endif
+#  ifdef ADJOINT
+        real(r8), pointer :: ad_gammaT(:,:)
+        real(r8), pointer :: ad_gammaS(:,:)
+        real(r8), pointer :: ad_Tb(:,:)
+        real(r8), pointer :: ad_Sb(:,:)
+#  endif
 # endif
         real(r8), pointer :: m(:,:)
+# ifdef TANGENT
+        real(r8), pointer :: tl_m(:,:)
+# endif
+# ifdef ADJOINT
+        real(r8), pointer :: ad_m(:,:)
+# endif
 # if defined ICESHELF_MORPH
         real(r8), pointer :: iceshelf_draft0(:,:)
         real(r8), pointer :: iceshelf_draft(:,:,:)
+#  ifdef TANGENT
+        real(r8), pointer :: tl_iceshelf_draft0(:,:)
+        real(r8), pointer :: tl_iceshelf_draft(:,:,:)
+#  endif
+#  ifdef ADJOINT
+        real(r8), pointer :: ad_iceshelf_draft0(:,:)
+        real(r8), pointer :: ad_iceshelf_draft(:,:,:)
+#  endif
 # endif
 #endif
       END TYPE T_ICESHELFVAR
@@ -66,11 +92,37 @@
       allocate ( ICESHELFVAR(ng) % gammaS(LBi:UBi,LBj:UBj))
       allocate ( ICESHELFVAR(ng) % Tb(LBi:UBi,LBj:UBj))
       allocate ( ICESHELFVAR(ng) % Sb(LBi:UBi,LBj:UBj))
+#  ifdef TANGENT
+      allocate ( ICESHELFVAR(ng) % tl_gammaT(LBi:UBi,LBj:UBj))
+      allocate ( ICESHELFVAR(ng) % tl_gammaS(LBi:UBi,LBj:UBj))
+      allocate ( ICESHELFVAR(ng) % tl_Tb(LBi:UBi,LBj:UBj))
+      allocate ( ICESHELFVAR(ng) % tl_Sb(LBi:UBi,LBj:UBj))
+#  endif
+#  ifdef ADJOINT
+      allocate ( ICESHELFVAR(ng) % ad_gammaT(LBi:UBi,LBj:UBj))
+      allocate ( ICESHELFVAR(ng) % ad_gammaS(LBi:UBi,LBj:UBj))
+      allocate ( ICESHELFVAR(ng) % ad_Tb(LBi:UBi,LBj:UBj))
+      allocate ( ICESHELFVAR(ng) % ad_Sb(LBi:UBi,LBj:UBj))
+#  endif
 # endif
       allocate ( ICESHELFVAR(ng) % m(LBi:UBi,LBj:UBj))
+# ifdef TANGENT
+      allocate ( ICESHELFVAR(ng) % tl_m(LBi:UBi,LBj:UBj))
+# endif
+# ifdef ADJOINT
+      allocate ( ICESHELFVAR(ng) % ad_m(LBi:UBi,LBj:UBj))
+# endif
 # if defined ICESHELF_MORPH
       allocate ( ICESHELFVAR(ng) % iceshelf_draft0(LBi:UBi,LBj:UBj) )
       allocate ( ICESHELFVAR(ng) % iceshelf_draft(LBi:UBi,LBj:UBj,1:2))
+#  ifdef TANGENT
+      allocate ( ICESHELFVAR(ng) % tl_iceshelf_draft0(LBi:UBi,LBj:UBj) )
+      allocate ( ICESHELFVAR(ng) % tl_iceshelf_draft(LBi:UBi,LBj:UBj,1:2))
+#  endif
+#  ifdef ADJOINT
+      allocate ( ICESHELFVAR(ng) % ad_iceshelf_draft0(LBi:UBi,LBj:UBj) )
+      allocate ( ICESHELFVAR(ng) % ad_iceshelf_draft(LBi:UBi,LBj:UBj,1:2))
+#  endif
 # endif
 #endif
 
@@ -162,6 +214,56 @@
         END DO
 #endif
       END IF
+#ifdef TANGENT
+!
+!  Tangent linear model state.
+!
+      IF ((model.eq.0).or.(model.eq.iTLM)) THEN
+#if defined ICESHELF
+        DO j=Jmin,Jmax
+          DO i=Imin,Imax
+# if defined ICESHELF_3EQN_VBC 
+            ICESHELFVAR(ng) % tl_gammaT(i,j) = IniVal
+            ICESHELFVAR(ng) % tl_gammaS(i,j) = IniVal
+            ICESHELFVAR(ng) % tl_Tb(i,j) = IniVal
+            ICESHELFVAR(ng) % tl_Sb(i,j) = IniVal
+# endif
+            ICESHELFVAR(ng) % tl_m(i,j) = IniVal
+# if defined ICESHELF_MORPH
+            ICESHELFVAR(ng) % tl_iceshelf_draft0(i,j) = IniVal
+            ICESHELFVAR(ng) % tl_iceshelf_draft(i,j,1) = IniVal
+            ICESHELFVAR(ng) % tl_iceshelf_draft(i,j,2) = IniVal
+# endif
+          END DO
+        END DO
+#endif
+      END IF
+#endif
+#ifdef ADJOINT
+!
+!  Adjoint linear model state.
+!
+      IF ((model.eq.0).or.(model.eq.iTLM)) THEN
+#if defined ICESHELF
+        DO j=Jmin,Jmax
+          DO i=Imin,Imax
+# if defined ICESHELF_3EQN_VBC 
+            ICESHELFVAR(ng) % ad_gammaT(i,j) = IniVal
+            ICESHELFVAR(ng) % ad_gammaS(i,j) = IniVal
+            ICESHELFVAR(ng) % ad_Tb(i,j) = IniVal
+            ICESHELFVAR(ng) % ad_Sb(i,j) = IniVal
+# endif
+            ICESHELFVAR(ng) % ad_m(i,j) = IniVal
+# if defined ICESHELF_MORPH
+            ICESHELFVAR(ng) % ad_iceshelf_draft0(i,j) = IniVal
+            ICESHELFVAR(ng) % ad_iceshelf_draft(i,j,1) = IniVal
+            ICESHELFVAR(ng) % ad_iceshelf_draft(i,j,2) = IniVal
+# endif
+          END DO
+        END DO
+#endif
+      END IF
+#endif
       RETURN
       END SUBROUTINE initialize_iceshelfvar
 

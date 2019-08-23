@@ -58,7 +58,7 @@ $(if $(filter $(MAKE_VERSION),$(NEED_VERSION)),,        \
 #  the .h extension. For example, the upwelling application includes the
 #  "upwelling.h" header file.
 #ROMS_APPLICATION ?= ISOMIP_PLUS
- ROMS_APPLICATION ?= ICECLIFF2D_TOY
+ ROMS_APPLICATION ?= ICETEST
 #ROMS_APPLICATION ?= ICEBERG
 #ROMS_APPLICATION ?= ICESHELF2D_TOY
 #  If application header files is not located in "ROMS/Include",
@@ -139,7 +139,7 @@ MY_CPP_FLAGS ?=
 #  NetCDF and so on.
 #--------------------------------------------------------------------------
 
-        FORT ?= gfortran
+        FORT ?= ifort
 
 #--------------------------------------------------------------------------
 #  Set directory for executable.
@@ -390,7 +390,8 @@ all: $(SCRATCH_DIR) $(SCRATCH_DIR)/MakeDepend $(BIN) rm_macros
  modules  :=
 ifdef USE_ADJOINT
  modules  +=	ROMS/Adjoint \
-		ROMS/Adjoint/Biology
+		ROMS/Adjoint/Biology \
+                ROMS/Adjoint/IceShelf
 endif
 ifdef USE_REPRESENTER
  modules  +=	ROMS/Representer \
@@ -401,7 +402,8 @@ ifdef USE_SEAICE
 endif
 ifdef USE_TANGENT
  modules  +=	ROMS/Tangent \
-		ROMS/Tangent/Biology
+		ROMS/Tangent/Biology \
+                ROMS/Tangent/IceShelf
 endif
  modules  +=	ROMS/Nonlinear \
 		ROMS/Nonlinear/Biology \
@@ -417,7 +419,8 @@ ifdef MY_ANALYTICAL
 endif
 ifdef USE_ADJOINT
  includes +=	ROMS/Adjoint \
-		ROMS/Adjoint/Biology
+		ROMS/Adjoint/Biology \
+                ROMS/Adjoint/IceShelf
 endif
 ifdef USE_REPRESENTER
  includes +=	ROMS/Representer \
@@ -428,7 +431,8 @@ ifdef USE_SEAICE
 endif
 ifdef USE_TANGENT
  includes +=	ROMS/Tangent \
-		ROMS/Tangent/Biology
+		ROMS/Tangent/Biology \
+                ROMS/Tangent/IceShelf 
 endif
  includes +=	ROMS/Nonlinear \
 		ROMS/Nonlinear/Biology \

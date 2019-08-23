@@ -98,7 +98,7 @@
      &                              zice,                               &
      &                              ad_zice,                            &
 #   ifdef ICESHELF_MORPH
-     &                              iceshelf_draft                      &
+     &                              iceshelf_draft,                     &
      &                              ad_iceshelf_draft,                  &
 #   endif
 #  endif

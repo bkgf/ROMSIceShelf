@@ -4,7 +4,7 @@
 #  undef GAMMAS_Mc1987 
 #  undef GAMMAS_KY1972
 #else
-#  undef ICESHELF_VBC_HFPROPTOM
+#  define ICESHELF_VBC_HFPROPTOM
 #  define GAMMAS_Mc1987 
 #  undef GAMMAS_KY1972
 #endif
@@ -195,6 +195,10 @@
 # if defined ICESHELF_TEOS10
       USE iceshelf_vbc_mod, ONLY : ct_from_theta
       USE iceshelf_vbc_mod, ONLY : t_from_ct
+      USE iceshelf_vbc_mod, ONLY : theta_from_ct
+      USE iceshelf_vbc_mod, ONLY : de_dt_F
+      USE iceshelf_vbc_mod, ONLY : de_dt0_F
+      USE iceshelf_vbc_mod, ONLY : entropy_diff_F
 # else
       USE iceshelf_vbc_mod, ONLY : dTemp
       USE iceshelf_vbc_mod, ONLY : thetaa
@@ -327,9 +331,8 @@
       real(r8) :: mflag,TFi 
       real(r8) :: ad_TFi
 #endif
-      real(r8) :: cff1, cff2, cff3
+      real(r8) :: cff1, cff2, cff3, ad_Ti
       real(r8) :: ad_cff1, ad_cff2, ad_cff3, fac, adfac, adfac1,ad_fac
-      real(r8) :: ad_Ti
 #ifdef ICESHELF_TEOS10
       real(r8) :: ct, ad_ct
 #endif
@@ -373,7 +376,9 @@
       ad_ustar=0.0_r8
       ad_TFb=0.0_r8
       ad_turb=0.0_r8
+# ifndef ICESHELF_VBC_HFPROPTOM
       ad_TFi=0.0_r8
+# endif
       ad_Ti=0.0_r8
 #ifdef ICESHELF_TEOS10
       ad_ct=0.0_r8
@@ -701,7 +706,7 @@
             Ex1 = a*(Ep1-Ep2)
             Ex2 = Ep1*(Ep4-Tm)+Ep2*(Ti+a*Sm-Ep4)-Ep3
             Ex3 = Sm*(Ep2*(Ep4-Ti)+Ep3)
-            Ex6 = -0.5r_r8
+            Ex6 = -0.5_r8
           ENDIF
           Ex4 = Ex2/Ex1
           Ex5 = Ex3/Ex1
@@ -1580,7 +1585,11 @@
 !   check value      : theta_from_ct(20,20) = 19.55627910604363
 !   DRJ on 03/06/05
 
+      USE iceshelf_vbc_mod, ONLY : de_dt0_F
+      USE iceshelf_vbc_mod, ONLY : ct_from_theta
+
       implicit real*8(a-h,o-z)
+      integer :: iflag
 
       a0 = -1.446013646344788d-2
       a1 = -3.305308995852924d-3
@@ -1723,6 +1732,7 @@
 !   DRJ on 10/12/03
       implicit real*8(a-h,o-z)
 
+      integer :: iflag
 
       rec_Cp0 = 2.50494524832013d-4; !Cp0 = 3992.10322329649d0
 !     tl_ct_from_theta = rec_Cp0*tl_penthalpy_F(s,tl_s,theta,tl_theta)
@@ -1750,6 +1760,7 @@
 
       implicit real*8(a-h,o-z)
 
+      integer :: iflag
 !
 !  Clear adjoint variables
 !
@@ -1903,6 +1914,7 @@
 
       implicit real*8(a-h,o-z)
 
+      integer :: iflag
 !
 !  Clear adjoint variables
 !
@@ -2015,6 +2027,7 @@
 
       real*8 kTp
 
+      integer :: iflag
 !
 !    Clear adjoint variables.
 !
@@ -3010,6 +3023,7 @@
 
       implicit real*8(a-h,o-z)
 
+      integer :: iflag
 !
 !  Clear adjoint variables.
 !
@@ -3291,8 +3305,11 @@
 !                                                      theta_from_ct
 !   DRJ on 11/10/03
 
+      USE iceshelf_vbc_mod, ONLY : theta_from_ct
+
       implicit real*8(a-h,o-z)
 
+      integer :: iflag
 !
 !   Clear adjoint variables.
 !
@@ -3346,10 +3363,14 @@
 !
 !   DRJ on 10/12/03
 
+      USE iceshelf_vbc_mod, ONLY : entropy_diff_F
+      USE iceshelf_vbc_mod, ONLY : de_dt_F
+
       implicit real*8(a-h,o-z)
       real*8 theta_s(2), th0_s(2), dentropy_s(2)
       real*8 de_dt_s1(2), de_dt_s2(2)
       integer :: nloops, n
+      integer :: iflag
 
 !
 !  Clear adjoint variables
@@ -3484,7 +3505,7 @@
 
       implicit real*8(a-h,o-z)
       character*(*) sat
-
+      integer :: iflag
 !
 !   Clear adjoint variables.
 !
@@ -3835,6 +3856,7 @@
       real(r8), intent(inout) :: ad_Temp
 
       integer               :: ind, ind1
+      integer :: iflag
       real(r8)              :: tpmd, theta1, thetad, epsi
       real(r8)              :: ad_thetad, ad_epsi
 
