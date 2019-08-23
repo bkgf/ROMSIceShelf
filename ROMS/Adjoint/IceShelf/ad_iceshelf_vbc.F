@@ -4,12 +4,12 @@
 #  undef GAMMAS_Mc1987 
 #  undef GAMMAS_KY1972
 #else
-#  define ICESHELF_VBC_HFPROPTOM
+#  undef ICESHELF_VBC_HFPROPTOM
 #  define GAMMAS_Mc1987 
 #  undef GAMMAS_KY1972
 #endif
       MODULE ad_iceshelf_vbc_mod
-#ifdef ICESHELF
+#if defined ICESHELF && defined ADJOINT
 !
 !=======================================================================
 !  Copyright (c) 2002 ROMS/TOMS Group                                  !
@@ -1088,7 +1088,7 @@
             ad_turb=0.0_r8
 
 !           tl_cff1=(tl_ustar*Hz(i,j,N(ng))+ustar*tl_Hz(i,j,N(ng)))/visc
-            ad_ustar=ad_ustar+Hz(i,j,N(ng)*ad_cff1/visc
+            ad_ustar=ad_ustar+Hz(i,j,N(ng))*ad_cff1/visc
             ad_Hz(i,j,N(ng))=ad_Hz(i,j,N(ng))+ustar*ad_cff1/visc
             ad_cff1=0.0_r8
 

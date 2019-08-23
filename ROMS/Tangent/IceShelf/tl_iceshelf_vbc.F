@@ -9,7 +9,7 @@
 #  undef GAMMAS_KY1972
 #endif
       MODULE tl_iceshelf_vbc_mod
-#ifdef ICESHELF
+#if defined ICESHELF && defined TANGENT
 !
 !=======================================================================
 !  Copyright (c) 2002 ROMS/TOMS Group                                  !
